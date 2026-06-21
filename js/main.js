@@ -1,0 +1,1114 @@
+// ============================================
+// DATA LAYER
+// ============================================
+
+let notes = [];
+let currentFilter = "all";
+let currentView = "grid";
+let currentNoteId = null;
+let currentColor = "color-default";
+let isPinned = false;
+let isArchived = false;
+let isMarkdownMode = false;
+let hasUnsavedChanges = false;
+let searchTerm = "";
+let tagFilter = null;
+let deletedNotes = [];
+
+// Load notes from localStorage
+function loadNotes() {
+  const saved = localStorage.getItem("material_keep_notes");
+  if (saved) {
+    try {
+      notes = JSON.parse(saved);
+      return;
+    } catch (e) {
+      console.error("Error loading notes:", e);
+    }
+  }
+
+  // Default notes if none saved
+  notes = [
+    {
+      id: Date.now() - 100000,
+      title: "Добро пожаловать в Material Keep!",
+      content:
+        "• Кликните на заметку чтобы редактировать\n• Используйте поиск для фильтрации\n• Добавляйте ярлыки и цвета",
+      color: "color-yellow",
+      tags: ["Вступление"],
+      pinned: true,
+      archived: false,
+      trashed: false,
+      date: new Date().toLocaleDateString("ru-RU"),
+    },
+    {
+      id: Date.now() - 50000,
+      title: "Идеи для проекта",
+      content: "Изучить Material Design 3, создать компоненты, анимации",
+      color: "color-blue",
+      tags: ["Работа", "Дизайн"],
+      pinned: true,
+      archived: false,
+      trashed: false,
+      date: new Date(Date.now() - 86400000).toLocaleDateString("ru-RU"),
+    },
+    {
+      id: Date.now() - 20000,
+      title: "Книги для прочтения",
+      content: "1. Atomic Habits\n2. Deep Work\n3. Design of Everyday Things",
+      color: "color-green",
+      tags: ["Образование"],
+      pinned: false,
+      archived: false,
+      trashed: false,
+      date: new Date(Date.now() - 172800000).toLocaleDateString("ru-RU"),
+    },
+  ];
+  saveNotes();
+}
+
+function saveNotes() {
+  localStorage.setItem("material_keep_notes", JSON.stringify(notes));
+  updateCounts();
+}
+
+// ============================================
+// RENDER ENGINE
+// ============================================
+
+function getFilteredNotes() {
+  let filtered = notes.filter((n) => !n.trashed);
+
+  if (currentFilter === "pinned") {
+    filtered = filtered.filter((n) => n.pinned);
+  } else if (currentFilter === "archive") {
+    filtered = filtered.filter((n) => n.archived);
+  } else if (currentFilter === "trash") {
+    filtered = notes.filter((n) => n.trashed);
+  } else {
+    filtered = filtered.filter((n) => !n.archived);
+  }
+
+  // Search filter
+  if (searchTerm) {
+    const term = searchTerm.toLowerCase();
+    filtered = filtered.filter(
+      (n) =>
+        n.title.toLowerCase().includes(term) ||
+        n.content.toLowerCase().includes(term) ||
+        n.tags.some((t) => t.toLowerCase().includes(term)),
+    );
+  }
+
+  // Tag filter
+  if (tagFilter) {
+    filtered = filtered.filter((n) => n.tags.includes(tagFilter));
+  }
+
+  return filtered;
+}
+
+function renderNotes() {
+  const container = document.getElementById("notesContainer");
+  const filtered = getFilteredNotes();
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <span class="material-icons">${currentFilter === "trash" ? "delete_sweep" : "note_add"}</span>
+                        <h2>${currentFilter === "trash" ? "Корзина пуста" : "Нет заметок"}</h2>
+                        <p>${currentFilter === "trash" ? "Удаленные заметки будут здесь" : "Создайте новую заметку, нажав на кнопку +"}</p>
+                    </div>
+                `;
+    return;
+  }
+
+  container.innerHTML = "";
+
+  // Show pinned first (except in pinned or trash view)
+  let sorted = [...filtered];
+  if (currentFilter !== "pinned" && currentFilter !== "trash") {
+    sorted.sort((a, b) => {
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+      return b.id - a.id;
+    });
+  } else {
+    sorted.sort((a, b) => b.id - a.id);
+  }
+
+  sorted.forEach((note) => {
+    container.appendChild(createNoteElement(note));
+  });
+
+  // Update title
+  const titleMap = {
+    all: "Все заметки",
+    pinned: "Закрепленные",
+    archive: "Архив",
+    trash: "Корзина",
+  };
+  const title = document.getElementById("notesTitle");
+  title.innerHTML = `${titleMap[currentFilter] || "Все заметки"} <span class="notes-count">(${filtered.length})</span>`;
+}
+
+// ============================================
+// MARKDOWN PARSER
+// ============================================
+
+function renderMarkdown(text) {
+  if (!text) return "";
+
+  // Escape HTML to prevent XSS
+  let html = text.replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">");
+
+  // Headers: ## Title or # Title
+  html = html.replace(/^### (.+)$/gm, "<h3>$1</h3>");
+  html = html.replace(/^## (.+)$/gm, "<h2>$1</h2>");
+  html = html.replace(/^# (.+)$/gm, "<h1>$1</h1>");
+
+  // Bold: **text** or __text__
+  html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  html = html.replace(/__(.+?)__/g, "<strong>$1</strong>");
+
+  // Italic: *text* or _text_
+  html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
+  html = html.replace(/_(.+?)_/g, "<em>$1</em>");
+
+  // Strikethrough: ~~text~~
+  html = html.replace(/~~(.+?)~~/g, "<del>$1</del>");
+
+  // Inline code: `code`
+  html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+  // Code blocks: ```code```
+  html = html.replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>");
+
+  // Unordered lists: - item or * item
+  html = html.replace(/^- (.+)$/gm, "<li>$1</li>");
+  html = html.replace(/^\* (.+)$/gm, "<li>$1</li>");
+  // Wrap consecutive <li> in <ul>
+  html = html.replace(/(<li>.*<\/li>\n?)+/g, (match) => `<ul>${match}</ul>`);
+
+  // Ordered lists: 1. item
+  html = html.replace(/^\d+\. (.+)$/gm, "<li>$1</li>");
+  // Wrap consecutive <li> in <ol> (only if not already in <ul>)
+  // This is a simplified approach - ordered lists after unordered may not work perfectly
+
+  // Blockquotes: > text
+  html = html.replace(/^> (.+)$/gm, "<blockquote>$1</blockquote>");
+
+  // Horizontal rule: --- or ***
+  html = html.replace(/^---$/gm, "<hr>");
+  html = html.replace(/^\*\*\*$/gm, "<hr>");
+
+  // Line breaks: double newline = paragraph
+  html = html.replace(/\n\n/g, "</p><p>");
+
+  // Single line breaks
+  html = html.replace(/\n/g, "<br>");
+
+  // Wrap in paragraph if not already wrapped in block-level tags
+  if (
+    !html.startsWith("<h") &&
+    !html.startsWith("<ul") &&
+    !html.startsWith("<ol") &&
+    !html.startsWith("<blockquote") &&
+    !html.startsWith("<pre") &&
+    !html.startsWith("<p>") &&
+    !html.startsWith("<hr")
+  ) {
+    html = "<p>" + html + "</p>";
+  }
+
+  return html;
+}
+
+function createNoteElement(note) {
+  const div = document.createElement("div");
+  div.className = `note-card ${note.color} ${note.pinned ? "pinned" : ""}`;
+  div.setAttribute("data-id", note.id);
+
+  // Trash view has different actions
+  const isTrash = currentFilter === "trash";
+
+  const contentPreview =
+    note.content.length > 120
+      ? note.content.slice(0, 120) + "..."
+      : note.content;
+  const renderedContent = renderMarkdown(contentPreview);
+
+  div.innerHTML = `
+                <div class="note-title">${note.title || "Без названия"}</div>
+                <div class="note-content md-content">${renderedContent}</div>
+                <div class="note-footer">
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                        <div class="note-tags">
+                            ${note.tags
+                              .map(
+                                (tag) => `
+                                <span class="note-tag" onclick="filterByTag('${tag}', event)">
+                                    ${tag}
+                                    <span class="tag-remove" onclick="removeTagFromCard(${note.id}, '${tag}', event)" title="Удалить ярлык">&times;</span>
+                                </span>
+                            `,
+                              )
+                              .join("")}
+                        </div>
+                        <span class="note-date">${note.date || ""}</span>
+                    </div>
+                    <div class="note-actions">
+                        ${
+                          isTrash
+                            ? `
+                            <button class="action-button" onclick="restoreNote(${note.id}, event)" title="Восстановить">
+                                <span class="material-icons">restore</span>
+                            </button>
+                            <button class="action-button" onclick="deletePermanently(${note.id}, event)" title="Удалить навсегда">
+                                <span class="material-icons">delete_forever</span>
+                            </button>
+                        `
+                            : `
+                            ${
+                              note.pinned
+                                ? `<button class="action-button active" onclick="togglePin(${note.id}, event)" title="Открепить">
+                                    <span class="material-icons">push_pin</span>
+                                </button>`
+                                : `<button class="action-button" onclick="togglePin(${note.id}, event)" title="Закрепить">
+                                    <span class="material-icons">push_pin</span>
+                                </button>`
+                            }
+                            <button class="action-button" onclick="changeNoteColor(${note.id}, event)" title="Сменить цвет">
+                                <span class="material-icons">palette</span>
+                            </button>
+                            <button class="action-button" onclick="archiveNote(${note.id}, event)" title="Архивировать">
+                                <span class="material-icons">archive</span>
+                            </button>
+                            <button class="action-button" onclick="deleteNote(${note.id}, event)" title="Удалить">
+                                <span class="material-icons">delete</span>
+                            </button>
+                        `
+                        }
+                    </div>
+                </div>
+            `;
+
+  div.addEventListener("click", (e) => {
+    if (!e.target.closest(".action-button") && !e.target.closest(".note-tag")) {
+      if (!isTrash) {
+        editNote(note.id);
+      }
+    }
+  });
+
+  return div;
+}
+
+// ============================================
+// NOTES CRUD OPERATIONS
+// ============================================
+
+function addNote() {
+  currentNoteId = null;
+  isPinned = false;
+  isArchived = false;
+  currentColor = "color-default";
+  hasUnsavedChanges = false;
+  document.getElementById("noteTitle").value = "";
+  document.getElementById("noteContent").value = "";
+  document.getElementById("pinEditorBtn").classList.remove("active");
+  document.getElementById("archiveEditorBtn").classList.remove("active");
+  document.getElementById("noteEditor").classList.add("visible");
+  document.getElementById("noteTitle").focus();
+  updateEditorColorPicker();
+}
+
+function editNote(id) {
+  const note = notes.find((n) => n.id === id);
+  if (!note || note.trashed) return;
+
+  currentNoteId = id;
+  isPinned = note.pinned;
+  isArchived = note.archived || false;
+  currentColor = note.color || "color-default";
+  hasUnsavedChanges = false;
+
+  document.getElementById("noteTitle").value = note.title || "";
+  document.getElementById("noteContent").value = note.content || "";
+
+  // Update pin button
+  const pinBtn = document.getElementById("pinEditorBtn");
+  if (isPinned) {
+    pinBtn.classList.add("active");
+  } else {
+    pinBtn.classList.remove("active");
+  }
+
+  // Update archive button
+  const archiveBtn = document.getElementById("archiveEditorBtn");
+  if (isArchived) {
+    archiveBtn.classList.add("active");
+  } else {
+    archiveBtn.classList.remove("active");
+  }
+
+  document.getElementById("noteEditor").classList.add("visible");
+  updateEditorColorPicker();
+  document.getElementById("noteTitle").focus();
+}
+
+function saveNote() {
+  const title = document.getElementById("noteTitle").value.trim();
+  const content = document.getElementById("noteContent").value.trim();
+
+  if (!title && !content) {
+    showToast("Заметка пуста. Закрываю...");
+    closeEditor();
+    return;
+  }
+
+  const now = new Date();
+  const dateStr =
+    now.toLocaleDateString("ru-RU") +
+    " " +
+    now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+
+  if (currentNoteId) {
+    // Update existing note
+    const index = notes.findIndex((n) => n.id === currentNoteId);
+    if (index > -1) {
+      notes[index] = {
+        ...notes[index],
+        title: title || "Без названия",
+        content: content || "",
+        color: currentColor,
+        pinned: isPinned,
+        archived: isArchived,
+        date: dateStr,
+      };
+      showToast("Заметка обновлена");
+    }
+  } else {
+    // Add new note
+    const newNote = {
+      id: Date.now(),
+      title: title || "Без названия",
+      content: content || "",
+      color: currentColor,
+      tags: ["Новое"],
+      pinned: isPinned,
+      archived: isArchived,
+      trashed: false,
+      date: dateStr,
+    };
+    notes.unshift(newNote);
+    showToast("Заметка создана");
+  }
+
+  hasUnsavedChanges = false;
+  saveNotes();
+  closeEditor();
+  renderNotes();
+}
+
+function deleteNote(id, e) {
+  e?.stopPropagation();
+  const note = notes.find((n) => n.id === id);
+  if (!note) return;
+
+  note.trashed = true;
+  note.trashDate = new Date().toISOString();
+  saveNotes();
+  renderNotes();
+  showToast("Заметка перемещена в корзину");
+}
+
+function deletePermanently(id, e) {
+  e?.stopPropagation();
+  showConfirmDialog(
+    "delete_perm",
+    "delete_perm_" + id,
+    "delete_forever",
+    "Удалить навсегда?",
+    "Заметка будет удалена без возможности восстановления.",
+    "Удалить",
+    () => {
+      notes = notes.filter((n) => n.id !== id);
+      saveNotes();
+      renderNotes();
+      showToast("Заметка удалена навсегда");
+    },
+  );
+}
+
+function restoreNote(id, e) {
+  e?.stopPropagation();
+  const note = notes.find((n) => n.id === id);
+  if (note) {
+    note.trashed = false;
+    note.trashDate = null;
+    saveNotes();
+    renderNotes();
+    showToast("Заметка восстановлена");
+  }
+}
+
+function archiveNote(id, e) {
+  e?.stopPropagation();
+  const note = notes.find((n) => n.id === id);
+  if (note) {
+    note.archived = !note.archived;
+    saveNotes();
+    renderNotes();
+    showToast(
+      note.archived ? "Заметка архивирована" : "Заметка разархивирована",
+    );
+  }
+}
+
+function togglePin(id, e) {
+  e?.stopPropagation();
+  const note = notes.find((n) => n.id === id);
+  if (note) {
+    note.pinned = !note.pinned;
+    saveNotes();
+    renderNotes();
+    showToast(note.pinned ? "Заметка закреплена" : "Заметка откреплена");
+  }
+}
+
+function togglePinInEditor() {
+  isPinned = !isPinned;
+  const btn = document.getElementById("pinEditorBtn");
+  if (isPinned) {
+    btn.classList.add("active");
+  } else {
+    btn.classList.remove("active");
+  }
+}
+
+function toggleMarkdownMode() {
+  isMarkdownMode = !isMarkdownMode;
+  const btn = document.getElementById("markdownBtn");
+  const icon = document.getElementById("markdownIcon");
+  const hint = document.getElementById("mdHint");
+  if (isMarkdownMode) {
+    btn.classList.add("active");
+    icon.textContent = "visibility";
+    hint.style.display = "block";
+    showToast("Markdown: включён (код отображается как HTML)");
+  } else {
+    btn.classList.remove("active");
+    icon.textContent = "code";
+    hint.style.display = "none";
+    showToast("Markdown: выключен");
+  }
+}
+
+function archiveCurrentNote() {
+  if (!currentNoteId) {
+    isArchived = !isArchived;
+    const btn = document.getElementById("archiveEditorBtn");
+    if (isArchived) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+    return;
+  }
+
+  const note = notes.find((n) => n.id === currentNoteId);
+  if (note) {
+    note.archived = !note.archived;
+    isArchived = note.archived;
+    const btn = document.getElementById("archiveEditorBtn");
+    if (isArchived) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+    saveNotes();
+    showToast(isArchived ? "Заметка архивирована" : "Заметка разархивирована");
+  }
+}
+
+function changeNoteColor(id, e) {
+  e?.stopPropagation();
+  const note = notes.find((n) => n.id === id);
+  if (note) {
+    const colors = [
+      "color-default",
+      "color-red",
+      "color-orange",
+      "color-yellow",
+      "color-green",
+      "color-teal",
+      "color-blue",
+      "color-purple",
+    ];
+    const currentIndex = colors.indexOf(note.color) || 0;
+    const nextIndex = (currentIndex + 1) % colors.length;
+    note.color = colors[nextIndex];
+    saveNotes();
+    renderNotes();
+  }
+}
+
+// ============================================
+// COLOR PICKER
+// ============================================
+
+function toggleEditorColorPicker() {
+  const picker = document.getElementById("editorColorPicker");
+  picker.classList.toggle("visible");
+}
+
+function setEditorColor(color) {
+  currentColor = color;
+  document.getElementById("noteEditorContent").style.backgroundColor =
+    getColorValue(color);
+  // Update active state in picker
+  document
+    .querySelectorAll("#editorColorPicker .color-option")
+    .forEach((el) => {
+      el.classList.toggle("active", el.classList.contains(color));
+    });
+  // Close picker
+  document.getElementById("editorColorPicker").classList.remove("visible");
+}
+
+function getColorValue(color) {
+  const map = {
+    "color-default": "var(--note-default)",
+    "color-red": "var(--note-red)",
+    "color-orange": "var(--note-orange)",
+    "color-yellow": "var(--note-yellow)",
+    "color-green": "var(--note-green)",
+    "color-teal": "var(--note-teal)",
+    "color-blue": "var(--note-blue)",
+    "color-purple": "var(--note-purple)",
+  };
+  // Для правильного отображения в редакторе нужно получить вычисленное значение
+  const computedStyle = getComputedStyle(document.documentElement);
+  return computedStyle.getPropertyValue(map[color]).trim() || "#ffffff";
+}
+
+function updateEditorColorPicker() {
+  const bg = getColorValue(currentColor);
+  document.getElementById("noteEditorContent").style.backgroundColor = bg;
+  document
+    .querySelectorAll("#editorColorPicker .color-option")
+    .forEach((el) => {
+      el.classList.toggle("active", el.classList.contains(currentColor));
+    });
+}
+
+// ============================================
+// TAGS
+// ============================================
+
+function addTagToNote() {
+  showPromptDialog((tag) => {
+    if (!tag || tag.trim() === "") return;
+    const trimmedTag = tag.trim();
+
+    if (currentNoteId) {
+      const note = notes.find((n) => n.id === currentNoteId);
+      if (note) {
+        if (!note.tags.includes(trimmedTag)) {
+          note.tags.push(trimmedTag);
+          saveNotes();
+          renderNotes();
+          showToast(`Ярлык "${trimmedTag}" добавлен`);
+        } else {
+          showToast(`Ярлык "${trimmedTag}" уже существует`);
+        }
+      }
+    } else {
+      // For new note, we'll store tags in a temporary array
+      // Actually let's just save the note with the tag
+      const title =
+        document.getElementById("noteTitle").value.trim() || "Без названия";
+      const content = document.getElementById("noteContent").value.trim() || "";
+
+      const newNote = {
+        id: Date.now(),
+        title: title,
+        content: content,
+        color: currentColor,
+        tags: [trimmedTag],
+        pinned: isPinned,
+        archived: isArchived,
+        trashed: false,
+        date:
+          new Date().toLocaleDateString("ru-RU") +
+          " " +
+          new Date().toLocaleTimeString("ru-RU", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+      };
+      notes.unshift(newNote);
+      currentNoteId = newNote.id;
+      saveNotes();
+      renderNotes();
+      showToast(`Ярлык "${trimmedTag}" добавлен к новой заметке`);
+      closeEditor();
+    }
+  });
+}
+
+function removeTagFromNote(tag, e) {
+  e?.stopPropagation();
+  if (!currentNoteId) {
+    showToast("Сначала сохраните заметку");
+    return;
+  }
+  const note = notes.find((n) => n.id === currentNoteId);
+  if (note) {
+    const index = note.tags.indexOf(tag);
+    if (index > -1) {
+      note.tags.splice(index, 1);
+      saveNotes();
+      renderNotes();
+      showToast(`Ярлык "${tag}" удалён`);
+    }
+  }
+}
+
+function removeTagFromCard(noteId, tag, e) {
+  e?.stopPropagation();
+  const note = notes.find((n) => n.id === noteId);
+  if (note) {
+    const index = note.tags.indexOf(tag);
+    if (index > -1) {
+      note.tags.splice(index, 1);
+      saveNotes();
+      renderNotes();
+      showToast(`Ярлык "${tag}" удалён`);
+    }
+  }
+}
+
+function filterByTag(tag, e) {
+  e?.stopPropagation();
+  tagFilter = tag;
+  currentFilter = "all";
+  // Update active nav
+  document
+    .querySelectorAll(".nav-item")
+    .forEach((el) => el.classList.remove("active"));
+  document
+    .querySelector('.nav-item[data-filter="all"]')
+    .classList.add("active");
+  renderNotes();
+  showToast(`Фильтр: ${tag}`);
+}
+
+function renderTags() {
+    const container = document.getElementById('tagList');
+    
+    // Очищаем контейнер
+    container.innerHTML = '';
+    
+    // Собираем все теги
+    const tagMap = new Map();
+    notes.filter(n => !n.trashed && !n.archived).forEach(n => {
+        n.tags.forEach(t => {
+            tagMap.set(t, (tagMap.get(t) || 0) + 1);
+        });
+    });
+    
+    // Если тегов нет, ничего не показываем
+    if (tagMap.size === 0) {
+        return;
+    }
+    
+    // Создаём элементы для каждого тега
+    for (const [tag, count] of tagMap) {
+        const btn = document.createElement('button');
+        btn.className = 'nav-item';
+        
+        // SVG иконка
+        btn.innerHTML = `
+            <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2H2v10l9.29 9.29a2 2 0 0 0 2.83 0l7.17-7.17a2 2 0 0 0 0-2.83L12 2z"/>
+                <path d="M7 7h.01"/>
+            </svg>
+            <span class="nav-label">${tag}</span>
+            <span class="tag-count">${count}</span>
+        `;
+        
+        btn.onclick = () => filterByTag(tag);
+        container.appendChild(btn);
+    }
+}
+
+// ============================================
+// FILTERS & NAVIGATION
+// ============================================
+
+function filterNotes(filter) {
+  currentFilter = filter;
+  tagFilter = null;
+  document
+    .querySelectorAll(".nav-item")
+    .forEach((el) => el.classList.remove("active"));
+  const target = document.querySelector(`.nav-item[data-filter="${filter}"]`);
+  if (target) target.classList.add("active");
+  renderNotes();
+}
+
+function updateCounts() {
+  const all = notes.filter((n) => !n.trashed && !n.archived).length;
+  const pinned = notes.filter(
+    (n) => n.pinned && !n.trashed && !n.archived,
+  ).length;
+  const archived = notes.filter((n) => n.archived && !n.trashed).length;
+  const trashed = notes.filter((n) => n.trashed).length;
+
+  document.getElementById("countAll").textContent = all;
+  document.getElementById("countPinned").textContent = pinned;
+  document.getElementById("countArchive").textContent = archived;
+  document.getElementById("countTrash").textContent = trashed;
+
+  renderTags();
+}
+
+// ============================================
+// VIEW TOGGLES
+// ============================================
+
+function toggleView() {
+  if (currentView === "grid") {
+    setView("list");
+  } else {
+    setView("grid");
+  }
+}
+
+function setView(view) {
+  currentView = view;
+  const container = document.getElementById("notesContainer");
+  container.classList.toggle("list-view", view === "list");
+
+  const buttons = document.querySelectorAll(".view-button");
+  buttons.forEach((btn) => {
+    btn.classList.toggle("active", btn.textContent.toLowerCase() === view);
+  });
+
+  document.getElementById("viewIcon").textContent =
+    view === "grid" ? "view_stream" : "view_module";
+}
+
+// ============================================
+// SEARCH
+// ============================================
+
+function setupSearch() {
+  const input = document.getElementById("searchInput");
+  let timeout;
+  input.addEventListener("input", (e) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      searchTerm = e.target.value;
+      renderNotes();
+    }, 300);
+  });
+
+  // Clear search on Escape
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      input.value = "";
+      searchTerm = "";
+      renderNotes();
+      input.blur();
+    }
+  });
+}
+
+// ============================================
+// TOAST NOTIFICATION
+// ============================================
+
+let toastTimeout;
+
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("visible");
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove("visible");
+  }, 2500);
+}
+
+// ============================================
+// THEME TOGGLE
+// ============================================
+
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  const newTheme = isDark ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", newTheme);
+  localStorage.setItem("material_keep_theme", newTheme);
+  updateThemeIcon(newTheme);
+  showToast(isDark ? "Светлая тема" : "Тёмная тема");
+}
+
+function updateThemeIcon(theme) {
+    const icon = document.getElementById('themeIcon');
+    if (theme === 'dark') {
+        icon.innerHTML = `
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        `;
+    } else {
+        icon.innerHTML = `
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2"/>
+            <path d="M12 21v2"/>
+            <path d="M4.22 4.22l1.42 1.42"/>
+            <path d="M18.36 18.36l1.42 1.42"/>
+            <path d="M1 12h2"/>
+            <path d="M21 12h2"/>
+            <path d="M4.22 19.78l1.42-1.42"/>
+            <path d="M18.36 5.64l1.42-1.42"/>
+        `;
+    }
+}
+
+function loadTheme() {
+  const saved = localStorage.getItem("material_keep_theme");
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const theme = saved || (prefersDark ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", theme);
+  updateThemeIcon(theme);
+}
+
+// ============================================
+// EDITOR CONTROLS
+// ============================================
+
+function closeEditor() {
+  if (hasUnsavedChanges) {
+    document.getElementById("confirmDialog").classList.add("visible");
+    return;
+  }
+  forceCloseEditor();
+}
+
+function forceCloseEditor() {
+  document.getElementById("noteEditor").classList.remove("visible");
+  document.getElementById("editorColorPicker").classList.remove("visible");
+  document.getElementById("mdHint").style.display = "none";
+  isMarkdownMode = false;
+  document.getElementById("markdownBtn").classList.remove("active");
+  document.getElementById("markdownIcon").textContent = "code";
+  currentNoteId = null;
+  hasUnsavedChanges = false;
+}
+
+function confirmSave() {
+  document.getElementById("confirmDialog").classList.remove("visible");
+  saveNote();
+  forceCloseEditor();
+}
+
+function confirmDiscard() {
+  document.getElementById("confirmDialog").classList.remove("visible");
+  hasUnsavedChanges = false;
+  forceCloseEditor();
+}
+
+function confirmCancel() {
+  document.getElementById("confirmDialog").classList.remove("visible");
+}
+
+// ============================================
+// GENERIC CONFIRM DIALOG
+// ============================================
+
+let confirmCallback = null;
+
+function showConfirmDialog(
+  namespace,
+  id,
+  icon,
+  title,
+  message,
+  okText,
+  callback,
+) {
+  const dialog = document.getElementById("genericConfirmDialog");
+  document.getElementById("genericConfirmIcon").textContent = icon || "warning";
+  document.getElementById("genericConfirmTitle").textContent =
+    title || "Подтверждение";
+  document.getElementById("genericConfirmMessage").textContent = message || "";
+  document.getElementById("genericConfirmOkBtn").textContent =
+    okText || "Подтвердить";
+
+  confirmCallback = { namespace, id, callback };
+  dialog.classList.add("visible");
+}
+
+function closeGenericConfirm() {
+  document.getElementById("genericConfirmDialog").classList.remove("visible");
+  confirmCallback = null;
+}
+
+// ============================================
+// PROMPT DIALOG
+// ============================================
+
+let promptCallback = null;
+
+function showPromptDialog(callback) {
+  const dialog = document.getElementById("promptDialog");
+  const input = document.getElementById("promptInput");
+  input.value = "";
+  promptCallback = callback;
+  dialog.classList.add("visible");
+  setTimeout(() => input.focus(), 100);
+}
+
+function closePromptDialog() {
+  document.getElementById("promptDialog").classList.remove("visible");
+  promptCallback = null;
+}
+
+function markEditorChanged() {
+  hasUnsavedChanges = true;
+}
+
+function clearTrash() {
+    const trashedNotes = notes.filter(n => n.trashed);
+    
+    if (trashedNotes.length === 0) {
+        showToast('Корзина уже пуста');
+        return;
+    }
+    
+    showConfirmDialog(
+        'clear_trash',
+        'clear_trash',
+        'delete_sweep',
+        'Очистить корзину?',
+        `В корзине ${trashedNotes.length} заметок. Они будут удалены без возможности восстановления.`,
+        'Очистить',
+        () => {
+            notes = notes.filter(n => !n.trashed);
+            saveNotes();
+            renderNotes();
+            showToast(`Корзина очищена (${trashedNotes.length} заметок удалено)`);
+        }
+    );
+}
+
+// ============================================
+// KEYBOARD SHORTCUTS
+// ============================================
+
+document.addEventListener("keydown", (e) => {
+  // Ctrl+N - new note
+  if ((e.ctrlKey || e.metaKey) && e.key === "n") {
+    e.preventDefault();
+    addNote();
+  }
+
+  // Escape - close editor
+  if (e.key === "Escape") {
+    closeEditor();
+  }
+
+  // Ctrl+S - save note
+  if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+    if (document.getElementById("noteEditor").classList.contains("visible")) {
+      e.preventDefault();
+      saveNote();
+    }
+  }
+});
+
+// ============================================
+// INITIALIZATION
+// ============================================
+
+function init() {
+  loadTheme();
+  loadNotes();
+  renderNotes();
+  setupSearch();
+  updateCounts();
+
+  // Click outside modal to close
+  document.getElementById("noteEditor").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) {
+      closeEditor();
+    }
+  });
+
+  document.getElementById("addNoteBtn").addEventListener("click", addNote);
+
+  // Generic confirm dialog
+  document
+    .getElementById("genericConfirmDialog")
+    .addEventListener("click", (e) => {
+      if (e.target === e.currentTarget) {
+        closeGenericConfirm();
+      }
+    });
+  document
+    .getElementById("genericConfirmCancelBtn")
+    .addEventListener("click", closeGenericConfirm);
+  document
+    .getElementById("genericConfirmOkBtn")
+    .addEventListener("click", () => {
+      if (confirmCallback && confirmCallback.callback) {
+        confirmCallback.callback();
+      }
+      closeGenericConfirm();
+    });
+
+  // Prompt dialog
+  document.getElementById("promptDialog").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) {
+      closePromptDialog();
+    }
+  });
+  document
+    .getElementById("promptCancelBtn")
+    .addEventListener("click", closePromptDialog);
+  document.getElementById("promptOkBtn").addEventListener("click", () => {
+    const input = document.getElementById("promptInput");
+    if (promptCallback) {
+      promptCallback(input.value);
+    }
+    closePromptDialog();
+  });
+  document.getElementById("promptInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      document.getElementById("promptOkBtn").click();
+    }
+  });
+
+  // Track unsaved changes in editor
+  document
+    .getElementById("noteTitle")
+    .addEventListener("input", markEditorChanged);
+  document
+    .getElementById("noteContent")
+    .addEventListener("input", markEditorChanged);
+
+  // Close confirmation dialog on click outside
+  document.getElementById("confirmDialog").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) {
+      confirmCancel();
+    }
+  });
+
+  console.log("✨ Material Keep полностью функционален!");
+  console.log("📝 Горячие клавиши: Ctrl+N - новая заметка, Ctrl+S - сохранить");
+}
+
+// Start the app
+init();
