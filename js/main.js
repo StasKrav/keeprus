@@ -114,12 +114,31 @@ function renderNotes() {
 
   if (filtered.length === 0) {
     container.innerHTML = `
-                    <div class="empty-state" style="grid-column: 1/-1;">
-                        <span class="material-icons">${currentFilter === "trash" ? "delete_sweep" : "note_add"}</span>
-                        <h2>${currentFilter === "trash" ? "Корзина пуста" : "Нет заметок"}</h2>
-                        <p>${currentFilter === "trash" ? "Удаленные заметки будут здесь" : "Создайте новую заметку, нажав на кнопку +"}</p>
-                    </div>
-                `;
+        <div class="empty-state" style="grid-column: 1/-1;">
+            ${currentFilter === 'trash' ? `
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"/>
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                    <path d="M10 11v6"/>
+                    <path d="M14 11v6"/>
+                </svg>
+            ` : `
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v4"/>
+                    <path d="M12 18v4"/>
+                    <path d="M4.93 4.93l2.83 2.83"/>
+                    <path d="M16.24 16.24l2.83 2.83"/>
+                    <path d="M2 12h4"/>
+                    <path d="M18 12h4"/>
+                    <path d="M4.93 19.07l2.83-2.83"/>
+                    <path d="M16.24 7.76l2.83-2.83"/>
+                </svg>
+            `}
+            <h2>${currentFilter === 'trash' ? 'Корзина пуста' : 'Нет заметок'}</h2>
+            <p>${currentFilter === 'trash' ? 'Удаленные заметки будут здесь' : 'Создайте новую заметку, нажав на кнопку +'}</p>
+        </div>
+    `;
     return;
   }
 
@@ -788,17 +807,25 @@ function toggleView() {
 }
 
 function setView(view) {
-  currentView = view;
-  const container = document.getElementById("notesContainer");
-  container.classList.toggle("list-view", view === "list");
-
-  const buttons = document.querySelectorAll(".view-button");
-  buttons.forEach((btn) => {
-    btn.classList.toggle("active", btn.textContent.toLowerCase() === view);
-  });
-
-  document.getElementById("viewIcon").textContent =
-    view === "grid" ? "view_stream" : "view_module";
+    currentView = view;
+    const container = document.getElementById('notesContainer');
+    if (!container) return;
+    
+    // Переключаем класс для отображения
+    container.classList.toggle('list-view', view === 'list');
+    
+    // Обновляем активную кнопку
+    document.querySelectorAll('.view-button').forEach(btn => {
+        btn.classList.remove('active');
+        // Сравниваем с data-view атрибутом или текстом
+        const btnView = btn.getAttribute('data-view') || btn.textContent.toLowerCase().trim();
+        if (btnView === view) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Сохраняем выбор
+    localStorage.setItem('material_keep_view', view);
 }
 
 // ============================================

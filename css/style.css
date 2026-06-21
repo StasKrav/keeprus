@@ -103,23 +103,85 @@ body {
 }
 
 .app-bar .logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 22px;
-  font-weight: 500;
-  color: var(--text-primary);
-  cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding-left: 8px;
+    min-width: 160px;
+    flex-shrink: 0;
+    margin-right: 16px; /* добавляем отступ справа от логотипа */
 }
 
 .app-bar .logo:hover {
   opacity: 0.8;
 }
 
+
+/* Логотип в шапке */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+    transition: transform 0.2s ease;
+}
+
+.logo:hover {
+    transform: scale(1.02);
+}
+
+/* Стиль для текста логотипа */
+.logo-text {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+
+/* Анимация SVG при наведении */
+.logo:hover svg {
+    transform: rotate(-8deg) scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+.logo svg {
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.2));
+}
+
+/* Тёмная тема */
+[data-theme="dark"] .logo-text {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+[data-theme="dark"] .logo-text::after {
+    background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6);
+}
+
+[data-theme="dark"] .logo svg {
+    filter: drop-shadow(0 2px 8px rgba(96, 165, 250, 0.3));
+}
+
+
 .app-bar .search {
   flex: 1;
   max-width: 720px;
-  margin: 0 32px;
+  margin: 0 32px 0 90px;
   position: relative;
 }
 
@@ -283,6 +345,15 @@ body {
   border-radius: 12px;
 }
 
+/* Разделитель в боковом меню */
+.sidebar-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 8px 16px;
+    opacity: 0.5;
+    transition: background-color 0.3s;
+}
+
 /* Main Content */
 .main-content {
   margin-left: 280px;
@@ -355,6 +426,24 @@ body {
 .empty-state h2 {
   font-weight: 400;
   margin-bottom: 8px;
+}
+
+.empty-state svg {
+    display: block;
+    margin: 0 auto 16px;
+    color: var(--border-color);
+    opacity: 0.6;
+}
+
+.empty-state h2 {
+    font-weight: 400;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    font-size: 14px;
 }
 
 /* Notes Grid */
@@ -1072,4 +1161,26 @@ body {
   .fab-icon {
     font-size: 20px;
   }
+}
+
+
+@media (max-width: 768px) {
+    .app-bar .logo {
+        min-width: auto;
+        padding-left: 4px;
+        gap: 4px;
+    }
+    
+    .app-bar .search {
+        margin: 0 8px 0 4px;
+    }
+    
+    .main-content {
+        padding: 16px 16px 16px 20px;
+    }
+    
+    .notes-header,
+    .notes-grid {
+        padding-left: 4px;
+    }
 }

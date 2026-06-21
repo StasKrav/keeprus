@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Material Keep - Упрощенный Google Keep</title>
+    <title>Keeprus - Упрощенный Google Keep</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
@@ -13,21 +13,20 @@
     <!-- Top App Bar -->
     <header class="app-bar">
         <div class="logo" onclick="location.reload()">
-            <span class="material-icons">
-            <svg width="40" height="40" viewBox="0 0 484 420" xmlns="http://www.w3.org/2000/svg">
-            <path d="M274,114 L306,146" stroke="#3b82f6" stroke-width="20" fill="none" stroke-linecap="round"/>
-            <path d="M274,114 L146,242" stroke="#3b82f6" stroke-width="20" fill="none" stroke-linecap="round"/>
-            <path d="M306,146 L178,274" stroke="#3b82f6" stroke-width="20" fill="none" stroke-linecap="round"/>
-            <path d="M178,274 L146,242" stroke="#3b82f6" stroke-width="20" fill="none" stroke-linecap="round"/>
-            <path d="M146,242 L146,274" stroke="#3b82f6" stroke-width="20" fill="none" stroke-linecap="round"/>
-            <path d="M146,274 L178,274" stroke="#3b82f6" stroke-width="20" fill="none" stroke-linecap="round"/>
-            <path d="M242,146 L274,178" stroke="#3b82f6" stroke-width="16" fill="none" stroke-linecap="round"/>
-            <path d="M210,274 L306,274" stroke="#3b82f6" stroke-width="20" fill="none" stroke-linecap="round"/>
-            <path d="M50,50 L434,50 L434,370 L50,370 Z" stroke="#3b82f6" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            
+            <svg width="32" height="36" viewBox="60 60 130 140" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#3b82f6"/>
+                        <stop offset="50%" stop-color="#8b5cf6"/>
+                        <stop offset="100%" stop-color="#ec4899"/>
+                    </linearGradient>
+                </defs>
+                <path d="M 81.476562 77.955078 L 81.476562 177.95508 L 181.47656 177.95508 L 181.47656 77.955078 L 151.4375 77.955078 A 20 20 0 0 1 151.47656 79.140625 A 20 20 0 0 1 131.47656 99.140625 A 20 20 0 0 1 111.47656 79.140625 A 20 20 0 0 1 111.56055 77.955078 L 81.476562 77.955078 z M 98.810547 114.31055 L 164.14258 114.31055 L 164.14258 118.60938 L 98.810547 118.60938 L 98.810547 114.31055 z M 98.810547 129.94531 L 164.14258 129.94531 L 164.14258 134.24414 L 98.810547 134.24414 L 98.810547 129.94531 z M 98.810547 145.58203 L 164.14258 145.58203 L 164.14258 149.88086 L 98.810547 149.88086 L 98.810547 145.58203 z" fill="url(#logoGrad)"/>
+                <circle cx="131.97635" cy="78.919952" r="15" fill="url(#logoGrad)"/>
+                <path d="m 78.338058,99.01141 -11.865015,75.37052 11.849313,2.36831 z" fill="url(#logoGrad)"/>
+                <path d="m 98.166066,181.26294 66.482744,0.58277 -2.1047,12.26719 z" fill="url(#logoGrad)"/>
             </svg>
-            </span>
-            <span>Material Keep</span>
+            <span class="logo-text">Keeprus</span>
         </div>
         
         <div class="search">
@@ -107,6 +106,9 @@
             <span class="nav-label">Корзина</span>
             <span class="tag-count" id="countTrash">0</span>
         </button>
+
+        <!-- РАЗДЕЛИТЕЛЬ -->
+        <div class="sidebar-divider"></div>
                
         <div id="tagList"></div>
     </nav>
@@ -116,8 +118,8 @@
         <div class="notes-header">
             <h1 class="notes-title" id="notesTitle">Все заметки <span class="notes-count" id="notesCount"></span></h1>
             <div class="view-toggle">
-                <button class="view-button active" onclick="setView('grid')">Сетка</button>
-                <button class="view-button" onclick="setView('list')">Список</button>
+                <button class="view-button active" data-view="grid" onclick="setView('grid')">Сетка</button>
+                <button class="view-button" data-view="list" onclick="setView('list')">Список</button>
             </div>
         </div>
         
