@@ -199,6 +199,7 @@
             color: var(--primary-color);
             border-radius: 0 24px 24px 0;
             position: relative;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .nav-item.active::before {
@@ -317,6 +318,12 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
             gap: 24px;
+            animation: containerIn 0.3s ease;
+        }
+
+        @keyframes containerIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .notes-grid.list-view {
@@ -353,18 +360,46 @@
             border-radius: var(--radius);
             padding: 16px;
             box-shadow: var(--shadow-1);
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             cursor: pointer;
             border: 1px solid transparent;
             position: relative;
             min-height: 120px;
             display: flex;
             flex-direction: column;
+            animation: cardAppear 0.3s ease-out;
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(16px) scale(0.97);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes cardDisappear {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+        }
+
+        .note-card.removing {
+            animation: cardDisappear 0.25s ease-in forwards;
         }
 
         .note-card:hover {
             box-shadow: var(--shadow-2);
             border-color: var(--card-border-hover);
+            transform: translateY(-2px);
         }
 
         .note-card.pinned::after {
@@ -532,11 +567,13 @@
             display: flex;
             gap: 4px;
             opacity: 0;
-            transition: opacity 0.2s;
+            transform: translateY(4px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
 
         .note-card:hover .note-actions {
             opacity: 1;
+            transform: translateY(0);
         }
 
         .action-button {
@@ -633,22 +670,45 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 100;
+            animation: fabAppear 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fabAppear {
+            from {
+                transform: scale(0) translateY(40px);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
         }
 
         .fab:hover {
             background: var(--primary-dark);
             box-shadow: 0 6px 10px rgba(0,0,0,0.2);
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.05);
         }
 
         .fab:active {
-            transform: translateY(0);
+            transform: translateY(0) scale(0.95);
+        }
+
+        .fab.hidden {
+            transform: scale(0) translateY(40px);
+            opacity: 0;
+            pointer-events: none;
         }
 
         .fab-icon {
             font-size: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .fab:hover .fab-icon {
+            transform: rotate(90deg);
         }
 
         /* Note Editor Modal */
@@ -663,16 +723,26 @@
             z-index: 2000;
             justify-content: center;
             align-items: center;
-            animation: fadeIn 0.2s;
+            animation: overlayIn 0.2s ease;
         }
 
         .modal.visible {
             display: flex;
         }
 
+        @keyframes overlayIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); }
         }
 
         .note-editor {
@@ -682,9 +752,10 @@
             max-width: 600px;
             box-shadow: var(--shadow-3);
             overflow: hidden;
-            animation: fadeIn 0.2s;
+            animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
         }
+
 
         .editor-header {
             padding: 16px 16px 8px;
@@ -806,7 +877,7 @@
             max-width: 420px;
             box-shadow: var(--shadow-3);
             padding: 24px;
-            animation: fadeIn 0.2s;
+            animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .confirm-dialog-header {
