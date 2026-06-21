@@ -24,6 +24,11 @@
   --toast-color: #ffffff;
   --nav-active-bg: #e8f0fe;
   --card-border-hover: var(--border-color);
+  /* Светлая тема - графитовые цвета */
+      --logo-color-1: #374151;
+      --logo-color-2: #6b7280;
+      --logo-color-3: #4b5563;
+      --logo-shadow: rgba(107, 114, 128, 0.2);
 
   /* Пастельные цвета для заметок (светлая тема) */
   --note-default: #ffffff;
@@ -77,7 +82,7 @@
 }
 
 body {
-  font-family: "Roboto", sans-serif;
+  font-family: "Comfortaa", "Roboto", sans-serif;
   background: var(--background-color);
   color: var(--text-primary);
   min-height: 100vh;
@@ -102,6 +107,7 @@ body {
   transition: background-color 0.3s;
 }
 
+/* Логотип в шапке — объединённые стили */
 .app-bar .logo {
     display: flex;
     align-items: center;
@@ -113,26 +119,14 @@ body {
     padding-left: 8px;
     min-width: 160px;
     flex-shrink: 0;
-    margin-right: 16px; /* добавляем отступ справа от логотипа */
-}
-
-.app-bar .logo:hover {
-  opacity: 0.8;
-}
-
-
-/* Логотип в шапке */
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
+    margin-right: 16px;
     text-decoration: none;
     user-select: none;
     transition: transform 0.2s ease;
 }
 
-.logo:hover {
+.app-bar .logo:hover {
+    opacity: 0.8;
     transform: scale(1.02);
 }
 
@@ -141,14 +135,17 @@ body {
     font-size: 24px;
     font-weight: 700;
     letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+    background:  var(--logo-color-3);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     transition: all 0.3s ease;
-    position: relative;
 }
 
+.logo svg {
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 2px 4px var(--logo-shadow));
+}
 
 /* Анимация SVG при наведении */
 .logo:hover svg {
@@ -156,10 +153,7 @@ body {
     transition: transform 0.3s ease;
 }
 
-.logo svg {
-    transition: transform 0.3s ease;
-    filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.2));
-}
+
 
 /* Тёмная тема */
 [data-theme="dark"] .logo-text {
@@ -408,6 +402,32 @@ body {
   background: var(--primary-color);
   color: white;
   border-color: var(--primary-color);
+}
+
+/* Тёмная тема - кнопки переключения вида */
+[data-theme="dark"] .view-button {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .view-button:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--text-secondary);
+}
+
+[data-theme="dark"] .view-button.active {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 2px 10px rgba(96, 165, 250, 0.3);
+}
+
+[data-theme="dark"] .view-button.active:hover {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+    box-shadow: 0 4px 15px rgba(96, 165, 250, 0.4);
+    transform: translateY(-1px);
 }
 
 /* Empty State */
@@ -888,6 +908,23 @@ body {
   transform: rotate(90deg);
 }
 
+/* Тёмная тема - FAB кнопка */
+[data-theme="dark"] .fab {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+    color: white;
+    box-shadow: 0 4px 15px rgba(96, 165, 250, 0.4);
+}
+
+[data-theme="dark"] .fab:hover {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+    box-shadow: 0 6px 20px rgba(96, 165, 250, 0.5);
+    transform: translateY(-2px) scale(1.05);
+}
+
+[data-theme="dark"] .fab:active {
+    transform: translateY(0) scale(0.95);
+}
+
 /* Note Editor Modal */
 .modal {
   display: none;
@@ -1130,17 +1167,22 @@ body {
   }
   .main-content {
     margin-left: 0;
-    padding: 16px;
+    padding: 16px 16px 16px 20px;
   }
   .notes-grid {
     grid-template-columns: 1fr;
   }
   .app-bar .search {
-    margin: 0 8px;
+    margin: 0 8px 0 4px;
   }
   .app-bar .search-input {
     padding-left: 36px;
     font-size: 14px;
+  }
+  .app-bar .logo {
+    min-width: auto;
+    padding-left: 4px;
+    gap: 4px;
   }
   .app-bar .logo span:last-child {
     display: none;
@@ -1148,39 +1190,32 @@ body {
   .notes-header {
     flex-direction: column;
     align-items: stretch;
+    padding-left: 4px;
+  }
+  .notes-grid {
+    padding-left: 4px;
   }
   .view-toggle {
     align-self: flex-end;
   }
-  .fab {
-    bottom: 16px;
-    right: 16px;
-    width: 48px;
-    height: 48px;
-  }
-  .fab-icon {
-    font-size: 20px;
-  }
+
+/* Анимация пульсации для FAB в тёмной теме */
+@keyframes glowPulse {
+    0% {
+        box-shadow: 0 4px 20px rgba(96, 165, 250, 0.4);
+    }
+    50% {
+        box-shadow: 0 4px 35px rgba(96, 165, 250, 0.7);
+    }
+    100% {
+        box-shadow: 0 4px 20px rgba(96, 165, 250, 0.4);
+    }
 }
 
+[data-theme="dark"] .fab {
+    animation: glowPulse 3s ease-in-out infinite;
+}
 
-@media (max-width: 768px) {
-    .app-bar .logo {
-        min-width: auto;
-        padding-left: 4px;
-        gap: 4px;
-    }
-    
-    .app-bar .search {
-        margin: 0 8px 0 4px;
-    }
-    
-    .main-content {
-        padding: 16px 16px 16px 20px;
-    }
-    
-    .notes-header,
-    .notes-grid {
-        padding-left: 4px;
-    }
+[data-theme="dark"] .fab:hover {
+    animation: none; /* отключаем пульсацию при наведении */
 }

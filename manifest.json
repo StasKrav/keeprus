@@ -1,0 +1,20 @@
+{
+  "name": "Keeprus — Упрощённый Google Keep",
+  "short_name": "Keeprus",
+  "description": "Упрощённый аналог Google Keep для заметок с Markdown, тегами, цветами, архивом и тёмной темой.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#1a73e8",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "ru"
+}

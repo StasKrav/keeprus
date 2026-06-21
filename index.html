@@ -3,9 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <meta name="description" content="Keeprus — упрощённый аналог Google Keep для заметок с Markdown, тегами, цветами, архивом и тёмной темой.">
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Keeprus">
     <title>Keeprus - Упрощенный Google Keep</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Comfortaa:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -16,16 +22,23 @@
         <div class="logo" onclick="location.reload()">
             <svg width="32" height="36" viewBox="60 60 130 140" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#3b82f6"/>
-                        <stop offset="50%" stop-color="#8b5cf6"/>
-                        <stop offset="100%" stop-color="#ec4899"/>
+                    <!-- Светлая тема - графит -->
+                    <linearGradient id="logoGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#374151"/>
+                        <!-- <stop offset="50%" stop-color="#6b7280"/> -->
+                        <stop offset="100%" stop-color="#4b5563"/>
+                    </linearGradient>
+                    <!-- Тёмная тема - цветная -->
+                    <linearGradient id="logoGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#60a5fa"/>
+                        <stop offset="50%" stop-color="#a78bfa"/>
+                        <stop offset="100%" stop-color="#f472b6"/>
                     </linearGradient>
                 </defs>
-                <path d="M 81.476562 77.955078 L 81.476562 177.95508 L 181.47656 177.95508 L 181.47656 77.955078 L 151.4375 77.955078 A 20 20 0 0 1 151.47656 79.140625 A 20 20 0 0 1 131.47656 99.140625 A 20 20 0 0 1 111.47656 79.140625 A 20 20 0 0 1 111.56055 77.955078 L 81.476562 77.955078 z M 98.810547 114.31055 L 164.14258 114.31055 L 164.14258 118.60938 L 98.810547 118.60938 L 98.810547 114.31055 z M 98.810547 129.94531 L 164.14258 129.94531 L 164.14258 134.24414 L 98.810547 134.24414 L 98.810547 129.94531 z M 98.810547 145.58203 L 164.14258 145.58203 L 164.14258 149.88086 L 98.810547 149.88086 L 98.810547 145.58203 z" fill="url(#logoGrad)"/>
-                <circle cx="131.97635" cy="78.919952" r="15" fill="url(#logoGrad)"/>
-                <path d="m 78.338058,99.01141 -11.865015,75.37052 11.849313,2.36831 z" fill="url(#logoGrad)"/>
-                <path d="m 98.166066,181.26294 66.482744,0.58277 -2.1047,12.26719 z" fill="url(#logoGrad)"/>
+                <path d="M 81.476562 77.955078 L 81.476562 177.95508 L 181.47656 177.95508 L 181.47656 77.955078 L 151.4375 77.955078 A 20 20 0 0 1 151.47656 79.140625 A 20 20 0 0 1 131.47656 99.140625 A 20 20 0 0 1 111.47656 79.140625 A 20 20 0 0 1 111.56055 77.955078 L 81.476562 77.955078 z M 98.810547 114.31055 L 164.14258 114.31055 L 164.14258 118.60938 L 98.810547 118.60938 L 98.810547 114.31055 z M 98.810547 129.94531 L 164.14258 129.94531 L 164.14258 134.24414 L 98.810547 134.24414 L 98.810547 129.94531 z M 98.810547 145.58203 L 164.14258 145.58203 L 164.14258 149.88086 L 98.810547 149.88086 L 98.810547 145.58203 z" id="logoPath1"/>
+                <circle cx="131.97635" cy="78.919952" r="15" id="logoCircle"/>
+                <path d="m 78.338058,99.01141 -11.865015,75.37052 11.849313,2.36831 z" id="logoPath2"/>
+                <path d="m 98.166066,181.26294 66.482744,0.58277 -2.1047,12.26719 z" id="logoPath3"/>
             </svg>
             <span class="logo-text">Keeprus</span>
         </div>
@@ -37,12 +50,12 @@
         
         <div class="actions">
             <button class="icon-button" onclick="toggleTheme()" title="Тёмная тема" id="themeToggle">
-                <svg id="themeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg id="themeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Переключить тему">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                 </svg>
             </button>
             <button class="icon-button" onclick="clearTrash()" title="Очистить корзину">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Очистить корзину">
                     <path d="M3 6h18"/>
                     <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
@@ -56,7 +69,7 @@
     <!-- Sidebar Navigation -->
     <nav class="sidebar" id="sidebar">
         <button class="nav-item active" data-filter="all" onclick="filterNotes('all')">
-            <svg width="24" height="24" viewBox="0 0 608 544" xmlns="http://www.w3.org/2000/svg">
+            <svg width="24" height="24" viewBox="0 0 608 544" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Все заметки">
             <path d="M80,80 L528,80 L528,464 L80,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M240,176 L432,176" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
             <path d="M240,272 L432,272" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
@@ -68,7 +81,7 @@
         </button>
         
         <button class="nav-item" data-filter="pinned" onclick="filterNotes('pinned')">
-            <svg width="24" height="24" viewBox="0 0 448 448" xmlns="http://www.w3.org/2000/svg">
+            <svg width="24" height="24" viewBox="0 0 448 448" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Закрепленные">
             <path d="M272,80 L368,176" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
             <path d="M272,80 L240,144" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
             <path d="M368,176 L304,208" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
@@ -83,7 +96,7 @@
         </button>
         
         <button class="nav-item" data-filter="archive" onclick="filterNotes('archive')">
-            <svg width="24" height="24" viewBox="0 0 480 352" xmlns="http://www.w3.org/2000/svg">
+            <svg width="24" height="24" viewBox="0 0 480 352" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Архив">
             <path d="M240,80 L240,208" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
             <path d="M240,208 L176,144" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
             <path d="M240,208 L304,144" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
@@ -97,7 +110,7 @@
         </button>
         
         <button class="nav-item" data-filter="trash" onclick="filterNotes('trash')">
-            <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Корзина">
                 <path d="M3 6h18"/>
                 <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
@@ -132,7 +145,7 @@
     <!-- Floating Action Button -->
     <button class="fab" id="addNoteBtn" title="Создать заметку">
         <span class="material-icons fab-icon">
-        <svg width="50" height="50" viewBox="0 0 288 288" xmlns="http://www.w3.org/2000/svg">
+        <svg width="50" height="50" viewBox="0 0 288 288" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Создать заметку">
         <path d="M144,80 L144,208" stroke="currentColor" stroke-width="20" fill="none" stroke-linecap="round"/>
         <path d="M80,144 L208,144" stroke="currentColor" stroke-width="20" fill="none" stroke-linecap="round"/>
         

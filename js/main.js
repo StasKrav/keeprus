@@ -15,9 +15,30 @@ let searchTerm = "";
 let tagFilter = null;
 let deletedNotes = [];
 
+// Safe localStorage wrapper (handles private browsing, quota exceeded, etc.)
+function storageGet(key, fallback = null) {
+  try {
+    const val = localStorage.getItem(key);
+    return val !== null ? val : fallback;
+  } catch (e) {
+    console.warn("localStorage unavailable (getItem):", e.message);
+    return fallback;
+  }
+}
+
+function storageSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    console.warn("localStorage unavailable (setItem):", e.message);
+    return false;
+  }
+}
+
 // Load notes from localStorage
 function loadNotes() {
-  const saved = localStorage.getItem("material_keep_notes");
+  const saved = storageGet("material_keep_notes");
   if (saved) {
     try {
       notes = JSON.parse(saved);
@@ -31,7 +52,7 @@ function loadNotes() {
   notes = [
     {
       id: Date.now() - 100000,
-      title: "Добро пожаловать в Material Keep!",
+      title: "Добро пожаловать в Keeprus!",
       content:
         "• Кликните на заметку чтобы редактировать\n• Используйте поиск для фильтрации\n• Добавляйте ярлыки и цвета",
       color: "color-yellow",
@@ -68,8 +89,24 @@ function loadNotes() {
 }
 
 function saveNotes() {
-  localStorage.setItem("material_keep_notes", JSON.stringify(notes));
+  storageSet("material_keep_notes", JSON.stringify(notes));
   updateCounts();
+}
+
+function updateLogoColors(theme) {
+    const svg = document.querySelector('.logo svg');
+    if (!svg) return;
+    
+    // Находим все элементы с fill
+    const elements = svg.querySelectorAll('path, circle');
+    
+    // Выбираем нужный градиент
+    const gradientId = theme === 'dark' ? 'logoGradDark' : 'logoGradLight';
+    
+    // Применяем градиент ко всем элементам
+    elements.forEach(el => {
+        el.setAttribute('fill', `url(#${gradientId})`);
+    });
 }
 
 // ============================================
@@ -175,11 +212,20 @@ function renderNotes() {
 // MARKDOWN PARSER
 // ============================================
 
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&')
+    .replace(/</g, '<')
+    .replace(/>/g, '>')
+    .replace(/"/g, '"')
+    .replace(/'/g, '&#039;');
+}
+
 function renderMarkdown(text) {
   if (!text) return "";
 
-  // Escape HTML to prevent XSS
-  let html = text.replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">");
+  // Escape HTML to prevent XSS — do this FIRST, before any tag injection
+  let html = escapeHtml(text);
 
   // Headers: ## Title or # Title
   html = html.replace(/^### (.+)$/gm, "<h3>$1</h3>");
@@ -203,16 +249,18 @@ function renderMarkdown(text) {
   // Code blocks: ```code```
   html = html.replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>");
 
+  // Ordered lists: 1. item — process BEFORE unordered to avoid <li> conflicts
+  html = html.replace(/^\d+\. (.+)$/gm, "<oli>$1</oli>");
+  // Wrap consecutive <oli> in <ol>, converting markers to real <li>
+  html = html.replace(/(<oli>[\s\S]*?<\/oli>(\n?))+/g, (match) => {
+    return '<ol>' + match.replace(/<\/?oli>/g, (m) => m === '<oli>' ? '<li>' : '</li>') + '</ol>';
+  });
+
   // Unordered lists: - item or * item
   html = html.replace(/^- (.+)$/gm, "<li>$1</li>");
   html = html.replace(/^\* (.+)$/gm, "<li>$1</li>");
   // Wrap consecutive <li> in <ul>
-  html = html.replace(/(<li>.*<\/li>\n?)+/g, (match) => `<ul>${match}</ul>`);
-
-  // Ordered lists: 1. item
-  html = html.replace(/^\d+\. (.+)$/gm, "<li>$1</li>");
-  // Wrap consecutive <li> in <ol> (only if not already in <ul>)
-  // This is a simplified approach - ordered lists after unordered may not work perfectly
+  html = html.replace(/(<li>[\s\S]*?<\/li>(\n?))+/g, (match) => `<ul>${match}</ul>`);
 
   // Blockquotes: > text
   html = html.replace(/^> (.+)$/gm, "<blockquote>$1</blockquote>");
@@ -382,6 +430,7 @@ function saveNote() {
 
   if (!title && !content) {
     showToast("Заметка пуста. Закрываю...");
+    hasUnsavedChanges = false;
     closeEditor();
     return;
   }
@@ -565,8 +614,8 @@ function changeNoteColor(id, e) {
       "color-blue",
       "color-purple",
     ];
-    const currentIndex = colors.indexOf(note.color) || 0;
-    const nextIndex = (currentIndex + 1) % colors.length;
+    const currentIndex = colors.indexOf(note.color);
+    const nextIndex = (currentIndex === -1 ? 0 : (currentIndex + 1) % colors.length);
     note.color = colors[nextIndex];
     saveNotes();
     renderNotes();
@@ -825,7 +874,7 @@ function setView(view) {
     });
     
     // Сохраняем выбор
-    localStorage.setItem('material_keep_view', view);
+    storageSet('material_keep_view', view);
 }
 
 // ============================================
@@ -875,12 +924,13 @@ function showToast(message) {
 // ============================================
 
 function toggleTheme() {
-  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-  const newTheme = isDark ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", newTheme);
-  localStorage.setItem("material_keep_theme", newTheme);
-  updateThemeIcon(newTheme);
-  showToast(isDark ? "Светлая тема" : "Тёмная тема");
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const newTheme = isDark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('material_keep_theme', newTheme);
+    updateThemeIcon(newTheme);
+    updateLogoColors(newTheme); // <-- добавляем обновление логотипа
+    showToast(isDark ? 'Светлая тема' : 'Тёмная тема');
 }
 
 function updateThemeIcon(theme) {
@@ -905,7 +955,7 @@ function updateThemeIcon(theme) {
 }
 
 function loadTheme() {
-  const saved = localStorage.getItem("material_keep_theme");
+  const saved = storageGet("material_keep_theme");
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const theme = saved || (prefersDark ? "dark" : "light");
   document.documentElement.setAttribute("data-theme", theme);
@@ -1061,11 +1111,24 @@ document.addEventListener("keydown", (e) => {
 // ============================================
 
 function init() {
-  loadTheme();
-  loadNotes();
-  renderNotes();
-  setupSearch();
-  updateCounts();
+    loadTheme();
+    loadNotes();
+    
+    // Загружаем сохранённый вид
+    const savedView = localStorage.getItem('material_keep_view');
+    if (savedView) {
+        setView(savedView);
+    } else {
+        setView('grid');
+    }
+    
+    renderNotes();
+    setupSearch();
+    updateCounts();
+    
+    // Обновляем цвета логотипа при загрузке
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    updateLogoColors(currentTheme);
 
   // Click outside modal to close
   document.getElementById("noteEditor").addEventListener("click", (e) => {
@@ -1133,7 +1196,16 @@ function init() {
     }
   });
 
-  console.log("✨ Material Keep полностью функционален!");
+  // Register Service Worker for PWA offline support
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js").then((reg) => {
+      console.log("✅ Service Worker registered:", reg.scope);
+    }).catch((err) => {
+      console.warn("⚠️ Service Worker registration failed:", err);
+    });
+  }
+
+  console.log("✨ Keeprus полностью функционален!");
   console.log("📝 Горячие клавиши: Ctrl+N - новая заметка, Ctrl+S - сохранить");
 }
 
