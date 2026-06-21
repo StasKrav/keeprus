@@ -1115,6 +1115,37 @@
         </div>
     </div>
 
+    <!-- Generic Confirm Dialog -->
+    <div class="confirm-dialog" id="genericConfirmDialog">
+        <div class="confirm-dialog-content">
+            <div class="confirm-dialog-header">
+                <span class="material-icons confirm-dialog-icon" id="genericConfirmIcon">warning</span>
+                <span class="confirm-dialog-title" id="genericConfirmTitle">Подтверждение</span>
+            </div>
+            <p class="confirm-dialog-message" id="genericConfirmMessage"></p>
+            <div class="confirm-dialog-actions">
+                <button class="view-button" id="genericConfirmCancelBtn">Отмена</button>
+                <button class="view-button active" id="genericConfirmOkBtn">Подтвердить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prompt Dialog -->
+    <div class="confirm-dialog" id="promptDialog">
+        <div class="confirm-dialog-content">
+            <div class="confirm-dialog-header">
+                <span class="material-icons confirm-dialog-icon">local_offer</span>
+                <span class="confirm-dialog-title">Добавить ярлык</span>
+            </div>
+            <p class="confirm-dialog-message">Введите название ярлыка:</p>
+            <input type="text" class="prompt-input" id="promptInput" placeholder="Название ярлыка" maxlength="30" style="width:100%;padding:10px 12px;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:var(--bg-color);color:var(--text-primary);font-size:14px;outline:none;margin-bottom:16px;box-sizing:border-box;">
+            <div class="confirm-dialog-actions">
+                <button class="view-button" id="promptCancelBtn">Отмена</button>
+                <button class="view-button active" id="promptOkBtn">Добавить</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============================================
         // DATA LAYER
@@ -1355,9 +1386,9 @@
                     <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                         <div class="note-tags">
                             ${note.tags.map(tag => `
-                                <span class="note-tag" onclick="event.stopPropagation(); filterByTag('${tag}')">
+                                <span class="note-tag" onclick="filterByTag('${tag}', event)">
                                     ${tag}
-                                    <span class="tag-remove" onclick="event.stopPropagation(); removeTagFromCard(${note.id}, '${tag}')" title="Удалить ярлык">&times;</span>
+                                    <span class="tag-remove" onclick="removeTagFromCard(${note.id}, '${tag}', event)" title="Удалить ярлык">&times;</span>
                                 </span>
                             `).join('')}
                         </div>
@@ -1365,28 +1396,28 @@
                     </div>
                     <div class="note-actions">
                         ${isTrash ? `
-                            <button class="action-button" onclick="restoreNote(${note.id})" title="Восстановить">
+                            <button class="action-button" onclick="restoreNote(${note.id}, event)" title="Восстановить">
                                 <span class="material-icons">restore</span>
                             </button>
-                            <button class="action-button" onclick="deletePermanently(${note.id})" title="Удалить навсегда">
+                            <button class="action-button" onclick="deletePermanently(${note.id}, event)" title="Удалить навсегда">
                                 <span class="material-icons">delete_forever</span>
                             </button>
                         ` : `
-                            ${note.pinned ? 
-                                `<button class="action-button active" onclick="togglePin(${note.id})" title="Открепить">
+                            ${note.pinned ?
+                                `<button class="action-button active" onclick="togglePin(${note.id}, event)" title="Открепить">
                                     <span class="material-icons">push_pin</span>
                                 </button>` :
-                                `<button class="action-button" onclick="togglePin(${note.id})" title="Закрепить">
+                                `<button class="action-button" onclick="togglePin(${note.id}, event)" title="Закрепить">
                                     <span class="material-icons">push_pin</span>
                                 </button>`
                             }
-                            <button class="action-button" onclick="changeNoteColor(${note.id})" title="Сменить цвет">
+                            <button class="action-button" onclick="changeNoteColor(${note.id}, event)" title="Сменить цвет">
                                 <span class="material-icons">palette</span>
                             </button>
-                            <button class="action-button" onclick="archiveNote(${note.id})" title="Архивировать">
+                            <button class="action-button" onclick="archiveNote(${note.id}, event)" title="Архивировать">
                                 <span class="material-icons">archive</span>
                             </button>
-                            <button class="action-button" onclick="deleteNote(${note.id})" title="Удалить">
+                            <button class="action-button" onclick="deleteNote(${note.id}, event)" title="Удалить">
                                 <span class="material-icons">delete</span>
                             </button>
                         `}
@@ -1509,32 +1540,38 @@
             renderNotes();
         }
 
-        function deleteNote(id) {
-            event?.stopPropagation();
+        function deleteNote(id, e) {
+            e?.stopPropagation();
             const note = notes.find(n => n.id === id);
             if (!note) return;
             
-            if (confirm('Переместить заметку в корзину?')) {
-                note.trashed = true;
-                note.trashDate = new Date().toISOString();
-                saveNotes();
-                renderNotes();
-                showToast('Заметка перемещена в корзину');
-            }
+            note.trashed = true;
+            note.trashDate = new Date().toISOString();
+            saveNotes();
+            renderNotes();
+            showToast('Заметка перемещена в корзину');
         }
 
-        function deletePermanently(id) {
-            event?.stopPropagation();
-            if (confirm('Удалить заметку навсегда? Это действие нельзя отменить.')) {
-                notes = notes.filter(n => n.id !== id);
-                saveNotes();
-                renderNotes();
-                showToast('Заметка удалена навсегда');
-            }
+        function deletePermanently(id, e) {
+            e?.stopPropagation();
+            showConfirmDialog(
+                'delete_perm',
+                'delete_perm_' + id,
+                'delete_forever',
+                'Удалить навсегда?',
+                'Заметка будет удалена без возможности восстановления.',
+                'Удалить',
+                () => {
+                    notes = notes.filter(n => n.id !== id);
+                    saveNotes();
+                    renderNotes();
+                    showToast('Заметка удалена навсегда');
+                }
+            );
         }
 
-        function restoreNote(id) {
-            event?.stopPropagation();
+        function restoreNote(id, e) {
+            e?.stopPropagation();
             const note = notes.find(n => n.id === id);
             if (note) {
                 note.trashed = false;
@@ -1545,8 +1582,8 @@
             }
         }
 
-        function archiveNote(id) {
-            event?.stopPropagation();
+        function archiveNote(id, e) {
+            e?.stopPropagation();
             const note = notes.find(n => n.id === id);
             if (note) {
                 note.archived = !note.archived;
@@ -1556,8 +1593,8 @@
             }
         }
 
-        function togglePin(id) {
-            event?.stopPropagation();
+        function togglePin(id, e) {
+            e?.stopPropagation();
             const note = notes.find(n => n.id === id);
             if (note) {
                 note.pinned = !note.pinned;
@@ -1622,8 +1659,8 @@
             }
         }
 
-        function changeNoteColor(id) {
-            event?.stopPropagation();
+        function changeNoteColor(id, e) {
+            e?.stopPropagation();
             const note = notes.find(n => n.id === id);
             if (note) {
                 const colors = ['color-default', 'color-red', 'color-orange', 'color-yellow', 
@@ -1683,51 +1720,51 @@
         // ============================================
 
         function addTagToNote() {
-            const tag = prompt('Введите название ярлыка:');
-            if (!tag || tag.trim() === '') return;
-            
-            const trimmedTag = tag.trim();
-            
-            if (currentNoteId) {
-                const note = notes.find(n => n.id === currentNoteId);
-                if (note) {
-                    if (!note.tags.includes(trimmedTag)) {
-                        note.tags.push(trimmedTag);
-                        saveNotes();
-                        renderNotes();
-                        showToast(`Ярлык "${trimmedTag}" добавлен`);
-                    } else {
-                        showToast(`Ярлык "${trimmedTag}" уже существует`);
-                    }
-                }
-            } else {
-                // For new note, we'll store tags in a temporary array
-                // Actually let's just save the note with the tag
-                const title = document.getElementById('noteTitle').value.trim() || 'Без названия';
-                const content = document.getElementById('noteContent').value.trim() || '';
+            showPromptDialog((tag) => {
+                if (!tag || tag.trim() === '') return;
+                const trimmedTag = tag.trim();
                 
-                const newNote = {
-                    id: Date.now(),
-                    title: title,
-                    content: content,
-                    color: currentColor,
-                    tags: [trimmedTag],
-                    pinned: isPinned,
-                    archived: isArchived,
-                    trashed: false,
-                    date: new Date().toLocaleDateString('ru-RU') + ' ' + new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'})
-                };
-                notes.unshift(newNote);
-                currentNoteId = newNote.id;
-                saveNotes();
-                renderNotes();
-                showToast(`Ярлык "${trimmedTag}" добавлен к новой заметке`);
-                closeEditor();
-            }
+                if (currentNoteId) {
+                    const note = notes.find(n => n.id === currentNoteId);
+                    if (note) {
+                        if (!note.tags.includes(trimmedTag)) {
+                            note.tags.push(trimmedTag);
+                            saveNotes();
+                            renderNotes();
+                            showToast(`Ярлык "${trimmedTag}" добавлен`);
+                        } else {
+                            showToast(`Ярлык "${trimmedTag}" уже существует`);
+                        }
+                    }
+                } else {
+                    // For new note, we'll store tags in a temporary array
+                    // Actually let's just save the note with the tag
+                    const title = document.getElementById('noteTitle').value.trim() || 'Без названия';
+                    const content = document.getElementById('noteContent').value.trim() || '';
+                    
+                    const newNote = {
+                        id: Date.now(),
+                        title: title,
+                        content: content,
+                        color: currentColor,
+                        tags: [trimmedTag],
+                        pinned: isPinned,
+                        archived: isArchived,
+                        trashed: false,
+                        date: new Date().toLocaleDateString('ru-RU') + ' ' + new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'})
+                    };
+                    notes.unshift(newNote);
+                    currentNoteId = newNote.id;
+                    saveNotes();
+                    renderNotes();
+                    showToast(`Ярлык "${trimmedTag}" добавлен к новой заметке`);
+                    closeEditor();
+                }
+            });
         }
 
-        function removeTagFromNote(tag) {
-            event?.stopPropagation();
+        function removeTagFromNote(tag, e) {
+            e?.stopPropagation();
             if (!currentNoteId) {
                 showToast('Сначала сохраните заметку');
                 return;
@@ -1744,8 +1781,8 @@
             }
         }
 
-        function removeTagFromCard(noteId, tag) {
-            event?.stopPropagation();
+        function removeTagFromCard(noteId, tag, e) {
+            e?.stopPropagation();
             const note = notes.find(n => n.id === noteId);
             if (note) {
                 const index = note.tags.indexOf(tag);
@@ -1758,7 +1795,8 @@
             }
         }
 
-        function filterByTag(tag) {
+        function filterByTag(tag, e) {
+            e?.stopPropagation();
             tagFilter = tag;
             currentFilter = 'all';
             // Update active nav
@@ -1950,6 +1988,48 @@
             document.getElementById('confirmDialog').classList.remove('visible');
         }
 
+        // ============================================
+        // GENERIC CONFIRM DIALOG
+        // ============================================
+
+        let confirmCallback = null;
+
+        function showConfirmDialog(namespace, id, icon, title, message, okText, callback) {
+            const dialog = document.getElementById('genericConfirmDialog');
+            document.getElementById('genericConfirmIcon').textContent = icon || 'warning';
+            document.getElementById('genericConfirmTitle').textContent = title || 'Подтверждение';
+            document.getElementById('genericConfirmMessage').textContent = message || '';
+            document.getElementById('genericConfirmOkBtn').textContent = okText || 'Подтвердить';
+            
+            confirmCallback = { namespace, id, callback };
+            dialog.classList.add('visible');
+        }
+
+        function closeGenericConfirm() {
+            document.getElementById('genericConfirmDialog').classList.remove('visible');
+            confirmCallback = null;
+        }
+
+        // ============================================
+        // PROMPT DIALOG
+        // ============================================
+
+        let promptCallback = null;
+
+        function showPromptDialog(callback) {
+            const dialog = document.getElementById('promptDialog');
+            const input = document.getElementById('promptInput');
+            input.value = '';
+            promptCallback = callback;
+            dialog.classList.add('visible');
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function closePromptDialog() {
+            document.getElementById('promptDialog').classList.remove('visible');
+            promptCallback = null;
+        }
+
         function markEditorChanged() {
             hasUnsavedChanges = true;
         }
@@ -2004,6 +2084,40 @@
             });
             
             document.getElementById('addNoteBtn').addEventListener('click', addNote);
+            
+            // Generic confirm dialog
+            document.getElementById('genericConfirmDialog').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    closeGenericConfirm();
+                }
+            });
+            document.getElementById('genericConfirmCancelBtn').addEventListener('click', closeGenericConfirm);
+            document.getElementById('genericConfirmOkBtn').addEventListener('click', () => {
+                if (confirmCallback && confirmCallback.callback) {
+                    confirmCallback.callback();
+                }
+                closeGenericConfirm();
+            });
+            
+            // Prompt dialog
+            document.getElementById('promptDialog').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    closePromptDialog();
+                }
+            });
+            document.getElementById('promptCancelBtn').addEventListener('click', closePromptDialog);
+            document.getElementById('promptOkBtn').addEventListener('click', () => {
+                const input = document.getElementById('promptInput');
+                if (promptCallback) {
+                    promptCallback(input.value);
+                }
+                closePromptDialog();
+            });
+            document.getElementById('promptInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('promptOkBtn').click();
+                }
+            });
             
             // Track unsaved changes in editor
             document.getElementById('noteTitle').addEventListener('input', markEditorChanged);
