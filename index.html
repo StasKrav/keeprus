@@ -780,6 +780,66 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        /* Confirmation Dialog */
+        .confirm-dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--modal-overlay);
+            z-index: 2500;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.2s;
+        }
+
+        .confirm-dialog.visible {
+            display: flex;
+        }
+
+        .confirm-dialog-content {
+            background: var(--surface-color);
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 420px;
+            box-shadow: var(--shadow-3);
+            padding: 24px;
+            animation: fadeIn 0.2s;
+        }
+
+        .confirm-dialog-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .confirm-dialog-icon {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .confirm-dialog-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .confirm-dialog-message {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .confirm-dialog-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .sidebar {
@@ -968,6 +1028,22 @@
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 
+    <!-- Confirmation Dialog -->
+    <div class="confirm-dialog" id="confirmDialog">
+        <div class="confirm-dialog-content">
+            <div class="confirm-dialog-header">
+                <span class="material-icons confirm-dialog-icon">info</span>
+                <span class="confirm-dialog-title">Несохранённые изменения</span>
+            </div>
+            <p class="confirm-dialog-message">У вас есть несохранённые изменения. Что вы хотите сделать?</p>
+            <div class="confirm-dialog-actions">
+                <button class="view-button" onclick="confirmDiscard()">Не сохранять</button>
+                <button class="view-button" onclick="confirmCancel()">Отмена</button>
+                <button class="view-button active" onclick="confirmSave()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============================================
         // DATA LAYER
@@ -981,6 +1057,7 @@
         let isPinned = false;
         let isArchived = false;
         let isMarkdownMode = false;
+        let hasUnsavedChanges = false;
         let searchTerm = '';
         let tagFilter = null;
         let deletedNotes = [];
@@ -1266,6 +1343,7 @@
             isPinned = false;
             isArchived = false;
             currentColor = 'color-default';
+            hasUnsavedChanges = false;
             document.getElementById('noteTitle').value = '';
             document.getElementById('noteContent').value = '';
             document.getElementById('pinEditorBtn').classList.remove('active');
@@ -1283,6 +1361,7 @@
             isPinned = note.pinned;
             isArchived = note.archived || false;
             currentColor = note.color || 'color-default';
+            hasUnsavedChanges = false;
             
             document.getElementById('noteTitle').value = note.title || '';
             document.getElementById('noteContent').value = note.content || '';
@@ -1353,6 +1432,7 @@
                 showToast('Заметка создана');
             }
             
+            hasUnsavedChanges = false;
             saveNotes();
             closeEditor();
             renderNotes();
@@ -1765,9 +1845,42 @@
         // ============================================
 
         function closeEditor() {
+            if (hasUnsavedChanges) {
+                document.getElementById('confirmDialog').classList.add('visible');
+                return;
+            }
+            forceCloseEditor();
+        }
+
+        function forceCloseEditor() {
             document.getElementById('noteEditor').classList.remove('visible');
             document.getElementById('editorColorPicker').classList.remove('visible');
+            document.getElementById('mdHint').style.display = 'none';
+            isMarkdownMode = false;
+            document.getElementById('markdownBtn').classList.remove('active');
+            document.getElementById('markdownIcon').textContent = 'code';
             currentNoteId = null;
+            hasUnsavedChanges = false;
+        }
+
+        function confirmSave() {
+            document.getElementById('confirmDialog').classList.remove('visible');
+            saveNote();
+            forceCloseEditor();
+        }
+
+        function confirmDiscard() {
+            document.getElementById('confirmDialog').classList.remove('visible');
+            hasUnsavedChanges = false;
+            forceCloseEditor();
+        }
+
+        function confirmCancel() {
+            document.getElementById('confirmDialog').classList.remove('visible');
+        }
+
+        function markEditorChanged() {
+            hasUnsavedChanges = true;
         }
 
         function refreshNotes() {
@@ -1820,6 +1933,17 @@
             });
             
             document.getElementById('addNoteBtn').addEventListener('click', addNote);
+            
+            // Track unsaved changes in editor
+            document.getElementById('noteTitle').addEventListener('input', markEditorChanged);
+            document.getElementById('noteContent').addEventListener('input', markEditorChanged);
+            
+            // Close confirmation dialog on click outside
+            document.getElementById('confirmDialog').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    confirmCancel();
+                }
+            });
             
             console.log('✨ Material Keep полностью функционален!');
             console.log('📝 Горячие клавиши: Ctrl+N - новая заметка, Ctrl+S - сохранить');
