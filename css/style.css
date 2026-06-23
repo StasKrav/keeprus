@@ -85,10 +85,29 @@ body {
   font-family: "Comfortaa", "Roboto", sans-serif;
   background: var(--background-color);
   color: var(--text-primary);
-  min-height: 100vh;
+  overflow-y: scroll;
+  scrollbar-width: thin; /* Firefox */
   transition:
     background-color 0.3s,
     color 0.3s;
+}
+
+/* Для WebKit браузеров (Chrome, Safari) */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
 }
 
 /* Top App Bar */
@@ -1219,3 +1238,4 @@ body {
 [data-theme="dark"] .fab:hover {
     animation: none; /* отключаем пульсацию при наведении */
 }
+
