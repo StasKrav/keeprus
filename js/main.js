@@ -560,7 +560,7 @@ function createNoteElement(note) {
     div.appendChild(contentWrapper);
 
     // Клик по заметке для редактирования (кроме клика по магниту)
-    div.addEventListener("click", function(e) {
+    div.addEventListener("dblclick", function(e) {
         // Проверяем, что клик не по магниту и не по его дочерним элементам
         if (e.target.closest('.note-magnet')) {
             return; // Если клик по магниту - ничего не делаем
