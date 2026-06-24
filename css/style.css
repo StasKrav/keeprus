@@ -502,33 +502,163 @@ body {
   }
 }
 
-.notes-grid.list-view {
-  grid-template-columns: 1fr;
-}
-
+/* Стили для карточек в режиме "Список" */
 .notes-grid.list-view .note-card {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 12px 16px;
-  min-height: 60px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 14px;
+    min-height: 48px;
+    padding-top: 24px;
+    gap: 12px;
 }
 
-.notes-grid.list-view .note-card .note-title {
-  margin-bottom: 0;
-  flex: 1;
-}
-
+/* Скрываем текст заметки в режиме "Список" */
 .notes-grid.list-view .note-card .note-content {
-  margin-bottom: 0;
-  margin-right: 16px;
-  flex: 2;
+    display: none;
 }
 
-.notes-grid.list-view .note-card .note-footer {
-  margin-top: 0;
-  flex: 0;
+/* Заголовок заметки в режиме "Список" */
+.notes-grid.list-view .note-card .note-title {
+    margin-bottom: 0;
+    flex: 1;
+    min-width: 80px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
+/* Футер заметки в режиме "Список" */
+.notes-grid.list-view .note-card .note-footer {
+    margin-top: 0;
+    flex: 0;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Теги в режиме "Список" */
+.notes-grid.list-view .note-card .note-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: nowrap;
+    max-width: 200px;
+    overflow: hidden;
+}
+
+.notes-grid.list-view .note-card .note-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    white-space: nowrap;
+}
+
+/* Дата в режиме "Список" */
+.notes-grid.list-view .note-card .note-date {
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+/* ===== НАСТРОЙКИ (скрыты, показываются при наведении) ===== */
+.notes-grid.list-view .note-card .note-actions {
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    display: flex;
+    gap: 2px;
+}
+
+.notes-grid.list-view .note-card:hover .note-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.notes-grid.list-view .note-card .note-actions .action-button {
+    width: 28px;
+    height: 28px;
+}
+
+.notes-grid.list-view .note-card .note-actions .action-button .material-icons {
+    font-size: 18px;
+}
+
+/* Магнит в режиме "Список" - меньше */
+.notes-grid.list-view .note-magnet {
+    width: 24px;
+    height: 24px;
+    top: -8px;
+    border-width: 3px;
+}
+
+.notes-grid.list-view .note-magnet::after {
+    width: 14px;
+    height: 5px;
+    bottom: -5px;
+    filter: blur(2px);
+}
+
+/* Убираем линии блокнота в режиме "Список" */
+.notes-grid.list-view .note-card::before {
+    display: none;
+}
+
+/* Стили для тегов в режиме "Список" с overflow */
+.notes-grid.list-view .note-card .note-footer > div:first-child {
+    flex: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Для мобильных устройств */
+@media (max-width: 768px) {
+    .notes-grid.list-view {
+        grid-template-columns: 1fr;
+    }
+    
+    .notes-grid.list-view .note-card {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 12px 12px 8px;
+        min-height: 44px;
+        padding-top: 22px;
+    }
+    
+    .notes-grid.list-view .note-card .note-title {
+        font-size: 13px;
+        flex: 1 1 100%;
+        margin-bottom: 4px;
+        white-space: normal;
+        overflow: visible;
+    }
+    
+    .notes-grid.list-view .note-card .note-footer {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    
+    .notes-grid.list-view .note-card .note-tags {
+        max-width: 100%;
+        flex-wrap: wrap;
+    }
+    
+    .notes-grid.list-view .note-magnet {
+        width: 28px;
+        height: 28px;
+        top: -10px;
+    }
+    
+    /* На мобильных устройствах настройки всегда видны (или при наведении) */
+    .notes-grid.list-view .note-card .note-actions {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
 
 /* Note Card - обновлённый с магнитом */
 .note-card {
@@ -1309,4 +1439,7 @@ body {
     align-self: flex-end;
   }
 }
+
+
+
 
