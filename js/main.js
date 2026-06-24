@@ -315,12 +315,7 @@ function createNoteElement(note) {
     const magnet = document.createElement("div");
     magnet.className = "note-magnet";
     magnet.title = note.pinned ? "Открепить" : "Закрепить";
-    magnet.innerHTML = `
-        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 5v14"/>
-            <path d="M5 12h14"/>
-        </svg>
-    `;
+
     
     // === ИСПРАВЛЕНИЕ: добавляем обработчик напрямую на магнит ===
     // Сохраняем ID в data-атрибут
