@@ -66,13 +66,13 @@
 
   /* Приглушённые цвета для заметок (тёмная тема) */
   --note-default: #2d2d2d;
-  --note-red: #3c2828;
-  --note-orange: #3d3224;
-  --note-yellow: #3d3824;
-  --note-green: #263a2e;
-  --note-teal: #243a38;
-  --note-blue: #26323d;
-  --note-purple: #332a3d;
+      --note-red: #3a2d2d;
+      --note-orange: #3a342d;
+      --note-yellow: #3a3a2d;
+      --note-green: #2d3a30;
+      --note-teal: #2d3a38;
+      --note-blue: #2d323a;
+      --note-purple: #342d3a;
 }
 
 * {
@@ -645,16 +645,20 @@ body {
 }
 
 [data-theme="dark"] .note-card.pinned .note-magnet {
-    background: var(--primary-color);
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.8), rgba(167, 139, 250, 0.8), rgba(244, 114, 182, 0.8));
     box-shadow: 
         0 2px 8px rgba(138, 180, 248, 0.25),
         inset 0 -2px 4px rgba(0,0,0,0.1);
 }
 
 [data-theme="dark"] .note-card.pinned .note-magnet:hover {
-    background: var(--primary-dark);
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.8), rgba(167, 139, 250, 0.8), rgba(244, 114, 182, 0.8));
     box-shadow: 0 3px 12px rgba(138, 180, 248, 0.35);
 }
+
+
+
+
 .note-title {
   font-size: 16px;
   font-weight: 500;
