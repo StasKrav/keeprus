@@ -1,6 +1,21 @@
 // ============================================
 // DATA LAYER
 // ============================================
+// Глобальный обработчик для магнитов (делегирование событий)
+document.addEventListener('click', function(e) {
+    const magnet = e.target.closest('.note-magnet');
+    if (magnet) {
+        e.stopPropagation();
+        e.preventDefault();
+        const noteId = parseInt(magnet.dataset.noteId);
+        if (noteId) {
+            togglePin(noteId, e);
+        }
+        return false;
+    }
+});
+
+
 
 let notes = [];
 let currentFilter = "all";
@@ -292,83 +307,105 @@ function renderMarkdown(text) {
 }
 
 function createNoteElement(note) {
-  const div = document.createElement("div");
-  div.className = `note-card ${note.color} ${note.pinned ? "pinned" : ""}`;
-  div.setAttribute("data-id", note.id);
+    const div = document.createElement("div");
+    div.className = `note-card ${note.color} ${note.pinned ? "pinned" : ""}`;
+    div.setAttribute("data-id", note.id);
 
-  // Trash view has different actions
-  const isTrash = currentFilter === "trash";
+    // ===== МАГНИТ =====
+    const magnet = document.createElement("div");
+    magnet.className = "note-magnet";
+    magnet.title = note.pinned ? "Открепить" : "Закрепить";
+    magnet.innerHTML = `
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14"/>
+            <path d="M5 12h14"/>
+        </svg>
+    `;
+    
+    // === ИСПРАВЛЕНИЕ: добавляем обработчик напрямую на магнит ===
+    // Сохраняем ID в data-атрибут
+    magnet.dataset.noteId = note.id;
 
-  const contentPreview =
-    note.content.length > 120
-      ? note.content.slice(0, 120) + "..."
-      : note.content;
-  const renderedContent = renderMarkdown(contentPreview);
 
-  div.innerHTML = `
-                <div class="note-title">${note.title || "Без названия"}</div>
-                <div class="note-content md-content">${renderedContent}</div>
-                <div class="note-footer">
-                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                        <div class="note-tags">
-                            ${note.tags
-                              .map(
-                                (tag) => `
-                                <span class="note-tag" onclick="filterByTag('${tag}', event)">
-                                    ${tag}
-                                    <span class="tag-remove" onclick="removeTagFromCard(${note.id}, '${tag}', event)" title="Удалить ярлык">&times;</span>
-                                </span>
-                            `,
-                              )
-                              .join("")}
-                        </div>
-                        <span class="note-date">${note.date || ""}</span>
-                    </div>
-                    <div class="note-actions">
-                        ${
-                          isTrash
-                            ? `
-                            <button class="action-button" onclick="restoreNote(${note.id}, event)" title="Восстановить">
-                                <span class="material-icons">restore</span>
-                            </button>
-                            <button class="action-button" onclick="deletePermanently(${note.id}, event)" title="Удалить навсегда">
-                                <span class="material-icons">delete_forever</span>
-                            </button>
-                        `
-                            : `
-                            ${
-                              note.pinned
-                                ? `<button class="action-button active" onclick="togglePin(${note.id}, event)" title="Открепить">
-                                    <span class="material-icons">push_pin</span>
-                                </button>`
-                                : `<button class="action-button" onclick="togglePin(${note.id}, event)" title="Закрепить">
-                                    <span class="material-icons">push_pin</span>
-                                </button>`
-                            }
-                            <button class="action-button" onclick="changeNoteColor(${note.id}, event)" title="Сменить цвет">
-                                <span class="material-icons">palette</span>
-                            </button>
-                            <button class="action-button" onclick="archiveNote(${note.id}, event)" title="Архивировать">
-                                <span class="material-icons">archive</span>
-                            </button>
-                            <button class="action-button" onclick="deleteNote(${note.id}, event)" title="Удалить">
-                                <span class="material-icons">delete</span>
-                            </button>
-                        `
-                        }
-                    </div>
+    // ===== ОСТАЛЬНОЕ СОДЕРЖИМОЕ =====
+    const isTrash = currentFilter === "trash";
+
+    const contentPreview =
+        note.content.length > 120
+            ? note.content.slice(0, 120) + "..."
+            : note.content;
+    const renderedContent = renderMarkdown(contentPreview);
+
+    // Контейнер для содержимого
+    const contentWrapper = document.createElement("div");
+    contentWrapper.style.cssText = "position:relative;z-index:1;flex:1;display:flex;flex-direction:column;";
+    
+    contentWrapper.innerHTML = `
+        <div class="note-title">${note.title || "Без названия"}</div>
+        <div class="note-content md-content">${renderedContent}</div>
+        <div class="note-footer">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <div class="note-tags">
+                    ${note.tags
+                      .map(
+                        (tag) => `
+                        <span class="note-tag" onclick="filterByTag('${tag}', event)">
+                            ${tag}
+                            <span class="tag-remove" onclick="removeTagFromCard(${note.id}, '${tag}', event)">&times;</span>
+                        </span>
+                    `,
+                      )
+                      .join("")}
                 </div>
-            `;
+                <span class="note-date">${note.date || ""}</span>
+            </div>
+            <div class="note-actions">
+                ${
+                  isTrash
+                    ? `
+                    <button class="action-button" onclick="restoreNote(${note.id}, event)">
+                        <span class="material-icons">restore</span>
+                    </button>
+                    <button class="action-button" onclick="deletePermanently(${note.id}, event)">
+                        <span class="material-icons">delete_forever</span>
+                    </button>
+                `
+                    : `
+                    <button class="action-button" onclick="changeNoteColor(${note.id}, event)">
+                        <span class="material-icons">palette</span>
+                    </button>
+                    <button class="action-button" onclick="archiveNote(${note.id}, event)">
+                        <span class="material-icons">archive</span>
+                    </button>
+                    <button class="action-button" onclick="deleteNote(${note.id}, event)">
+                        <span class="material-icons">delete</span>
+                    </button>
+                `
+                }
+            </div>
+        </div>
+    `;
 
-  div.addEventListener("click", (e) => {
-    if (!e.target.closest(".action-button") && !e.target.closest(".note-tag")) {
-      if (!isTrash) {
-        editNote(note.id);
-      }
-    }
-  });
+    // Собираем всё вместе
+    div.appendChild(magnet);
+    div.appendChild(contentWrapper);
 
-  return div;
+    // Клик по заметке для редактирования (кроме клика по магниту)
+    div.addEventListener("click", function(e) {
+        // Проверяем, что клик не по магниту и не по его дочерним элементам
+        if (e.target.closest('.note-magnet')) {
+            return; // Если клик по магниту - ничего не делаем
+        }
+        
+        if (!e.target.closest(".action-button") && 
+            !e.target.closest(".note-tag")) {
+            if (!isTrash) {
+                editNote(note.id);
+            }
+        }
+    });
+
+    return div;
 }
 
 // ============================================
@@ -535,14 +572,23 @@ function archiveNote(id, e) {
 }
 
 function togglePin(id, e) {
-  e?.stopPropagation();
-  const note = notes.find((n) => n.id === id);
-  if (note) {
-    note.pinned = !note.pinned;
-    saveNotes();
-    renderNotes();
-    showToast(note.pinned ? "Заметка закреплена" : "Заметка откреплена");
-  }
+    // Останавливаем всплытие, если событие передано
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    
+    console.log("togglePin вызван для ID:", id); // Для отладки
+    
+    const note = notes.find((n) => n.id === id);
+    if (note) {
+        note.pinned = !note.pinned;
+        saveNotes();
+        renderNotes();
+        showToast(note.pinned ? "Заметка закреплена" : "Заметка откреплена");
+    } else {
+        console.error("Заметка с ID", id, "не найдена");
+    }
 }
 
 function togglePinInEditor() {

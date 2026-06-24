@@ -86,7 +86,7 @@ body {
   background: var(--background-color);
   color: var(--text-primary);
   overflow-y: scroll;
-  scrollbar-width: thin; /* Firefox */
+  scrollbar-width: thin;
   transition:
     background-color 0.3s,
     color 0.3s;
@@ -530,63 +530,264 @@ body {
   flex: 0;
 }
 
-/* Note Card */
+/* Note Card - обновлённый с магнитом */
 .note-card {
-  background: var(--surface-color);
-  border-radius: var(--radius);
-  padding: 16px;
-  box-shadow: var(--shadow-1);
-  transition: all 0.2s ease;
-  cursor: pointer;
-  border: 1px solid transparent;
-  position: relative;
-  min-height: 120px;
-  display: flex;
-  flex-direction: column;
-  animation: cardAppear 0.3s ease-out;
-}
-
-@keyframes cardAppear {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes cardDisappear {
-  from {
-    opacity: 1;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-}
-
-.note-card.removing {
-  animation: cardDisappear 0.25s ease-in forwards;
+    background: var(--surface-color);
+    border-radius: 4px;
+    box-shadow: 
+        0 1px 3px rgba(0,0,0,0.06),
+        0 4px 12px rgba(0,0,0,0.04);
+    border: 1px solid var(--border-color);
+    position: relative;
+    padding: 32px 16px 16px;
+    transition: all 0.25s ease;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    animation: cardAppear 0.3s ease-out;
 }
 
 .note-card:hover {
-  box-shadow: var(--shadow-2);
-  border-color: var(--card-border-hover);
-  transform: translateY(-2px);
+    box-shadow: 
+        0 2px 6px rgba(0,0,0,0.08),
+        0 6px 18px rgba(0,0,0,0.06);
+    transform: translateY(-2px);
+    border-color: var(--card-border-hover);
 }
 
+.note-card.removing {
+    animation: cardDisappear 0.25s ease-in forwards;
+}
+
+/* Линии как у блокнота */
+.note-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 27px,
+            rgba(0,0,0,0.025) 27px,
+            rgba(0,0,0,0.025) 28px
+        );
+    pointer-events: none;
+    border-radius: 4px;
+    z-index: 0;
+}
+
+/* Все содержимое заметки поверх линий */
+.note-title,
+.note-content,
+.note-footer {
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== МАГНИТ ===== */
+.note-magnet {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #e8e8e8, #b0b0b0);
+    box-shadow: 
+        0 2px 8px rgba(0,0,0,0.15),
+        inset 0 -3px 8px rgba(0,0,0,0.12),
+        inset 0 3px 8px rgba(255,255,255,0.7);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255,255,255,0.8);
+    overflow: hidden;
+}
+
+/* Блик на магните */
+.note-magnet::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 8px;
+    width: 12px;
+    height: 6px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 50%;
+    transform: rotate(-30deg);
+    filter: blur(1px);
+    transition: all 0.3s ease;
+}
+
+/* Тень от магнита на бумаге */
+.note-magnet::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 10px;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.1), transparent);
+    border-radius: 50%;
+    filter: blur(4px);
+    transition: all 0.3s ease;
+}
+
+/* Магнит при наведении */
+.note-magnet:hover {
+    transform: translateX(-50%) scale(1.12);
+    box-shadow: 
+        0 4px 16px rgba(0,0,0,0.2),
+        inset 0 -3px 8px rgba(0,0,0,0.12);
+}
+
+.note-magnet:hover::before {
+    transform: rotate(-30deg) scale(1.2);
+    opacity: 0.6;
+}
+
+.note-magnet:active {
+    transform: translateX(-50%) scale(0.92);
+}
+
+/* Иконка внутри магнита - аккуратный крестик */
+.note-magnet svg {
+    width: 16px;
+    height: 16px;
+    stroke: rgba(80,80,80,0.5);
+    stroke-width: 2.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.note-magnet:hover svg {
+    stroke: rgba(80,80,80,0.8);
+}
+
+/* ===== ЗАКРЕПЛЁННАЯ ЗАМЕТКА ===== */
+.note-card.pinned {
+    border-color: rgba(220, 38, 38, 0.15);
+    box-shadow: 
+        0 2px 8px rgba(220, 38, 38, 0.06),
+        0 6px 20px rgba(220, 38, 38, 0.04);
+}
+
+.note-card.pinned .note-magnet {
+    background: radial-gradient(circle at 40% 35%, #fca5a5, #dc2626);
+    box-shadow: 
+        0 2px 12px rgba(220, 38, 38, 0.35),
+        inset 0 -3px 8px rgba(139, 0, 0, 0.2),
+        inset 0 3px 8px rgba(255,200,200,0.4);
+    border-color: rgba(255,200,200,0.5);
+    animation: magnetPulse 2.5s ease-in-out infinite;
+}
+
+.note-card.pinned .note-magnet::before {
+    background: rgba(255,255,255,0.6);
+}
+
+.note-card.pinned .note-magnet::after {
+    background: radial-gradient(ellipse at center, rgba(220, 38, 38, 0.15), transparent);
+}
+
+.note-card.pinned .note-magnet svg {
+    stroke: white;
+    stroke-width: 2.5;
+}
+
+.note-card.pinned .note-magnet:hover {
+    animation: none;
+    box-shadow: 
+        0 4px 20px rgba(220, 38, 38, 0.45),
+        inset 0 -3px 8px rgba(139, 0, 0, 0.2);
+}
+
+/* Пульсация закреплённого магнита */
+@keyframes magnetPulse {
+    0%, 100% {
+        box-shadow: 
+            0 2px 12px rgba(220, 38, 38, 0.35),
+            inset 0 -3px 8px rgba(139, 0, 0, 0.2);
+    }
+    50% {
+        box-shadow: 
+            0 2px 20px rgba(220, 38, 38, 0.55),
+            inset 0 -3px 8px rgba(139, 0, 0, 0.25);
+    }
+}
+
+/* Убираем старую иконку закрепления */
 .note-card.pinned::after {
-  content: "push_pin";
-  font-family: "Material Icons";
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  font-size: 16px;
-  color: var(--text-secondary);
-  transform: rotate(45deg);
+    display: none;
+}
+
+/* ===== ТЁМНАЯ ТЕМА ===== */
+[data-theme="dark"] .note-magnet {
+    background: radial-gradient(circle at 40% 35%, #4a4a4a, #2a2a2a);
+    box-shadow: 
+        0 2px 8px rgba(0,0,0,0.3),
+        inset 0 -3px 8px rgba(0,0,0,0.3),
+        inset 0 3px 8px rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.15);
+}
+
+[data-theme="dark"] .note-magnet::before {
+    background: rgba(255,255,255,0.1);
+}
+
+[data-theme="dark"] .note-magnet svg {
+    stroke: rgba(180,180,180,0.5);
+}
+
+[data-theme="dark"] .note-magnet:hover {
+    box-shadow: 
+        0 4px 16px rgba(0,0,0,0.4),
+        inset 0 -3px 8px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .note-magnet:hover svg {
+    stroke: rgba(180,180,180,0.8);
+}
+
+[data-theme="dark"] .note-card.pinned .note-magnet {
+    background: radial-gradient(circle at 40% 35%, #f87171, #b91c1c);
+    box-shadow: 
+        0 2px 12px rgba(220, 38, 38, 0.3),
+        inset 0 -3px 8px rgba(100, 0, 0, 0.3),
+        inset 0 3px 8px rgba(255,150,150,0.2);
+    border-color: rgba(255,150,150,0.3);
+}
+
+[data-theme="dark"] .note-card.pinned .note-magnet svg {
+    stroke: #fca5a5;
+}
+
+[data-theme="dark"] .note-card.pinned .note-magnet::before {
+    background: rgba(255,255,255,0.2);
+}
+
+[data-theme="dark"] .note-card::before {
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 27px,
+            rgba(255,255,255,0.02) 27px,
+            rgba(255,255,255,0.02) 28px
+        );
 }
 
 .note-title {
@@ -944,6 +1145,27 @@ body {
     transform: translateY(0) scale(0.95);
 }
 
+/* Анимация пульсации для FAB в тёмной теме */
+@keyframes glowPulse {
+    0% {
+        box-shadow: 0 4px 20px rgba(96, 165, 250, 0.4);
+    }
+    50% {
+        box-shadow: 0 4px 35px rgba(96, 165, 250, 0.7);
+    }
+    100% {
+        box-shadow: 0 4px 20px rgba(96, 165, 250, 0.4);
+    }
+}
+
+[data-theme="dark"] .fab {
+    animation: glowPulse 3s ease-in-out infinite;
+}
+
+[data-theme="dark"] .fab:hover {
+    animation: none;
+}
+
 /* Note Editor Modal */
 .modal {
   display: none;
@@ -1217,25 +1439,4 @@ body {
   .view-toggle {
     align-self: flex-end;
   }
-
-/* Анимация пульсации для FAB в тёмной теме */
-@keyframes glowPulse {
-    0% {
-        box-shadow: 0 4px 20px rgba(96, 165, 250, 0.4);
-    }
-    50% {
-        box-shadow: 0 4px 35px rgba(96, 165, 250, 0.7);
-    }
-    100% {
-        box-shadow: 0 4px 20px rgba(96, 165, 250, 0.4);
-    }
 }
-
-[data-theme="dark"] .fab {
-    animation: glowPulse 3s ease-in-out infinite;
-}
-
-[data-theme="dark"] .fab:hover {
-    animation: none; /* отключаем пульсацию при наведении */
-}
-
