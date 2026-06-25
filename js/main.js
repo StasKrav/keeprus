@@ -5,7 +5,6 @@
 
 
 let notes = [];
-let folderHandle = null;
 let isFirstLaunch = true;
 let currentFilter = "all";
 let currentView = "grid";
@@ -20,77 +19,11 @@ let tagFilter = null;
 let deletedNotes = [];
 
 // ============================================
-// ОНБОРДИНГ — ВЫБОР ПАПКИ ПРИ ПЕРВОМ ЗАПУСКЕ
-// ============================================
-
-function showFolderPicker() {
-    const modal = document.getElementById('folderPickerModal');
-    if (modal) modal.classList.add('visible');
-}
-
-function hideFolderPicker() {
-    const modal = document.getElementById('folderPickerModal');
-    if (modal) modal.classList.remove('visible');
-}
-
-async function selectFolderOnboarding() {
-    if (!('showDirectoryPicker' in window)) {
-        showToast('Используйте Chrome или Edge для выбора папки');
-        return;
-    }
-    
-    try {
-        const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
-        folderHandle = handle;
-        localStorage.setItem('keeprus_folder', JSON.stringify(handle));
-        localStorage.setItem('keeprus_onboarded', 'true');
-        
-        hideFolderPicker();
-        
-        // Сохраняем дефолтные заметки
-        notes = getDefaultNotes();
-        await saveNotes();
-        renderNotes();
-        
-        showToast('✅ Папка выбрана! Заметки будут сохраняться здесь');
-    } catch (e) {
-        if (e.name !== 'AbortError') {
-            showToast('Ошибка: ' + e.message);
-        }
-    }
-}
-
-function skipFolderSelection() {
-    localStorage.setItem('keeprus_onboarded', 'true');
-    hideFolderPicker();
-    notes = getDefaultNotes();
-    renderNotes();
-    showToast('⚠️ Заметки сохраняются в браузере. Выберите папку в меню (☰)');
-}
-
-
-// ============================================
 // ЗАГРУЗКА ЗАМЕТОК
 // ============================================
 
 async function loadNotes() {
-    // Если папка есть — загружаем из файла
-    if (folderHandle) {
-        try {
-            const fileHandle = await folderHandle.getFileHandle('notes.json', { create: true });
-            const file = await fileHandle.getFile();
-            const text = await file.text();
-            
-            if (text.trim()) {
-                notes = JSON.parse(text);
-                return;
-            }
-        } catch (e) {
-            console.error('Ошибка загрузки:', e);
-        }
-    }
-    
-    // Если папки нет — пробуем загрузить из localStorage (для тех, кто пропустил)
+    // Только localStorage, никакой файловой системы при загрузке
     const saved = localStorage.getItem('keeprus_notes_fallback');
     if (saved) {
         try {
@@ -99,8 +32,10 @@ async function loadNotes() {
         } catch (e) {}
     }
     
-    // Иначе — дефолтные заметки
+    // Дефолтные заметки
     notes = getDefaultNotes();
+    // Сохраняем дефолтные в localStorage
+    localStorage.setItem('keeprus_notes_fallback', JSON.stringify(notes));
 }
 
 // ============================================
@@ -249,14 +184,22 @@ function startAutoSave() {
     }
     
     autoSaveInterval = setInterval(async () => {
+        console.log('⏰ Автосохранение: проверка...');
+        console.log('hasUnsavedChanges:', hasUnsavedChanges);
+        console.log('folderHandle:', !!folderHandle);
+        
         if (hasUnsavedChanges && folderHandle) {
+            console.log('💾 Автосохранение: сохраняю...');
+            await saveNotes();
+            showToast('💾 Автосохранение');
+        } else if (hasUnsavedChanges && !folderHandle) {
+            console.log('⚠️ Папка не выбрана, сохраняю в localStorage');
             await saveNotes();
         }
-    }, 30000);
+    }, 30000); // 30 секунд
     
     console.log('✅ Автосохранение включено (каждые 30 секунд)');
 }
-
 // ============================================
 // INITIALIZATION
 // ============================================
@@ -286,17 +229,12 @@ async function init() {
     renderNotes();
     setupSearch();
     updateCounts();
-    startAutoSave();
+
     
     // Обновляем логотип
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
     updateLogoColors(currentTheme);
     
-    // Показываем онбординг, если ещё не показывали
-    const onboarded = localStorage.getItem('keeprus_onboarded');
-    if (!onboarded && !folderHandle) {
-        setTimeout(() => showFolderPicker(), 300);
-    }
 
   // Click outside modal to close
   document.getElementById("noteEditor").addEventListener("click", (e) => {

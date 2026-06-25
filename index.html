@@ -14,7 +14,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Comfortaa:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/modal-window.css">
 </head>
 
 <body>
@@ -67,57 +66,10 @@
         </div>
     </header>
     
+
+    <!-- ГАМБУРГЕР МЕНЮ (КОНТЕЙНЕР БЕЗ СОДЕРЖИМОГО) -->
     <div class="hamburger-menu" id="hamburgerMenu">
-        <div class="hamburger-menu-content">
-            <div class="menu-section">
-                <button class="menu-item" onclick="selectFolder(); closeHamburgerMenu();">
-                    <span class="menu-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                        </svg>
-                    </span>
-                    <span class="menu-label">Сменить папку</span>
-                </button>
-                
-                <button class="menu-item" onclick="openNotesFile(); closeHamburgerMenu();">
-                    <span class="menu-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
-                            <polyline points="8 12 12 16 16 12"/>
-                            <line x1="12" y1="2" x2="12" y2="16"/>
-                        </svg>
-                    </span>
-                    <span class="menu-label">Открыть файл</span>
-                </button>
-            </div>
-            
-            <div class="menu-divider"></div>
-            
-            <div class="menu-section">
-                <button class="menu-item" onclick="clearTrash(); closeHamburgerMenu();">
-                    <span class="menu-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 6h18"/>
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-                            <path d="M10 11v6"/>
-                            <path d="M14 11v6"/>
-                        </svg>
-                    </span>
-                    <span class="menu-label">Очистить корзину</span>
-                </button>
-            </div>
-            
-            <div class="menu-divider"></div>
-            
-            <div class="menu-section">
-                <div class="menu-item info-item">
-                    <span class="menu-label" style="font-size: 12px; color: var(--text-secondary);">
-                        Keeprus · 
-                    </span>
-                </div>
-            </div>
-        </div>
+        <div class="hamburger-menu-content"></div>
     </div>
     
     <!-- Оверлей -->
@@ -320,9 +272,6 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div class="toast" id="toast"></div>
-
     <!-- Confirmation Dialog -->
     <div class="confirm-dialog" id="confirmDialog">
         <div class="confirm-dialog-content">
@@ -370,54 +319,10 @@
         </div>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО ВЫБОРА ПАПКИ -->
-    <div class="modal" id="folderPickerModal">
-        <div class="modal-content folder-picker">
-            <div class="folder-picker-icon">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                </svg>
-            </div>
-            
-            <h2 class="folder-picker-title">Выберите папку для заметок</h2>
-            
-            <p class="folder-picker-desc">
-                Все заметки будут сохраняться в выбранную папку на вашем диске.
-                <br><br>
-                Это позволит:
-                <br>
-                ✅ Сохранять заметки даже при очистке браузера
-                <br>
-                ✅ Открывать заметки в любом браузере
-                <br>
-                ✅ Делать резервные копии
-            </p>
-            
-            <div class="folder-picker-actions">
-                <button class="btn-primary folder-picker-btn" onclick="selectFolderOnboarding()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    Выбрать папку
-                </button>
-                <button class="btn-secondary folder-picker-skip" onclick="skipFolderSelection()">
-                    Пропустить (сохранять в браузере)
-                </button>
-            </div>
-            
-            <div class="folder-picker-note">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="12" x2="12" y2="16"/>
-                    <line x1="12" y1="8" x2="12.01" y2="8"/>
-                </svg>
-                <span>Вы всегда сможете изменить папку в меню (☰)</span>
-            </div>
-        </div>
-    </div>
+    
 
 <script src="js/toast.js"></script>
-<script src="js/hamburger.js"></script>
+<script src="js/hamburger.js"></script>   
 <script src="js/drag-n-drop.js"></script>
 <script src="js/render.js"></script>
 <script src="js/markdown.js"></script>
@@ -427,9 +332,9 @@
 <script src="js/navigation.js"></script>
 <script src="js/toggles.js"></script>
 <script src="js/search.js"></script>
-<script src="js/controls.js"></script>
+<script src="js/controls.js"></script>     
 <script src="js/dialogs.js"></script>
-<script src="js/shortcuts.js"></script>
+<script src="js/shortcuts.js"></script>   
 
 <script src="js/main.js"></script>
 

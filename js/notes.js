@@ -258,3 +258,132 @@ function changeNoteColor(id, e) {
     renderNotes();
   }
 }
+
+function markEditorChanged() {
+    hasUnsavedChanges = true;
+    console.log('🔄 Изменения отмечены'); // для отладки
+}
+
+// ============================================
+// СОХРАНЕНИЕ И ОТКРЫТИЕ ФАЙЛОВ (ручное)
+// ============================================
+
+// Сохранить как... (выбор места и имени файла)
+async function saveNotesAs() {
+    if (notes.length === 0) {
+        showToast('Нет заметок для сохранения');
+        return;
+    }
+    
+    try {
+        // Используем стандартный диалог сохранения
+        if ('showSaveFilePicker' in window) {
+            const options = {
+                suggestedName: `заметки_${new Date().toISOString().slice(0,10)}.json`,
+                types: [{
+                    description: 'JSON файл',
+                    accept: { 'application/json': ['.json'] }
+                }]
+            };
+            
+            const fileHandle = await window.showSaveFilePicker(options);
+            const writable = await fileHandle.createWritable();
+            
+            // Просто сохраняем массив заметок
+            await writable.write(JSON.stringify(notes, null, 2));
+            await writable.close();
+            
+            showToast(`✅ Сохранено ${notes.length} заметок`);
+        } else {
+            // Если браузер старый - скачиваем файл
+            const blob = new Blob([JSON.stringify(notes, null, 2)], { 
+                type: 'application/json' 
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `заметки_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast(`✅ Сохранено ${notes.length} заметок`);
+        }
+    } catch (e) {
+        if (e.name !== 'AbortError') {
+            showToast('❌ Ошибка: ' + e.message);
+        }
+    }
+}
+
+// Открыть файл
+async function openNotesFile() {
+    if (hasUnsavedChanges) {
+        if (!confirm('У вас есть несохранённые изменения. Открыть файл без сохранения?')) {
+            return;
+        }
+    }
+    
+    try {
+        if ('showOpenFilePicker' in window) {
+            const [fileHandle] = await window.showOpenFilePicker({
+                types: [{
+                    description: 'JSON файл',
+                    accept: { 'application/json': ['.json'] }
+                }]
+            });
+            
+            const file = await fileHandle.getFile();
+            const text = await file.text();
+            const loadedNotes = JSON.parse(text);
+            
+            if (!Array.isArray(loadedNotes)) {
+                showToast('❌ Неверный формат файла');
+                return;
+            }
+            
+            notes = loadedNotes;
+            hasUnsavedChanges = false;
+            
+            // Сохраняем в localStorage как резервную копию
+            localStorage.setItem('keeprus_notes_fallback', JSON.stringify(notes));
+            
+            renderNotes();
+            updateCounts();
+            showToast(`✅ Загружено ${notes.length} заметок`);
+            
+        } else {
+            // Старый браузер - через input
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = async function() {
+                const file = this.files[0];
+                if (!file) return;
+                
+                const text = await file.text();
+                const loadedNotes = JSON.parse(text);
+                
+                if (!Array.isArray(loadedNotes)) {
+                    showToast('❌ Неверный формат файла');
+                    return;
+                }
+                
+                notes = loadedNotes;
+                hasUnsavedChanges = false;
+                localStorage.setItem('keeprus_notes_fallback', JSON.stringify(notes));
+                renderNotes();
+                updateCounts();
+                showToast(`✅ Загружено ${notes.length} заметок`);
+            };
+            
+            input.click();
+        }
+    } catch (e) {
+        if (e.name !== 'AbortError') {
+            showToast('❌ Ошибка: ' + e.message);
+        }
+    }
+}
