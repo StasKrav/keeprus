@@ -5,6 +5,8 @@
 
 
 let notes = [];
+let folderHandle = null;
+let isFirstLaunch = true;
 let currentFilter = "all";
 let currentView = "grid";
 let currentNoteId = null;
@@ -17,82 +19,206 @@ let searchTerm = "";
 let tagFilter = null;
 let deletedNotes = [];
 
-// Safe localStorage wrapper (handles private browsing, quota exceeded, etc.)
-function storageGet(key, fallback = null) {
-  try {
-    const val = localStorage.getItem(key);
-    return val !== null ? val : fallback;
-  } catch (e) {
-    console.warn("localStorage unavailable (getItem):", e.message);
-    return fallback;
-  }
+// ============================================
+// ОНБОРДИНГ — ВЫБОР ПАПКИ ПРИ ПЕРВОМ ЗАПУСКЕ
+// ============================================
+
+function showFolderPicker() {
+    const modal = document.getElementById('folderPickerModal');
+    if (modal) modal.classList.add('visible');
 }
 
-function storageSet(key, value) {
-  try {
-    localStorage.setItem(key, value);
-    return true;
-  } catch (e) {
-    console.warn("localStorage unavailable (setItem):", e.message);
-    return false;
-  }
+function hideFolderPicker() {
+    const modal = document.getElementById('folderPickerModal');
+    if (modal) modal.classList.remove('visible');
 }
 
-// Load notes from localStorage
-function loadNotes() {
-  const saved = storageGet("material_keep_notes");
-  if (saved) {
-    try {
-      notes = JSON.parse(saved);
-      return;
-    } catch (e) {
-      console.error("Error loading notes:", e);
+async function selectFolderOnboarding() {
+    if (!('showDirectoryPicker' in window)) {
+        showToast('Используйте Chrome или Edge для выбора папки');
+        return;
     }
-  }
-
-  // Default notes if none saved
-  notes = [
-    {
-      id: Date.now() - 100000,
-      title: "Добро пожаловать в Keeprus!",
-      content:
-        "• Кликните на заметку чтобы редактировать\n• Используйте поиск для фильтрации\n• Добавляйте ярлыки и цвета",
-      color: "color-yellow",
-      tags: ["Вступление"],
-      pinned: true,
-      archived: false,
-      trashed: false,
-      date: new Date().toLocaleDateString("ru-RU"),
-    },
-    {
-      id: Date.now() - 50000,
-      title: "Идеи для проекта",
-      content: "Изучить Material Design 3, создать компоненты, анимации",
-      color: "color-blue",
-      tags: ["Работа", "Дизайн"],
-      pinned: true,
-      archived: false,
-      trashed: false,
-      date: new Date(Date.now() - 86400000).toLocaleDateString("ru-RU"),
-    },
-    {
-      id: Date.now() - 20000,
-      title: "Книги для прочтения",
-      content: "1. Atomic Habits\n2. Deep Work\n3. Design of Everyday Things",
-      color: "color-green",
-      tags: ["Образование"],
-      pinned: false,
-      archived: false,
-      trashed: false,
-      date: new Date(Date.now() - 172800000).toLocaleDateString("ru-RU"),
-    },
-  ];
-  saveNotes();
+    
+    try {
+        const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        folderHandle = handle;
+        localStorage.setItem('keeprus_folder', JSON.stringify(handle));
+        localStorage.setItem('keeprus_onboarded', 'true');
+        
+        hideFolderPicker();
+        
+        // Сохраняем дефолтные заметки
+        notes = getDefaultNotes();
+        await saveNotes();
+        renderNotes();
+        
+        showToast('✅ Папка выбрана! Заметки будут сохраняться здесь');
+    } catch (e) {
+        if (e.name !== 'AbortError') {
+            showToast('Ошибка: ' + e.message);
+        }
+    }
 }
 
-function saveNotes() {
-  storageSet("material_keep_notes", JSON.stringify(notes));
-  updateCounts();
+function skipFolderSelection() {
+    localStorage.setItem('keeprus_onboarded', 'true');
+    hideFolderPicker();
+    notes = getDefaultNotes();
+    renderNotes();
+    showToast('⚠️ Заметки сохраняются в браузере. Выберите папку в меню (☰)');
+}
+
+
+// ============================================
+// ЗАГРУЗКА ЗАМЕТОК
+// ============================================
+
+async function loadNotes() {
+    // Если папка есть — загружаем из файла
+    if (folderHandle) {
+        try {
+            const fileHandle = await folderHandle.getFileHandle('notes.json', { create: true });
+            const file = await fileHandle.getFile();
+            const text = await file.text();
+            
+            if (text.trim()) {
+                notes = JSON.parse(text);
+                return;
+            }
+        } catch (e) {
+            console.error('Ошибка загрузки:', e);
+        }
+    }
+    
+    // Если папки нет — пробуем загрузить из localStorage (для тех, кто пропустил)
+    const saved = localStorage.getItem('keeprus_notes_fallback');
+    if (saved) {
+        try {
+            notes = JSON.parse(saved);
+            return;
+        } catch (e) {}
+    }
+    
+    // Иначе — дефолтные заметки
+    notes = getDefaultNotes();
+}
+
+// ============================================
+// СОХРАНЕНИЕ ЗАМЕТОК НА ДИСК
+// ============================================
+
+async function saveNotes() {
+    if (folderHandle) {
+        // Сохраняем в файл
+        try {
+            const fileHandle = await folderHandle.getFileHandle('notes.json', { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(JSON.stringify(notes, null, 2));
+            await writable.close();
+            hasUnsavedChanges = false;
+            updateCounts();
+            return;
+        } catch (e) {
+            console.error('Ошибка сохранения в файл:', e);
+        }
+    }
+    
+    // Fallback: сохраняем в localStorage
+    try {
+        localStorage.setItem('keeprus_notes_fallback', JSON.stringify(notes));
+        hasUnsavedChanges = false;
+        updateCounts();
+    } catch (e) {
+        console.error('Ошибка сохранения:', e);
+        showToast('Ошибка сохранения заметок');
+    }
+}
+
+// ============================================
+// ВЫБОР ПАПКИ
+// ============================================
+
+async function selectFolder() {
+    if (!('showDirectoryPicker' in window)) {
+        showToast('Используйте Chrome или Edge для выбора папки');
+        return;
+    }
+    
+    try {
+        const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        folderHandle = handle;
+        localStorage.setItem('keeprus_folder', JSON.stringify(handle));
+        
+        // Сохраняем заметки в новую папку
+        await saveNotes();
+        renderNotes();
+        
+        showToast('✅ Папка изменена');
+        closeHamburgerMenu();
+    } catch (e) {
+        if (e.name !== 'AbortError') {
+            showToast('Ошибка: ' + e.message);
+        }
+    }
+}
+
+// ============================================
+// ОТКРЫТЬ ФАЙЛ
+// ============================================
+
+function openNotesFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = async function() {
+        const file = this.files[0];
+        if (!file) return;
+        
+        try {
+            const text = await file.text();
+            const data = JSON.parse(text);
+            
+            if (!Array.isArray(data)) {
+                showToast('Неверный формат файла');
+                return;
+            }
+            
+            if (!confirm(`Заменить текущие заметки (${data.length} шт.)?`)) {
+                return;
+            }
+            
+            notes = data;
+            await saveNotes();
+            renderNotes();
+            showToast(`✅ Загружено ${notes.length} заметок`);
+            closeHamburgerMenu();
+        } catch (e) {
+            showToast('Ошибка: ' + e.message);
+        }
+    };
+    
+    input.click();
+}
+
+// ============================================
+// ДЕФОЛТНЫЕ ЗАМЕТКИ
+// ============================================
+
+function getDefaultNotes() {
+    return [
+        {
+            id: Date.now() - 100000,
+            title: 'Добро пожаловать в Keeprus!',
+            content: '• Все заметки сохраняются на диск\n• Выберите папку для хранения\n• Автосохранение каждые 30 секунд',
+            color: 'color-yellow',
+            tags: ['Вступление'],
+            pinned: true,
+            archived: false,
+            trashed: false,
+            date: new Date().toLocaleDateString('ru-RU')
+        }
+    ];
 }
 
 function updateLogoColors(theme) {
@@ -111,31 +237,66 @@ function updateLogoColors(theme) {
     });
 }
 
+// ============================================
+// АВТОСОХРАНЕНИЕ
+// ============================================
 
+let autoSaveInterval = null;
+
+function startAutoSave() {
+    if (autoSaveInterval) {
+        clearInterval(autoSaveInterval);
+    }
+    
+    autoSaveInterval = setInterval(async () => {
+        if (hasUnsavedChanges && folderHandle) {
+            await saveNotes();
+        }
+    }, 30000);
+    
+    console.log('✅ Автосохранение включено (каждые 30 секунд)');
+}
 
 // ============================================
 // INITIALIZATION
 // ============================================
 
-function init() {
+async function init() {
     loadTheme();
-    loadNotes();
     
-    // Загружаем сохранённый вид
-    const savedView = localStorage.getItem('material_keep_view');
-    if (savedView) {
-        setView(savedView);
-    } else {
-        setView('grid');
+    // Восстанавливаем папку
+    const savedFolder = localStorage.getItem('keeprus_folder');
+    if (savedFolder) {
+        try {
+            folderHandle = JSON.parse(savedFolder);
+            await folderHandle.requestPermission({ mode: 'readwrite' });
+        } catch (e) {
+            folderHandle = null;
+            localStorage.removeItem('keeprus_folder');
+        }
     }
+    
+    // Загружаем заметки
+    await loadNotes();
+    
+    // Загружаем вид
+    const savedView = localStorage.getItem('material_keep_view');
+    setView(savedView || 'grid');
     
     renderNotes();
     setupSearch();
     updateCounts();
+    startAutoSave();
     
-    // Обновляем цвета логотипа при загрузке
+    // Обновляем логотип
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
     updateLogoColors(currentTheme);
+    
+    // Показываем онбординг, если ещё не показывали
+    const onboarded = localStorage.getItem('keeprus_onboarded');
+    if (!onboarded && !folderHandle) {
+        setTimeout(() => showFolderPicker(), 300);
+    }
 
   // Click outside modal to close
   document.getElementById("noteEditor").addEventListener("click", (e) => {
@@ -218,3 +379,4 @@ function init() {
 
 // Start the app
 init();
+

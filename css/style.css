@@ -230,8 +230,37 @@ body {
 }
 
 .app-bar .actions {
-  display: flex;
-  gap: 16px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: auto; /* ПРИЖИМАЕМ ВПРАВО */
+    gap: 4px; /* Уменьшаем расстояние между кнопками */
+}
+
+/* Кнопки в правой группе */
+.app-bar .actions .icon-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: background 0.2s, color 0.2s;
+}
+
+.app-bar .actions .icon-button:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.app-bar .actions .icon-button svg {
+    width: 24px;
+    height: 24px;
+    stroke: currentColor;
 }
 
 .icon-button {
@@ -1440,6 +1469,304 @@ body {
   }
 }
 
+/* ============================================
+   ГАМБУРГЕР-МЕНЮ
+   ============================================ */
 
+/* Кнопка гамбургера */
+.hamburger-btn {
+    position: relative;
+    z-index: 1001;
+}
 
+/* ============================================
+   МЕНЮ-КНОПКА (три вертикальные точки)
+   ============================================ */
+
+/* Убираем старые стили гамбургера и добавляем новые */
+.hamburger-btn svg {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hamburger-btn:hover svg {
+    transform: rotate(90deg);
+}
+
+.hamburger-btn.active svg {
+    transform: rotate(90deg);
+}
+
+/* Стили для точек */
+.hamburger-btn .dot {
+    fill: currentColor;
+    transition: all 0.3s ease;
+}
+
+.hamburger-btn:hover .dot {
+    fill: var(--primary-color);
+}
+
+.hamburger-btn.active .dot {
+    fill: var(--primary-color);
+}
+
+/* Оверлей */
+.hamburger-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 999;
+    animation: fadeIn 0.2s ease;
+}
+
+.hamburger-overlay.visible {
+    display: block;
+}
+
+/* Само меню */
+.hamburger-menu {
+    display: none;
+    position: fixed;
+    top: 64px;
+    right: 8px;
+    width: 320px;
+    max-width: calc(100vw - 16px);
+    background: var(--surface-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    padding: 8px 0;
+    animation: menuSlideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: top right;
+    border: 1px solid var(--border-color);
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+}
+
+.hamburger-menu.visible {
+    display: block;
+}
+
+@keyframes menuSlideDown {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Секции меню */
+.menu-section {
+    padding: 4px 0;
+}
+
+.menu-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 4px 12px;
+}
+
+/* Пункты меню */
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 16px;
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.15s ease;
+    text-align: left;
+    font-family: inherit;
+    font-size: 14px;
+    border-radius: 0;
+}
+
+.menu-item:hover {
+    background: var(--hover-bg);
+}
+
+.menu-item:active {
+    background: var(--hover-bg-dark);
+}
+
+.menu-icon {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+}
+
+.menu-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+}
+
+.menu-item:hover .menu-icon {
+    color: var(--text-primary);
+}
+
+/* Статус хранилища */
+.storage-status-item {
+    cursor: default;
+    padding: 12px 16px;
+}
+
+.storage-status-item .menu-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.storage-status-item .menu-icon {
+    color: var(--primary-color);
+}
+
+/* Иконки в диалогах */
+.confirm-dialog-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+/* Поиск */
+.search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    width: 20px;
+    height: 20px;
+}
+
+/* Информационный пункт */
+.info-item {
+    cursor: default;
+    padding: 8px 16px;
+}
+
+.info-item .menu-label {
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* Для тёмной темы */
+[data-theme="dark"] .hamburger-menu {
+    border-color: var(--border-color);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .menu-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .menu-item:active {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Для тёмной темы */
+[data-theme="dark"] .menu-icon {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .menu-item:hover .menu-icon {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .confirm-dialog-icon {
+    color: var(--primary-color);
+}
+
+/* ============================================
+   АДАПТИВ ДЛЯ МОБИЛЬНЫХ
+   ============================================ */
+
+@media (max-width: 768px) {
+    .app-bar {
+        padding: 0 12px;
+        gap: 8px;
+    }
+    
+    /* Скрываем текст логотипа на телефонах */
+    .app-bar .logo .logo-text {
+        display: none;
+    }
+    
+    .app-bar .logo {
+        min-width: auto;
+        padding-left: 4px;
+        gap: 4px;
+    }
+    
+    .app-bar .search {
+        margin: 0 4px;
+        min-width: 60px;
+    }
+    
+    .search-input {
+        padding: 10px 12px 10px 36px;
+        font-size: 14px;
+    }
+    
+    .search-icon {
+        left: 12px;
+        width: 16px;
+        height: 16px;
+    }
+    
+    .app-bar .actions .icon-button {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .app-bar .actions .icon-button svg {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-bar .search {
+        min-width: 40px;
+    }
+    
+    .search-input {
+        padding: 8px 10px 8px 32px;
+        font-size: 13px;
+    }
+    
+    .search-icon {
+        left: 10px;
+        width: 14px;
+        height: 14px;
+    }
+    
+    .app-bar .actions .icon-button {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .app-bar .actions .icon-button svg {
+        width: 18px;
+        height: 18px;
+    }
+}
 

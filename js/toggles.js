@@ -16,23 +16,19 @@ function setView(view) {
     const container = document.getElementById('notesContainer');
     if (!container) return;
     
-    // Переключаем класс для отображения
     container.classList.toggle('list-view', view === 'list');
     
-    // Обновляем активную кнопку
     document.querySelectorAll('.view-button').forEach(btn => {
         btn.classList.remove('active');
-        // Сравниваем с data-view атрибутом или текстом
         const btnView = btn.getAttribute('data-view') || btn.textContent.toLowerCase().trim();
         if (btnView === view) {
             btn.classList.add('active');
         }
     });
     
-    // Сохраняем выбор
-    storageSet('material_keep_view', view);
+    // ✅ ВМЕСТО storageSet используем localStorage
+    localStorage.setItem('material_keep_view', view);
 }
-
 
 // ============================================
 // THEME TOGGLE
@@ -71,9 +67,9 @@ function updateThemeIcon(theme) {
 }
 
 function loadTheme() {
-  const saved = storageGet("material_keep_theme");
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const theme = saved || (prefersDark ? "dark" : "light");
-  document.documentElement.setAttribute("data-theme", theme);
-  updateThemeIcon(theme);
+    const saved = localStorage.getItem('material_keep_theme'); // ✅ Вместо storageGet
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const theme = saved || (prefersDark ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+    updateThemeIcon(theme);
 }

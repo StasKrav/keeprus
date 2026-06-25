@@ -1,0 +1,149 @@
+/* ============================================
+   МОДАЛЬНОЕ ОКНО ВЫБОРА ПАПКИ
+   ============================================ */
+
+#folderPickerModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 3000;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+
+#folderPickerModal.visible {
+    display: flex;
+}
+
+.folder-picker {
+    max-width: 500px;
+    width: 90%;
+    padding: 40px 32px 32px;
+    background: var(--surface-color);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    animation: modalSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.folder-picker-icon {
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}
+
+.folder-picker-icon svg {
+    stroke: var(--primary-color);
+}
+
+.folder-picker-title {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.folder-picker-desc {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+.folder-picker-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.folder-picker-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 24px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    width: 100%;
+}
+
+.folder-picker-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+}
+
+.folder-picker-btn svg {
+    stroke: white;
+}
+
+.folder-picker-skip {
+    padding: 12px 24px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.folder-picker-skip:hover {
+    background: var(--hover-bg);
+    border-color: var(--text-secondary);
+}
+
+.folder-picker-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.folder-picker-note svg {
+    flex-shrink: 0;
+    stroke: var(--text-secondary);
+}
+
+/* Тёмная тема */
+[data-theme="dark"] .folder-picker {
+    background: var(--surface-color);
+}
+
+[data-theme="dark"] .folder-picker-btn {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+}
+
+[data-theme="dark"] .folder-picker-btn:hover {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+}

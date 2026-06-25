@@ -10,25 +10,24 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Keeprus">
-    <title>Keeprus - Упрощенный Google Keep</title>
+    <title>Keeprus</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Comfortaa:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/modal-window.css">
 </head>
 
 <body>
+
     <!-- Top App Bar -->
     <header class="app-bar">
         <div class="logo" onclick="location.reload()">
             <svg width="32" height="36" viewBox="60 60 130 140" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                    <!-- Светлая тема - графит -->
                     <linearGradient id="logoGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stop-color="#374151"/>
-                        <!-- <stop offset="50%" stop-color="#6b7280"/> -->
                         <stop offset="100%" stop-color="#4b5563"/>
                     </linearGradient>
-                    <!-- Тёмная тема - цветная -->
                     <linearGradient id="logoGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stop-color="#60a5fa"/>
                         <stop offset="50%" stop-color="#a78bfa"/>
@@ -37,32 +36,153 @@
                 </defs>
                 <path d="M 81.476562 77.955078 L 81.476562 177.95508 L 181.47656 177.95508 L 181.47656 77.955078 L 151.4375 77.955078 A 20 20 0 0 1 151.47656 79.140625 A 20 20 0 0 1 131.47656 99.140625 A 20 20 0 0 1 111.47656 79.140625 A 20 20 0 0 1 111.56055 77.955078 L 81.476562 77.955078 z M 98.810547 114.31055 L 164.14258 114.31055 L 164.14258 118.60938 L 98.810547 118.60938 L 98.810547 114.31055 z M 98.810547 129.94531 L 164.14258 129.94531 L 164.14258 134.24414 L 98.810547 134.24414 L 98.810547 129.94531 z M 98.810547 145.58203 L 164.14258 145.58203 L 164.14258 149.88086 L 98.810547 149.88086 L 98.810547 145.58203 z" id="logoPath1"/>
                 <circle cx="131.97635" cy="78.919952" r="15" id="logoCircle"/>
-                </svg>
+            </svg>
             <span class="logo-text">Keeprus</span>
         </div>
         
         <div class="search">
-            <span class="material-icons search-icon">search</span>
+            <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+            </svg>
             <input type="text" class="search-input" placeholder="Поиск заметок" id="searchInput">
         </div>
         
         <div class="actions">
-            <button class="icon-button" onclick="toggleTheme()" title="Тёмная тема" id="themeToggle">
-                <svg id="themeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Переключить тему">
+            <!-- Кнопка темы -->
+            <button class="icon-button" onclick="toggleTheme()" title="Переключить тему" id="themeToggle">
+                <svg id="themeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                 </svg>
             </button>
-            <button class="icon-button" onclick="clearTrash()" title="Очистить корзину">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Очистить корзину">
-                    <path d="M3 6h18"/>
-                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-                    <path d="M10 11v6"/>
-                    <path d="M14 11v6"/>
+            
+            <!-- Гамбургер -->
+            <button class="icon-button hamburger-btn" onclick="toggleHamburgerMenu()" id="hamburgerBtn" title="Меню">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round">
+                    <circle cx="12" cy="5" r="1" class="dot"/>
+                    <circle cx="12" cy="12" r="1" class="dot"/>
+                    <circle cx="12" cy="19" r="1" class="dot"/>
                 </svg>
             </button>
         </div>
     </header>
+    
+    <div class="hamburger-menu" id="hamburgerMenu">
+        <div class="hamburger-menu-content">
+            <div class="menu-section">
+                <button class="menu-item" onclick="selectFolder(); closeHamburgerMenu();">
+                    <span class="menu-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </span>
+                    <span class="menu-label">Сменить папку</span>
+                </button>
+                
+                <button class="menu-item" onclick="openNotesFile(); closeHamburgerMenu();">
+                    <span class="menu-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+                            <polyline points="8 12 12 16 16 12"/>
+                            <line x1="12" y1="2" x2="12" y2="16"/>
+                        </svg>
+                    </span>
+                    <span class="menu-label">Открыть файл</span>
+                </button>
+            </div>
+            
+            <div class="menu-divider"></div>
+            
+            <div class="menu-section">
+                <button class="menu-item" onclick="clearTrash(); closeHamburgerMenu();">
+                    <span class="menu-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18"/>
+                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                            <path d="M10 11v6"/>
+                            <path d="M14 11v6"/>
+                        </svg>
+                    </span>
+                    <span class="menu-label">Очистить корзину</span>
+                </button>
+            </div>
+            
+            <div class="menu-divider"></div>
+            
+            <div class="menu-section">
+                <div class="menu-item info-item">
+                    <span class="menu-label" style="font-size: 12px; color: var(--text-secondary);">
+                        Keeprus · 
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Оверлей -->
+    <div class="hamburger-overlay" id="hamburgerOverlay" onclick="closeHamburgerMenu()"></div>
+    
+    <!-- Toast (без эмодзи) -->
+    <div class="toast" id="toast"></div>
+    
+    <!-- Confirm Dialog -->
+    <div class="confirm-dialog" id="confirmDialog">
+        <div class="confirm-dialog-content">
+            <div class="confirm-dialog-header">
+                <svg class="confirm-dialog-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span class="confirm-dialog-title">Несохранённые изменения</span>
+            </div>
+            <p class="confirm-dialog-message">У вас есть несохранённые изменения. Что вы хотите сделать?</p>
+            <div class="confirm-dialog-actions">
+                <button class="view-button" onclick="confirmDiscard()">Не сохранять</button>
+                <button class="view-button" onclick="confirmCancel()">Отмена</button>
+                <button class="view-button active" onclick="confirmSave()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Generic Confirm Dialog -->
+    <div class="confirm-dialog" id="genericConfirmDialog">
+        <div class="confirm-dialog-content">
+            <div class="confirm-dialog-header">
+                <svg class="confirm-dialog-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="M12 8v4"/>
+                    <path d="M12 16h.01"/>
+                </svg>
+                <span class="confirm-dialog-title" id="genericConfirmTitle">Подтверждение</span>
+            </div>
+            <p class="confirm-dialog-message" id="genericConfirmMessage"></p>
+            <div class="confirm-dialog-actions">
+                <button class="view-button" id="genericConfirmCancelBtn">Отмена</button>
+                <button class="view-button active" id="genericConfirmOkBtn">Подтвердить</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Prompt Dialog -->
+    <div class="confirm-dialog" id="promptDialog">
+        <div class="confirm-dialog-content">
+            <div class="confirm-dialog-header">
+                <svg class="confirm-dialog-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2H2v10l9.29 9.29a2 2 0 0 0 2.83 0l7.17-7.17a2 2 0 0 0 0-2.83L12 2z"/>
+                    <path d="M7 7h.01"/>
+                </svg>
+                <span class="confirm-dialog-title">Добавить ярлык</span>
+            </div>
+            <p class="confirm-dialog-message">Введите название ярлыка:</p>
+            <input type="text" class="prompt-input" id="promptInput" placeholder="Название ярлыка" maxlength="30">
+            <div class="confirm-dialog-actions">
+                <button class="view-button" id="promptCancelBtn">Отмена</button>
+                <button class="view-button active" id="promptOkBtn">Добавить</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Sidebar Navigation -->
     <nav class="sidebar" id="sidebar">
@@ -250,7 +370,54 @@
         </div>
     </div>
 
-<script src="js/toast.js"></script>        <!-- ✅ Сначала toast -->
+    <!-- МОДАЛЬНОЕ ОКНО ВЫБОРА ПАПКИ -->
+    <div class="modal" id="folderPickerModal">
+        <div class="modal-content folder-picker">
+            <div class="folder-picker-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                </svg>
+            </div>
+            
+            <h2 class="folder-picker-title">Выберите папку для заметок</h2>
+            
+            <p class="folder-picker-desc">
+                Все заметки будут сохраняться в выбранную папку на вашем диске.
+                <br><br>
+                Это позволит:
+                <br>
+                ✅ Сохранять заметки даже при очистке браузера
+                <br>
+                ✅ Открывать заметки в любом браузере
+                <br>
+                ✅ Делать резервные копии
+            </p>
+            
+            <div class="folder-picker-actions">
+                <button class="btn-primary folder-picker-btn" onclick="selectFolderOnboarding()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Выбрать папку
+                </button>
+                <button class="btn-secondary folder-picker-skip" onclick="skipFolderSelection()">
+                    Пропустить (сохранять в браузере)
+                </button>
+            </div>
+            
+            <div class="folder-picker-note">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="12" x2="12" y2="16"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                <span>Вы всегда сможете изменить папку в меню (☰)</span>
+            </div>
+        </div>
+    </div>
+
+<script src="js/toast.js"></script>
+<script src="js/hamburger.js"></script>
 <script src="js/drag-n-drop.js"></script>
 <script src="js/render.js"></script>
 <script src="js/markdown.js"></script>
