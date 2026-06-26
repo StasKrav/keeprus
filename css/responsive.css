@@ -1,0 +1,121 @@
+/* ============================================
+   RESPONSIVE.CSS — адаптивность
+   ============================================ */
+
+/* Планшеты и маленькие ноутбуки (до 1024px) */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 72px;
+    }
+    .main-content {
+        margin-left: 72px;
+    }
+    .nav-label,
+    .section-title,
+    .tag-count {
+        display: none;
+    }
+    .nav-item {
+        justify-content: center;
+        padding: 16px;
+    }
+}
+
+/* Телефоны (до 768px) */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+    .main-content {
+        margin-left: 0;
+        padding: 16px 16px 16px 20px;
+    }
+    .notes-grid {
+        grid-template-columns: 1fr;
+    }
+    .app-bar .search {
+        margin: 0 8px 0 4px;
+    }
+    .app-bar .search-input {
+        padding-left: 36px;
+        font-size: 14px;
+    }
+    .app-bar .logo {
+        min-width: auto;
+        padding-left: 4px;
+        gap: 4px;
+    }
+    .app-bar .logo span:last-child {
+        display: none;
+    }
+    .notes-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding-left: 4px;
+    }
+    .notes-grid {
+        padding-left: 4px;
+    }
+    .view-toggle {
+        align-self: flex-end;
+    }
+
+    /* Гамбургер-меню для мобильных */
+    .app-bar {
+        padding: 0 12px;
+        gap: 8px;
+    }
+    .app-bar .logo .logo-text {
+        display: none;
+    }
+    .app-bar .logo {
+        min-width: auto;
+        padding-left: 4px;
+        gap: 4px;
+    }
+    .app-bar .search {
+        margin: 0 4px;
+        min-width: 60px;
+    }
+    .search-input {
+        padding: 10px 12px 10px 36px;
+        font-size: 14px;
+    }
+    .search-icon {
+        left: 12px;
+        width: 16px;
+        height: 16px;
+    }
+    .app-bar .actions .icon-button {
+        width: 36px;
+        height: 36px;
+    }
+    .app-bar .actions .icon-button svg {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+/* Очень маленькие телефоны (до 480px) */
+@media (max-width: 480px) {
+    .app-bar .search {
+        min-width: 40px;
+    }
+    .search-input {
+        padding: 8px 10px 8px 32px;
+        font-size: 13px;
+    }
+    .search-icon {
+        left: 10px;
+        width: 14px;
+        height: 14px;
+    }
+    .app-bar .actions .icon-button {
+        width: 32px;
+        height: 32px;
+    }
+    .app-bar .actions .icon-button svg {
+        width: 18px;
+        height: 18px;
+    }
+}

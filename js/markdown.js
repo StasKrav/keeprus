@@ -12,73 +12,83 @@ function escapeHtml(str) {
 }
 
 function renderMarkdown(text) {
-  if (!text) return "";
+    if (!text) return "";
 
-  // Escape HTML to prevent XSS — do this FIRST, before any tag injection
-  let html = escapeHtml(text);
+    // Экранируем HTML
+    let html = escapeHtml(text);
 
-  // Headers: ## Title or # Title
-  html = html.replace(/^### (.+)$/gm, "<h3>$1</h3>");
-  html = html.replace(/^## (.+)$/gm, "<h2>$1</h2>");
-  html = html.replace(/^# (.+)$/gm, "<h1>$1</h1>");
+    // 1. Заголовки
+    html = html.replace(/^### (.+)$/gm, "<h3>$1</h3>");
+    html = html.replace(/^## (.+)$/gm, "<h2>$1</h2>");
+    html = html.replace(/^# (.+)$/gm, "<h1>$1</h1>");
 
-  // Bold: **text** or __text__
-  html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-  html = html.replace(/__(.+?)__/g, "<strong>$1</strong>");
+    // 2. Жирный
+    html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    html = html.replace(/__(.+?)__/g, "<strong>$1</strong>");
 
-  // Italic: *text* or _text_
-  html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
-  html = html.replace(/_(.+?)_/g, "<em>$1</em>");
+    // 3. Курсив
+    html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
+    html = html.replace(/_(.+?)_/g, "<em>$1</em>");
 
-  // Strikethrough: ~~text~~
-  html = html.replace(/~~(.+?)~~/g, "<del>$1</del>");
+    // 4. Зачёркнутый
+    html = html.replace(/~~(.+?)~~/g, "<del>$1</del>");
 
-  // Inline code: `code`
-  html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+    // 5. Встроенный код
+    html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
 
-  // Code blocks: ```code```
-  html = html.replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>");
+    // 6. Блок кода
+    html = html.replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>");
 
-  // Ordered lists: 1. item — process BEFORE unordered to avoid <li> conflicts
-  html = html.replace(/^\d+\. (.+)$/gm, "<oli>$1</oli>");
-  // Wrap consecutive <oli> in <ol>, converting markers to real <li>
-  html = html.replace(/(<oli>[\s\S]*?<\/oli>(\n?))+/g, (match) => {
-    return '<ol>' + match.replace(/<\/?oli>/g, (m) => m === '<oli>' ? '<li>' : '</li>') + '</ol>';
-  });
+    // 7. Списки
+    html = html.replace(/^\d+\. (.+)$/gm, "<oli>$1</oli>");
+    html = html.replace(/(<oli>[\s\S]*?<\/oli>(\n?))+/g, (match) => {
+        return '<ol>' + match.replace(/<\/?oli>/g, (m) => m === '<oli>' ? '<li>' : '</li>') + '</ol>';
+    });
 
-  // Unordered lists: - item or * item
-  html = html.replace(/^- (.+)$/gm, "<li>$1</li>");
-  html = html.replace(/^\* (.+)$/gm, "<li>$1</li>");
-  // Wrap consecutive <li> in <ul>
-  html = html.replace(/(<li>[\s\S]*?<\/li>(\n?))+/g, (match) => `<ul>${match}</ul>`);
+    html = html.replace(/^- (.+)$/gm, "<li>$1</li>");
+    html = html.replace(/^\* (.+)$/gm, "<li>$1</li>");
+    html = html.replace(/(<li>[\s\S]*?<\/li>(\n?))+/g, (match) => `<ul>${match}</ul>`);
 
-  // Blockquotes: > text
-  html = html.replace(/^> (.+)$/gm, "<blockquote>$1</blockquote>");
+    // 8. Цитаты
+    html = html.replace(/^> (.+)$/gm, "<blockquote>$1</blockquote>");
 
-  // Horizontal rule: --- or ***
-  html = html.replace(/^---$/gm, "<hr>");
-  html = html.replace(/^\*\*\*$/gm, "<hr>");
+    // 9. Горизонтальная линия
+    html = html.replace(/^---$/gm, "<hr>");
+    html = html.replace(/^\*\*\*$/gm, "<hr>");
 
-  // Line breaks: double newline = paragraph
-  html = html.replace(/\n\n/g, "</p><p>");
+    // 10. Параграфы и переносы
+    html = html.replace(/\n\n/g, "</p><p>");
+    html = html.replace(/\n/g, "<br>");
 
-  // Single line breaks
-  html = html.replace(/\n/g, "<br>");
+    // Оборачиваем в параграф
+    if (!html.startsWith("<h") && !html.startsWith("<ul") && 
+        !html.startsWith("<ol") && !html.startsWith("<blockquote") && 
+        !html.startsWith("<pre") && !html.startsWith("<p>") && 
+        !html.startsWith("<hr")) {
+        html = "<p>" + html + "</p>";
+    }
 
-  // Wrap in paragraph if not already wrapped in block-level tags
-  if (
-    !html.startsWith("<h") &&
-    !html.startsWith("<ul") &&
-    !html.startsWith("<ol") &&
-    !html.startsWith("<blockquote") &&
-    !html.startsWith("<pre") &&
-    !html.startsWith("<p>") &&
-    !html.startsWith("<hr")
-  ) {
-    html = "<p>" + html + "</p>";
-  }
+    // ⭐ КРИТИЧЕСКИ ВАЖНО: Очистка от XSS
+    if (typeof DOMPurify !== 'undefined') {
+        html = DOMPurify.sanitize(html, {
+            ALLOWED_TAGS: [
+                'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                'p', 'br', 'strong', 'em', 'del',
+                'ul', 'ol', 'li',
+                'code', 'pre',
+                'blockquote', 'hr',
+                'a', 'img'
+            ],
+            ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class']
+        });
+    } else {
+        // Fallback
+        html = html.replace(/<script.*?>.*?<\/script>/gi, '');
+        html = html.replace(/on\w+\s*=/gi, '');
+        html = html.replace(/javascript:/gi, '');
+    }
 
-  return html;
+    return html;
 }
 
 function createNoteElement(note) {
@@ -86,33 +96,26 @@ function createNoteElement(note) {
     div.className = `note-card ${note.color} ${note.pinned ? "pinned" : ""}`;
     div.setAttribute("data-id", note.id);
 
-    // ===== МАГНИТ =====
+    // Магнит
     const magnet = document.createElement("div");
     magnet.className = "note-magnet";
     magnet.title = note.pinned ? "Открепить" : "Закрепить";
-
-    
-    // === ИСПРАВЛЕНИЕ: добавляем обработчик напрямую на магнит ===
-    // Сохраняем ID в data-атрибут
     magnet.dataset.noteId = note.id;
 
-
-    // ===== ОСТАЛЬНОЕ СОДЕРЖИМОЕ =====
     const isTrash = currentFilter === "trash";
 
-    const contentPreview =
-        note.content.length > 120
-            ? note.content.slice(0, 120) + "..."
-            : note.content;
+    // ⭐ УВЕЛИЧИВАЕМ КОЛИЧЕСТВО ТЕКСТА: 120 → 250 символов
+    const contentPreview = note.content.length > 250 
+        ? note.content.slice(0, 250) + "..." 
+        : note.content;
     const renderedContent = renderMarkdown(contentPreview);
 
-    // Контейнер для содержимого
     const contentWrapper = document.createElement("div");
-    contentWrapper.style.cssText = "position:relative;z-index:1;flex:1;display:flex;flex-direction:column;";
+    contentWrapper.style.cssText = "position:relative;z-index:1;flex:1;display:flex;flex-direction:column;max-height:320px;overflow:hidden;";
     
     contentWrapper.innerHTML = `
         <div class="note-title">${note.title || "Без названия"}</div>
-        <div class="note-content md-content">${renderedContent}</div>
+        <div class="note-content md-content note-preview">${renderedContent}</div>
         <div class="note-footer">
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                 <div class="note-tags">
@@ -156,15 +159,12 @@ function createNoteElement(note) {
         </div>
     `;
 
-    // Собираем всё вместе
     div.appendChild(magnet);
     div.appendChild(contentWrapper);
 
-    // Клик по заметке для редактирования (кроме клика по магниту)
     div.addEventListener("dblclick", function(e) {
-        // Проверяем, что клик не по магниту и не по его дочерним элементам
         if (e.target.closest('.note-magnet')) {
-            return; // Если клик по магниту - ничего не делаем
+            return;
         }
         
         if (!e.target.closest(".action-button") && 
