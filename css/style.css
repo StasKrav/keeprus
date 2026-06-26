@@ -93,23 +93,50 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
-/* Для WebKit браузеров (Chrome, Safari) */
+
+/*==== скроллы ===*/
 ::-webkit-scrollbar {
-  width: 6px;
+    width: 2px;
+    height: 2px;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 3px;
+    background: var(--border-color);
+    border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
+    background: var(--text-secondary);
 }
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Тёмная тема */
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Убираем стандартную ручку ресайза */
+.editor-content::-webkit-resizer {
+    display: none !important;
+    background: transparent !important;
+}
+
+.editor-content {
+    resize: vertical; /* оставляем возможность растягивать */
+}
+
 
 /* ============================================
    TOP APP BAR
@@ -1452,49 +1479,7 @@ body {
   box-sizing: border-box;
 }
 
-/* ============================================
-   СКРОЛЛЫ В ТЁМНОЙ ТЕМЕ
-   ============================================ */
 
-[data-theme="dark"] ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-    background: transparent;
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 3px;
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.25);
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-corner {
-    background: transparent;
-}
-
-/* Для Firefox */
-[data-theme="dark"] {
-    scrollbar-color: rgba(255, 255, 255, 0.15) rgba(255, 255, 255, 0.05);
-    scrollbar-width: thin;
-}
-
-/* Убираем стандартную ручку ресайза */
-.editor-content::-webkit-resizer {
-    display: none !important;
-    background: transparent !important;
-}
-
-.editor-content {
-    resize: vertical; /* оставляем возможность растягивать */
-}
 
 
 
