@@ -11,14 +11,27 @@ function closeEditor() {
 }
 
 function forceCloseEditor() {
-  document.getElementById("noteEditor").classList.remove("visible");
-  document.getElementById("editorColorPicker").classList.remove("visible");
-  document.getElementById("mdHint").style.display = "none";
-  isMarkdownMode = false;
-  document.getElementById("markdownBtn").classList.remove("active");
-  document.getElementById("markdownIcon").textContent = "code";
-  currentNoteId = null;
-  hasUnsavedChanges = false;
+    // ⭐ УДАЛЯЕМ ПРЕВЬЮ MARKDOWN ПРИ ЗАКРЫТИИ
+    const preview = document.getElementById("mdPreview");
+    if (preview) {
+        preview.remove(); // полностью удаляем из DOM
+    }
+    
+    // ⭐ ВОЗВРАЩАЕМ textarea
+    const content = document.getElementById("noteContent");
+    content.style.display = "block";
+    
+    // ⭐ СБРАСЫВАЕМ РЕЖИМ MARKDOWN
+    isMarkdownMode = false;
+    document.getElementById("markdownBtn").classList.remove("active");
+    document.getElementById("markdownIcon").textContent = "code";
+    document.getElementById("mdHint").style.display = "none";
+    
+    // Остальное как было
+    document.getElementById("noteEditor").classList.remove("visible");
+    document.getElementById("editorColorPicker").classList.remove("visible");
+    currentNoteId = null;
+    hasUnsavedChanges = false;
 }
 
 function confirmSave() {

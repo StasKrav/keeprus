@@ -54,18 +54,17 @@
             <!-- Кнопки переключения вида -->
             <div class="view-toggle-header">
                 <button class="view-button-header active" data-view="grid" onclick="setView('grid')" title="Сетка">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="7" rx="1"/>
-                        <rect x="14" y="3" width="7" height="7" rx="1"/>
-                        <rect x="3" y="14" width="7" height="7" rx="1"/>
-                        <rect x="14" y="14" width="7" height="7" rx="1"/>
+                    <svg width="20" height="20" viewBox="0 0 544 544" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M80,80 L240,80 L240,240 L80,240 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M304,80 L464,80 L464,240 L304,240 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M80,304 L240,304 L240,464 L80,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M304,304 L464,304 L464,464 L304,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </button>
                 <button class="view-button-header" data-view="list" onclick="setView('list')" title="Список">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="3" y1="6" x2="21" y2="6"/>
-                        <line x1="3" y1="12" x2="21" y2="12"/>
-                        <line x1="3" y1="18" x2="21" y2="18"/>
+                    <svg width="20" height="20" viewBox="0 0 544 544" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M80,80 L464,80 L464,240 L80,240 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M80,304 L464,304 L464,464 L80,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </button>
             </div>
@@ -113,7 +112,7 @@
             </div>
             <p class="confirm-dialog-message">У вас есть несохранённые изменения. Что вы хотите сделать?</p>
             <div class="confirm-dialog-actions">
-                <button class="view-button" onclick="confirmDiscard()">Не сохранять</button>
+               <button class="view-button danger" onclick="confirmDiscard()">Не сохранять</button>
                 <button class="view-button" onclick="confirmCancel()">Отмена</button>
                 <button class="view-button active" onclick="confirmSave()">Сохранить</button>
             </div>

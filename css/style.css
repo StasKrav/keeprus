@@ -443,8 +443,8 @@ body {
 }
 
 .view-button-header {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     border: none;
     background: transparent;
@@ -602,7 +602,7 @@ body {
 
 .note-card {
   background: var(--surface-color);
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
   border: 1px solid var(--border-color);
   position: relative;
@@ -1074,7 +1074,7 @@ body {
   background: var(--surface-color) !important;
   border-radius: var(--radius);
   width: 95%;
-  max-width: 800px;
+  max-width: 600px;
   box-shadow: var(--shadow-3);
   overflow: hidden;
   animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1109,7 +1109,7 @@ body {
 
 .editor-content {
   width: 100%;
-  min-height: 400px;
+  min-height: 740px;
   border: none;
   padding: 12px 20px;
   font-size: 15px;
@@ -1148,10 +1148,65 @@ body {
   position: relative;
 }
 
+/* ============================================
+   КНОПКИ В РЕДАКТОРЕ
+   ============================================ */
+
 .editor-right-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.editor-right-actions .view-button {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: var(--text-secondary);
+}
+
+.editor-right-actions .view-button:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.editor-right-actions .view-button.active {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
+}
+
+.editor-right-actions .view-button.active:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
+}
+
+/* Тёмная тема */
+[data-theme="dark"] .editor-right-actions .view-button {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .editor-right-actions .view-button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .editor-right-actions .view-button.active {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    color: white;
+    box-shadow: 0 2px 12px rgba(96, 165, 250, 0.3);
+}
+
+[data-theme="dark"] .editor-right-actions .view-button.active:hover {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    box-shadow: 0 4px 16px rgba(96, 165, 250, 0.4);
 }
 
 .md-hint {
@@ -1159,6 +1214,94 @@ body {
   font-size: 11px;
   color: var(--text-secondary);
   background: var(--surface-color);
+}
+
+/* ============================================
+   ПРЕВЬЮ MARKDOWN В РЕДАКТОРЕ
+   ============================================ */
+
+.md-preview {
+    padding: 16px 20px;
+    min-height: 300px;
+    max-height: 730px; /* ⭐ ОГРАНИЧИВАЕМ ВЫСОТУ */
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    background: var(--surface-color);
+    overflow-y: auto !important; /* ⭐ ВКЛЮЧАЕМ СКРОЛЛ */
+    overflow-x: hidden;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+/* Стили для Markdown в превью */
+.md-preview h1 {
+    font-size: 28px;
+    font-weight: 600;
+    margin: 16px 0 8px;
+}
+.md-preview h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 14px 0 8px;
+}
+.md-preview h3 {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 12px 0 6px;
+}
+.md-preview strong {
+    font-weight: 600;
+}
+.md-preview em {
+    font-style: italic;
+}
+.md-preview del {
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+.md-preview code {
+    background: var(--tag-bg);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: "Roboto Mono", monospace;
+    font-size: 14px;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+.md-preview pre {
+    background: var(--tag-bg);
+    padding: 12px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 8px 0;
+    max-height: 400px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.md-preview pre code {
+    background: none;
+    padding: 0;
+}
+.md-preview ul,
+.md-preview ol {
+    padding-left: 24px;
+    margin: 8px 0;
+}
+.md-preview li {
+    margin: 4px 0;
+}
+.md-preview blockquote {
+    border-left: 4px solid var(--primary-color);
+    padding: 4px 16px;
+    margin: 8px 0;
+    background: var(--hover-bg);
+    border-radius: 0 4px 4px 0;
+}
+.md-preview hr {
+    border: none;
+    border-top: 2px solid var(--border-color);
+    margin: 16px 0;
 }
 
 /* ============================================
@@ -1244,10 +1387,74 @@ body {
   margin-bottom: 24px;
 }
 
+/* ============================================
+   КНОПКИ В ДИАЛОГОВЫХ ОКНАХ
+   ============================================ */
+
 .confirm-dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.confirm-dialog-actions .view-button {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: var(--text-secondary);
+}
+
+.confirm-dialog-actions .view-button:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.confirm-dialog-actions .view-button.active {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
+}
+
+.confirm-dialog-actions .view-button.active:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
+}
+
+/* Тёмная тема */
+[data-theme="dark"] .confirm-dialog-actions .view-button {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .confirm-dialog-actions .view-button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .confirm-dialog-actions .view-button.active {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    color: white;
+    box-shadow: 0 2px 12px rgba(96, 165, 250, 0.3);
+}
+
+[data-theme="dark"] .confirm-dialog-actions .view-button.active:hover {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    box-shadow: 0 4px 16px rgba(96, 165, 250, 0.4);
+}
+
+/* Кнопка "Не сохранять" — красноватая при наведении */
+.confirm-dialog-actions .view-button.danger:hover {
+    color: #d32f2f;
+}
+
+[data-theme="dark"] .confirm-dialog-actions .view-button.danger:hover {
+    color: #ef5350;
 }
 
 /* ============================================
@@ -1480,3 +1687,29 @@ body {
    ВСЕ МЕДИА-ЗАПРОСЫ ВЫНЕСЕНЫ В responsive.css
    ============================================ */
 
+
+
+
+/* ============================================
+   МАГНИТЫ — СКРЫВАЕМ, ПОКАЗЫВАЕМ ПРИ НАВЕДЕНИИ
+   ============================================ */
+
+.note-magnet {
+    opacity: 0 !important;
+    transform: translateX(-50%) scale(0.7) !important;
+    pointer-events: none !important;
+    transition: opacity 0.25s ease, transform 0.25s ease !important;
+}
+
+.note-card:hover .note-magnet {
+    opacity: 1 !important;
+    transform: translateX(-50%) scale(1) !important;
+    pointer-events: auto !important;
+}
+
+/* Для закреплённых — всегда видны */
+.note-card.pinned .note-magnet {
+    opacity: 1 !important;
+    transform: translateX(-50%) scale(1) !important;
+    pointer-events: auto !important;
+}

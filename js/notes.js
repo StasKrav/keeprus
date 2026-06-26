@@ -4,107 +4,140 @@
 // ============================================
 
 function addNote() {
-  currentNoteId = null;
-  isPinned = false;
-  isArchived = false;
-  currentColor = "color-default";
-  hasUnsavedChanges = false;
-  document.getElementById("noteTitle").value = "";
-  document.getElementById("noteContent").value = "";
-  document.getElementById("pinEditorBtn").classList.remove("active");
-  document.getElementById("archiveEditorBtn").classList.remove("active");
-  document.getElementById("noteEditor").classList.add("visible");
-  document.getElementById("noteTitle").focus();
-  updateEditorColorPicker();
+    currentNoteId = null;
+    isPinned = false;
+    isArchived = false;
+    currentColor = "color-default";
+    hasUnsavedChanges = false;
+    
+    // ⭐ СБРАСЫВАЕМ MARKDOWN
+    if (isMarkdownMode) {
+        isMarkdownMode = false;
+        document.getElementById("markdownBtn").classList.remove("active");
+        document.getElementById("markdownIcon").textContent = "code";
+        document.getElementById("mdHint").style.display = "none";
+        
+        const preview = document.getElementById("mdPreview");
+        if (preview) {
+            preview.remove();
+        }
+        document.getElementById("noteContent").style.display = "block";
+    }
+    
+    document.getElementById("noteTitle").value = "";
+    document.getElementById("noteContent").value = "";
+    document.getElementById("pinEditorBtn").classList.remove("active");
+    document.getElementById("archiveEditorBtn").classList.remove("active");
+    document.getElementById("noteEditor").classList.add("visible");
+    document.getElementById("noteTitle").focus();
+    updateEditorColorPicker();
 }
 
 function editNote(id) {
-  const note = notes.find((n) => n.id === id);
-  if (!note || note.trashed) return;
+    const note = notes.find((n) => n.id === id);
+    if (!note || note.trashed) return;
 
-  currentNoteId = id;
-  isPinned = note.pinned;
-  isArchived = note.archived || false;
-  currentColor = note.color || "color-default";
-  hasUnsavedChanges = false;
+    currentNoteId = id;
+    isPinned = note.pinned;
+    isArchived = note.archived || false;
+    currentColor = note.color || "color-default";
+    hasUnsavedChanges = false;
 
-  document.getElementById("noteTitle").value = note.title || "";
-  document.getElementById("noteContent").value = note.content || "";
+    // ⭐ СБРАСЫВАЕМ MARKDOWN ПРИ ОТКРЫТИИ
+    if (isMarkdownMode) {
+        isMarkdownMode = false;
+        document.getElementById("markdownBtn").classList.remove("active");
+        document.getElementById("markdownIcon").textContent = "code";
+        document.getElementById("mdHint").style.display = "none";
+        
+        // Удаляем превью
+        const preview = document.getElementById("mdPreview");
+        if (preview) {
+            preview.remove();
+        }
+        
+        // Показываем textarea
+        document.getElementById("noteContent").style.display = "block";
+    }
 
-  // Update pin button
-  const pinBtn = document.getElementById("pinEditorBtn");
-  if (isPinned) {
-    pinBtn.classList.add("active");
-  } else {
-    pinBtn.classList.remove("active");
-  }
+    document.getElementById("noteTitle").value = note.title || "";
+    document.getElementById("noteContent").value = note.content || "";
 
-  // Update archive button
-  const archiveBtn = document.getElementById("archiveEditorBtn");
-  if (isArchived) {
-    archiveBtn.classList.add("active");
-  } else {
-    archiveBtn.classList.remove("active");
-  }
+    // Обновляем кнопки
+    const pinBtn = document.getElementById("pinEditorBtn");
+    if (isPinned) {
+        pinBtn.classList.add("active");
+    } else {
+        pinBtn.classList.remove("active");
+    }
 
-  document.getElementById("noteEditor").classList.add("visible");
-  updateEditorColorPicker();
-  document.getElementById("noteTitle").focus();
+    const archiveBtn = document.getElementById("archiveEditorBtn");
+    if (isArchived) {
+        archiveBtn.classList.add("active");
+    } else {
+        archiveBtn.classList.remove("active");
+    }
+
+    document.getElementById("noteEditor").classList.add("visible");
+    updateEditorColorPicker();
+    document.getElementById("noteTitle").focus();
 }
 
 function saveNote() {
-  const title = document.getElementById("noteTitle").value.trim();
-  const content = document.getElementById("noteContent").value.trim();
+    const title = document.getElementById("noteTitle").value.trim();
+    
+    // Берём контент из textarea (всегда из textarea)
+    const content = document.getElementById("noteContent").value.trim();
 
-  if (!title && !content) {
-    showToast("Заметка пуста. Закрываю...");
-    hasUnsavedChanges = false;
-    closeEditor();
-    return;
-  }
-
-  const now = new Date();
-  const dateStr =
-    now.toLocaleDateString("ru-RU") +
-    " " +
-    now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-
-  if (currentNoteId) {
-    // Update existing note
-    const index = notes.findIndex((n) => n.id === currentNoteId);
-    if (index > -1) {
-      notes[index] = {
-        ...notes[index],
-        title: title || "Без названия",
-        content: content || "",
-        color: currentColor,
-        pinned: isPinned,
-        archived: isArchived,
-        date: dateStr,
-      };
-      showToast("Заметка обновлена");
+    if (!title && !content) {
+        showToast("Заметка пуста. Закрываю...");
+        hasUnsavedChanges = false;
+        closeEditor();
+        return;
     }
-  } else {
-    // Add new note
-    const newNote = {
-      id: Date.now(),
-      title: title || "Без названия",
-      content: content || "",
-      color: currentColor,
-      tags: ["Новое"],
-      pinned: isPinned,
-      archived: isArchived,
-      trashed: false,
-      date: dateStr,
-    };
-    notes.unshift(newNote);
-    showToast("Заметка создана");
-  }
 
-  hasUnsavedChanges = false;
-  saveNotes();
-  closeEditor();
-  renderNotes();
+    const now = new Date();
+    const dateStr =
+        now.toLocaleDateString("ru-RU") +
+        " " +
+        now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+
+    if (currentNoteId) {
+        // Обновляем существующую заметку
+        const index = notes.findIndex((n) => n.id === currentNoteId);
+        if (index > -1) {
+            notes[index] = {
+                ...notes[index],
+                title: title || "Без названия",
+                content: content || "",
+                color: currentColor,
+                pinned: isPinned,
+                archived: isArchived,
+                date: dateStr,
+            };
+            showToast("Заметка обновлена");
+        }
+    } else {
+        // Создаём новую заметку
+        const newNote = {
+            id: Date.now(),
+            title: title || "Без названия",
+            content: content || "",
+            color: currentColor,
+            tags: ["Новое"],
+            pinned: isPinned,
+            archived: isArchived,
+            trashed: false,
+            date: dateStr,
+        };
+        notes.unshift(newNote);
+        showToast("Заметка создана");
+    }
+
+    hasUnsavedChanges = false;
+    saveNotes();
+    closeEditor();
+    renderNotes();
 }
 
 function deleteNote(id, e) {
@@ -193,21 +226,52 @@ function togglePinInEditor() {
 }
 
 function toggleMarkdownMode() {
-  isMarkdownMode = !isMarkdownMode;
-  const btn = document.getElementById("markdownBtn");
-  const icon = document.getElementById("markdownIcon");
-  const hint = document.getElementById("mdHint");
-  if (isMarkdownMode) {
-    btn.classList.add("active");
-    icon.textContent = "visibility";
-    hint.style.display = "block";
-    showToast("Markdown: включён (код отображается как HTML)");
-  } else {
-    btn.classList.remove("active");
-    icon.textContent = "code";
-    hint.style.display = "none";
-    showToast("Markdown: выключен");
-  }
+    isMarkdownMode = !isMarkdownMode;
+    const btn = document.getElementById("markdownBtn");
+    const icon = document.getElementById("markdownIcon");
+    const hint = document.getElementById("mdHint");
+    const content = document.getElementById("noteContent");
+    const editor = document.getElementById("noteEditorContent");
+    
+    if (isMarkdownMode) {
+        btn.classList.add("active");
+        icon.textContent = "visibility";
+        hint.style.display = "block";
+        
+        const rawText = content.value;
+        content.style.display = "none";
+        
+        let preview = document.getElementById("mdPreview");
+        if (!preview) {
+            preview = document.createElement("div");
+            preview.id = "mdPreview";
+            preview.className = "md-preview";
+            content.parentNode.insertBefore(preview, content.nextSibling);
+        }
+        
+        // ⭐ ПРИНУДИТЕЛЬНО УСТАНАВЛИВАЕМ СТИЛИ
+        preview.style.display = "block";
+        preview.style.maxHeight = "730px";
+        preview.style.overflowY = "auto";
+        preview.style.minHeight = "300px";
+        preview.style.padding = "16px 20px";
+        
+        preview.innerHTML = renderMarkdown(rawText);
+        
+        showToast("📖 Режим просмотра Markdown");
+    } else {
+        btn.classList.remove("active");
+        icon.textContent = "code";
+        hint.style.display = "none";
+        content.style.display = "block";
+        
+        const preview = document.getElementById("mdPreview");
+        if (preview) {
+            preview.style.display = "none";
+        }
+        
+        showToast("✏️ Режим редактирования Markdown");
+    }
 }
 
 function archiveCurrentNote() {
