@@ -86,13 +86,5 @@ function renderNotes() {
     container.appendChild(createNoteElement(note));
   });
 
-  // Update title
-  const titleMap = {
-    all: "Все заметки",
-    pinned: "Закрепленные",
-    archive: "Архив",
-    trash: "Корзина",
-  };
-  const title = document.getElementById("notesTitle");
-  title.innerHTML = `${titleMap[currentFilter] || "Все заметки"} <span class="notes-count">(${filtered.length})</span>`;
+
 }

@@ -86,7 +86,7 @@
 
 body {
   font-family: "Comfortaa", "Roboto", sans-serif;
-  background: var(--background-color);
+  background: var(--surface-color);
   color: var(--text-primary);
   overflow-y: scroll;
   scrollbar-width: thin;
@@ -317,7 +317,7 @@ body {
   bottom: 0;
   width: 280px;
   background: var(--surface-color);
-  border-right: 1px solid var(--border-color);
+  border-right: 0px solid var(--border-color);
   padding: 24px 0;
   overflow-y: auto;
   transition: background-color 0.3s, border-color 0.3s;
@@ -431,57 +431,50 @@ body {
   font-weight: 400;
 }
 
-.view-toggle {
-  display: flex;
-  gap: 8px;
+/* ============================================
+   КНОПКИ В ВЕРХНЕЙ ПАНЕЛИ
+   ============================================ */
+
+.view-toggle-header {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    margin-right: 8px;
 }
 
-.view-button {
-  padding: 8px 16px;
-  border: 1px solid var(--border-color);
-  background: var(--surface-color);
-  border-radius: 20px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-  color: var(--text-primary);
+.view-button-header {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
 }
 
-.view-button:hover {
-  background: var(--hover-bg);
+.view-button-header:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
 }
 
-.view-button.active {
-  background: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
+.view-button-header.active {
+    background: var(--hover-bg);
+    color: var(--primary-color);
 }
 
-[data-theme="dark"] .view-button {
-  background: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  transition: all 0.3s ease;
+[data-theme="dark"] .view-button-header:hover {
+    background: rgba(255, 255, 255, 0.08);
 }
 
-[data-theme="dark"] .view-button:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--text-secondary);
+[data-theme="dark"] .view-button-header.active {
+    background: rgba(138, 180, 248, 0.15);
+    color: #8ab4f8;
 }
 
-[data-theme="dark"] .view-button.active {
-  background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
-  color: white;
-  border-color: transparent;
-  box-shadow: 0 2px 10px rgba(96, 165, 250, 0.3);
-}
-
-[data-theme="dark"] .view-button.active:hover {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
-  box-shadow: 0 4px 15px rgba(96, 165, 250, 0.4);
-  transform: translateY(-1px);
-}
 
 /* ============================================
    NOTES GRID — УЛУЧШЕННАЯ ВЕРСИЯ
@@ -1486,3 +1479,4 @@ body {
 /* ============================================
    ВСЕ МЕДИА-ЗАПРОСЫ ВЫНЕСЕНЫ В responsive.css
    ============================================ */
+

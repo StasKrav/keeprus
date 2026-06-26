@@ -51,16 +51,35 @@
         </div>
         
         <div class="actions">
+            <!-- Кнопки переключения вида -->
+            <div class="view-toggle-header">
+                <button class="view-button-header active" data-view="grid" onclick="setView('grid')" title="Сетка">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1"/>
+                    </svg>
+                </button>
+                <button class="view-button-header" data-view="list" onclick="setView('list')" title="Список">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="3" y1="12" x2="21" y2="12"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+        
             <!-- Кнопка темы -->
             <button class="icon-button" onclick="toggleTheme()" title="Переключить тему" id="themeToggle">
-                <svg id="themeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg id="themeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                 </svg>
             </button>
             
             <!-- Гамбургер -->
             <button class="icon-button hamburger-btn" onclick="toggleHamburgerMenu()" id="hamburgerBtn" title="Меню">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
                     <circle cx="12" cy="5" r="1" class="dot"/>
                     <circle cx="12" cy="12" r="1" class="dot"/>
                     <circle cx="12" cy="19" r="1" class="dot"/>
@@ -202,13 +221,6 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <div class="notes-header">
-            <h1 class="notes-title" id="notesTitle">Все заметки <span class="notes-count" id="notesCount"></span></h1>
-            <div class="view-toggle">
-                <button class="view-button active" data-view="grid" onclick="setView('grid')">Сетка</button>
-                <button class="view-button" data-view="list" onclick="setView('list')">Список</button>
-            </div>
-        </div>
         
         <div class="notes-grid" id="notesContainer">
             <!-- Notes will be added here dynamically -->

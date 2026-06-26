@@ -18,15 +18,15 @@ function setView(view) {
     
     container.classList.toggle('list-view', view === 'list');
     
-    document.querySelectorAll('.view-button').forEach(btn => {
+    // Обновляем активное состояние для кнопок в хедере
+    document.querySelectorAll('.view-button-header').forEach(btn => {
         btn.classList.remove('active');
-        const btnView = btn.getAttribute('data-view') || btn.textContent.toLowerCase().trim();
+        const btnView = btn.getAttribute('data-view');
         if (btnView === view) {
             btn.classList.add('active');
         }
     });
     
-    // ✅ ВМЕСТО storageSet используем localStorage
     localStorage.setItem('material_keep_view', view);
 }
 

@@ -86,18 +86,26 @@ function removeTagFromCard(noteId, tag, e) {
 }
 
 function filterByTag(tag, e) {
-  e?.stopPropagation();
-  tagFilter = tag;
-  currentFilter = "all";
-  // Update active nav
-  document
-    .querySelectorAll(".nav-item")
-    .forEach((el) => el.classList.remove("active"));
-  document
-    .querySelector('.nav-item[data-filter="all"]')
-    .classList.add("active");
-  renderNotes();
-  showToast(`Фильтр: ${tag}`);
+    e?.stopPropagation();
+    tagFilter = tag;
+    currentFilter = "all";
+    
+    // Снимаем выделение со всех пунктов
+    document.querySelectorAll(".nav-item").forEach((el) => 
+        el.classList.remove("active")
+    );
+    
+    // Находим и подсвечиваем ярлык в списке
+    const tagItems = document.querySelectorAll("#tagList .nav-item");
+    tagItems.forEach((el) => {
+        const label = el.querySelector('.nav-label');
+        if (label && label.textContent === tag) {
+            el.classList.add("active");
+        }
+    });
+    
+    renderNotes();
+    showToast(`Фильтр: ${tag}`);
 }
 
 function renderTags() {
