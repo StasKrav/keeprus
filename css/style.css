@@ -608,15 +608,14 @@ body {
   position: relative;
   padding: 24px 20px 16px;
   transition: all 0.25s ease;
-  min-height: 160px;
+  min-height: 200px;
   display: flex;
   flex-direction: column;
   animation: cardAppear 0.3s ease-out;
 }
 
 .note-card:hover {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 6px 18px rgba(0, 0, 0, 0.06);
-  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
   border-color: var(--card-border-hover);
 }
 
@@ -684,17 +683,17 @@ body {
 
 .note-footer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: auto;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column; /* ⬅️ тэги и кнопки вертикально */
+  gap: 10px;
+  margin-top: auto; /* ⬅️ прижимаем к низу */
+  padding-top: 10px;
 }
 
 .note-date {
-  font-size: 11px;
-  color: var(--text-secondary);
-  opacity: 0.7;
+    font-size: 11px;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    margin-left: auto;
 }
 
 .note-tags {
@@ -703,37 +702,72 @@ body {
   flex-wrap: wrap;
 }
 
+/* === РЯД С ТЭГАМИ === */
+.note-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    min-height: 28px;
+}
+
 .note-tag {
-  padding: 4px 8px;
-  background: var(--tag-bg);
-  border-radius: 12px;
-  font-size: 11px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: background 0.2s;
+    position: relative; /* ⬅️ для позиционирования крестика */
+    padding: 12px 12px;
+    background: var(--tag-bg);
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    min-width: 30px;
 }
 
 .note-tag:hover {
-  background: var(--tag-hover);
+    background: var(--tag-hover);
 }
 
+/* Текст тега */
+.note-tag .tag-text {
+    display: inline-block;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* При наведении — текст сдвигается влево */
+.note-tag:hover .tag-text {
+    opacity: 0.3;
+    transform: translateX(-8px);
+}
+
+
+/* Крестик — поверх текста, всегда справа */
 .tag-remove {
-  display: none;
-  margin-left: 4px;
-  font-size: 14px;
-  line-height: 1;
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-weight: bold;
-  transition: color 0.2s;
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    line-height: 1;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+}
+
+/* При наведении — крестик появляется */
+.note-tag:hover .tag-remove {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .tag-remove:hover {
-  color: var(--text-primary);
-}
-
-.note-tag:hover .tag-remove {
-  display: inline;
+    color: var(--text-primary);
 }
 
 .note-actions {
@@ -769,6 +803,37 @@ body {
 
 .action-button.active {
   color: var(--primary-color);
+}
+
+/* === РЯД С КНОПКАМИ === */
+.note-actions-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    min-height: 36px;
+}
+
+.note-actions-row .action-button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: background 0.2s, color 0.2s;
+}
+
+.note-actions-row .action-button:hover {
+    background: var(--hover-bg-dark);
+    color: var(--text-primary);
+}
+
+.note-actions-row .action-button .material-icons {
+    font-size: 18px;
 }
 
 /* ============================================
@@ -1713,3 +1778,43 @@ body {
     transform: translateX(-50%) scale(1) !important;
     pointer-events: auto !important;
 }
+
+
+
+
+/* ============================================
+   КНОПКИ В КАРТОЧКЕ — МЕНЬШЕ И ГРАФИЧНЕЕ
+   ============================================ */
+
+.note-actions-row {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    min-height: 28px;
+}
+
+.note-actions-row .action-button {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.15s ease;
+    opacity: 0.4;
+}
+
+.note-actions-row .action-button:hover {
+    /* background: var(--hover-bg-dark); */
+    color: var(--text-primary);
+    opacity: 1;
+}
+
+.note-actions-row .action-button .material-icons {
+    font-size: 16px;
+}
+

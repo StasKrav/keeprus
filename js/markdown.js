@@ -123,35 +123,77 @@ function createNoteElement(note) {
                       .map(
                         (tag) => `
                         <span class="note-tag" onclick="filterByTag('${tag}', event)">
-                            ${tag}
+                            <span class="tag-text">${tag}</span>
                             <span class="tag-remove" onclick="removeTagFromCard(${note.id}, '${tag}', event)">&times;</span>
                         </span>
                     `,
                       )
                       .join("")}
                 </div>
-                <span class="note-date">${note.date || ""}</span>
             </div>
             <div class="note-actions">
                 ${
                   isTrash
                     ? `
                     <button class="action-button" onclick="restoreNote(${note.id}, event)">
-                        <span class="material-icons">restore</span>
+                        <svg width="20" height="20" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M80,144 L432,144" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M176,80 L336,80" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M112,144 L144,432" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M400,144 L368,432" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M368,432 L144,432" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M258,218 L258,346" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M255,217 L191,281" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M260,219 L324,283" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        </svg>
+                        
                     </button>
                     <button class="action-button" onclick="deletePermanently(${note.id}, event)">
-                        <span class="material-icons">delete_forever</span>
+                        <svg width="20" height="20" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M80,144 L432,144" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M176,80 L336,80" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M112,144 L144,432" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M400,144 L368,432" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M368,432 L144,432" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M208,240 L304,336" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M304,240 L208,336" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        </svg>
+                        
                     </button>
                 `
                     : `
                     <button class="action-button" onclick="changeNoteColor(${note.id}, event)">
-                        <span class="material-icons">palette</span>
+                        <svg width="20" height="20" viewBox="0 0 608 576" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M272,80 C432,80 528,176 432,368" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M272,80 C176,80 80,144 80,272" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M304,368 L304,496" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M304,368 L432,368" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <circle cx="308" cy="171" r="21.377558326431952" stroke="currentColor" stroke-width="32" fill="#3b82f6"/>
+                        <circle cx="400" cy="240" r="20.591260281974" stroke="currentColor" stroke-width="32" fill="#3b82f6"/>
+                        <circle cx="193" cy="209" r="23.021728866442675" stroke="currentColor" stroke-width="32" fill="#3b82f6"/>
+                        <circle cx="162" cy="323" r="22.203603311174515" stroke="currentColor" stroke-width="32" fill="#3b82f6"/>
+                        <path d="M80,272 C80,368 176,496 304,496" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        </svg>
                     </button>
                     <button class="action-button" onclick="archiveNote(${note.id}, event)">
-                        <span class="material-icons">archive</span>
+                        <svg width="20" height="20" viewBox="0 0 416 352" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M208,80 L208,208" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M144,144 L208,208" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M208,208 L272,144" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M80,272 L336,272" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M336,272 L336,112" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M80,112 L80,272" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        </svg>
+                        
                     </button>
                     <button class="action-button" onclick="deleteNote(${note.id}, event)">
-                        <span class="material-icons">delete</span>
+                        <svg width="20" height="20" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M80,144 L432,144" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M176,80 L336,80" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M112,144 L144,432" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M400,144 L368,432" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M368,432 L144,432" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        </svg>
                     </button>
                 `
                 }
@@ -177,3 +219,4 @@ function createNoteElement(note) {
 
     return div;
 }
+
