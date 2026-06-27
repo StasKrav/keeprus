@@ -129,7 +129,7 @@ function saveNoteSilent() {
         // Новая заметка — создаём и запоминаем ID
         const newNote = {
             id: Date.now(),
-            title: title || "Без названия",
+            title: title || "",
             content: content || "",
             color: currentColor,
             tags: ["Новое"],

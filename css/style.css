@@ -500,7 +500,6 @@ body {
 .note-card {
   background: var(--surface-color);
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
   border: 1px solid var(--border-color);
   position: relative;
   padding: 24px 20px 6px;
@@ -530,6 +529,15 @@ body {
   to { opacity: 0; transform: scale(0.95); }
 }
 
+/* У белых заметок — рамка есть */
+.note-card.color-default {
+    border-color: var(--border-color);
+}
+
+/* У цветных — рамки нет */
+.note-card:not(.color-default) {
+    border-color: transparent !important;
+}
 
 .note-title,
 .note-content,

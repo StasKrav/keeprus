@@ -114,7 +114,7 @@ function createNoteElement(note) {
     contentWrapper.style.cssText = "position:relative;z-index:1;flex:1;display:flex;flex-direction:column;";
     
     contentWrapper.innerHTML = `
-        <div class="note-title">${note.title || "Без названия"}</div>
+        ${note.title ? `<div class="note-title">${note.title}</div>` : ''}
         <div class="note-content md-content note-preview">${renderedContent}</div>
         <div class="note-footer">
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
