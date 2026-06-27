@@ -96,11 +96,20 @@ function createNoteElement(note) {
     div.className = `note-card ${note.color} ${note.pinned ? "pinned" : ""}`;
     div.setAttribute("data-id", note.id);
 
-    // Магнит
-    const magnet = document.createElement("div");
-    magnet.className = "note-magnet";
-    magnet.title = note.pinned ? "Открепить" : "Закрепить";
-    magnet.dataset.noteId = note.id;
+    // ✅ ДОБАВЛЯЕМ БУЛАВКУ (SVG) В ПРАВЫЙ УГОЛ
+    const pinIcon = document.createElement('div');
+    pinIcon.className = 'pin-icon';
+    pinIcon.innerHTML = `
+        <svg width="32" height="32" viewBox="0 0 288 288">
+        <circle cx="144" cy="144" r="64" stroke="currentColor" stroke-width="32" fill="none"/>
+        </svg>
+    `;
+
+    pinIcon.addEventListener('click', function(e) {
+        e.stopPropagation();
+        togglePin(note.id, e);
+    });   
+    
 
     const isTrash = currentFilter === "trash";
 
@@ -215,11 +224,12 @@ function createNoteElement(note) {
         </div>
     `;
 
-    div.appendChild(magnet);
+
+    div.appendChild(pinIcon);
     div.appendChild(contentWrapper);
 
     div.addEventListener("dblclick", function(e) {
-        if (e.target.closest('.note-magnet')) {
+        if (e.target.closest('.pin-icon')) {  // ← исправлено
             return;
         }
         

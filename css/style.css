@@ -773,62 +773,67 @@ body {
 
 
 /* ============================================
-   МАГНИТ
+   КРУЖОК — В ПРАВОМ ВЕРХНЕМ УГЛУ
    ============================================ */
 
-.note-magnet {
-  position: absolute;
-  top: 12px;
-  right: -4px;
-  transform: translateX(-50%);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #cccccc;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  z-index: 10;
-  border: 4px solid var(--background-color);
-  background-clip: padding-box;
+.pin-icon {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    opacity: 0;
+    transition: opacity 0.2s ease, color 0.2s ease;
+    z-index: 5;
 }
 
-.note-magnet:hover {
-  background: #aaaaaa;
-  border: 2px solid var(--background-color);
-  transform: translateX(-50%) scale(1.1);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+/* Показываем кружок при наведении на карточку */
+.note-card:hover .pin-icon {
+    opacity: 0.4;
 }
 
-.note-magnet:active {
-  transform: translateX(-50%) scale(0.92);
+/* При наведении на сам кружок — делаем ярче */
+.pin-icon:hover {
+    opacity: 1 !important;
+    color: #777777;
 }
 
-.note-card.pinned .note-magnet {
-  background: #cccccc;
+/* ⬇️ ЗАКРЕПЛЁННАЯ ЗАМЕТКА — кружок с заливкой при наведении */
+.note-card.pinned:hover .pin-icon {
+    opacity: 1;
+    color: #777777;
 }
 
-.note-card.pinned .note-magnet:hover {
-  background: #aaaaaa;
+.note-card.pinned .pin-icon svg circle {
+    fill: none;
+    transition: fill 0.2s ease;
 }
 
-[data-theme="dark"] .note-magnet {
-  background: #4b5563;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25), inset 0 -2px 4px rgba(0, 0, 0, 0.15);
-  border-color: var(--surface-color);
+/* При наведении на закреплённую карточку — заливка появляется */
+.note-card.pinned:hover .pin-icon svg circle {
+    fill: #777777;
 }
 
-[data-theme="dark"] .note-magnet:hover {
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+/* Тёмная тема */
+[data-theme="dark"] .pin-icon {
+    color: var(--text-secondary);
 }
 
-[data-theme="dark"] .note-card.pinned .note-magnet {
-  background: linear-gradient(135deg, rgba(96, 165, 250, 0.8), rgba(167, 139, 250, 0.8), rgba(244, 114, 182, 0.8));
-  box-shadow: 0 2px 8px rgba(138, 180, 248, 0.25), inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+[data-theme="dark"] .pin-icon:hover {
+    color: #8ab4f8;
 }
 
-[data-theme="dark"] .note-card.pinned .note-magnet:hover {
-  background: linear-gradient(135deg, rgba(96, 165, 250, 0.8), rgba(167, 139, 250, 0.8), rgba(244, 114, 182, 0.8));
-  box-shadow: 0 3px 12px rgba(138, 180, 248, 0.35);
+[data-theme="dark"] .note-card.pinned:hover .pin-icon {
+    color: #8ab4f8;
+}
+
+[data-theme="dark"] .note-card.pinned:hover .pin-icon svg circle {
+    fill: #8ab4f8;
 }
 
 /* ============================================
