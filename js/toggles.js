@@ -18,21 +18,8 @@ function setView(view) {
     
     container.classList.toggle('list-view', view === 'list');
     
-    // ⬇️ МЕНЯЕМ ИКОНКУ
-    const icon = document.getElementById('viewIcon');
-    if (view === 'grid') {
-        icon.innerHTML = `
-            <path d="M80,80 L240,80 L240,240 L80,240 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M304,80 L464,80 L464,240 L304,240 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M80,304 L240,304 L240,464 L80,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M304,304 L464,304 L464,464 L304,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        `;
-    } else {
-        icon.innerHTML = `
-            <path d="M80,80 L464,80 L464,240 L80,240 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M80,304 L464,304 L464,464 L80,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        `;
-    }
+    // ⬇️ ПОКАЗЫВАЕМ ИКОНКУ ДЛЯ ПЕРЕКЛЮЧЕНИЯ
+    updateViewIcon(view);
     
     localStorage.setItem('material_keep_view', view);
 }
@@ -78,4 +65,26 @@ function loadTheme() {
     const theme = saved || (prefersDark ? "dark" : "light");
     document.documentElement.setAttribute("data-theme", theme);
     updateThemeIcon(theme);
+}
+
+function updateViewIcon(view) {
+    const icon = document.getElementById('viewIcon');
+    if (!icon) return;
+    
+    // ⬇️ ПОКАЗЫВАЕМ ПРОТИВОПОЛОЖНЫЙ РЕЖИМ
+    if (view === 'grid') {
+        // Сейчас сетка → показываем иконку списка
+        icon.innerHTML = `
+            <path d="M80,80 L464,80 L464,240 L80,240 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M80,304 L464,304 L464,464 L80,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        `;
+    } else {
+        // Сейчас список → показываем иконку сетки
+        icon.innerHTML = `
+            <path d="M80,80 L240,80 L240,240 L80,240 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M304,80 L464,80 L464,240 L304,240 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M80,304 L240,304 L240,464 L80,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M304,304 L464,304 L464,464 L304,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        `;
+    }
 }

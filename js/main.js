@@ -48,6 +48,56 @@ async function saveNotes() {
     }
 }
 
+// Сохраняет заметку без закрытия редактора (для автосохранения)
+function saveNoteSilent() {
+    const title = document.getElementById("noteTitle").value.trim();
+    const content = document.getElementById("noteContent").value.trim();
+
+    if (!title && !content) {
+        // Если пусто — ничего не делаем
+        return;
+    }
+
+    const now = new Date();
+    const dateStr =
+        now.toLocaleDateString("ru-RU") +
+        " " +
+        now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+
+    if (currentNoteId) {
+        const index = notes.findIndex((n) => n.id === currentNoteId);
+        if (index > -1) {
+            notes[index] = {
+                ...notes[index],
+                title: title || "Без названия",
+                content: content || "",
+                color: currentColor,
+                pinned: isPinned,
+                archived: isArchived,
+                date: dateStr,
+            };
+        }
+    } else {
+        const newNote = {
+            id: Date.now(),
+            title: title || "Без названия",
+            content: content || "",
+            color: currentColor,
+            tags: ["Новое"],
+            pinned: isPinned,
+            archived: isArchived,
+            trashed: false,
+            date: dateStr,
+        };
+        notes.unshift(newNote);
+        currentNoteId = newNote.id; // ⬅️ запоминаем ID новой заметки
+    }
+
+    hasUnsavedChanges = false;
+    saveNotes();
+    renderNotes();
+}
+
 
 // ============================================
 // ДЕФОЛТНЫЕ ЗАМЕТКИ
@@ -104,14 +154,12 @@ async function init() {
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
     updateLogoColors(currentTheme);
     
-    // Показываем подсказку при первом запуске
-    const onboarded = localStorage.getItem('keeprus_onboarded');
-    if (!onboarded) {
-        localStorage.setItem('keeprus_onboarded', 'true');
-        setTimeout(() => {
-            showToast('💡 Сохраняйте заметки через меню → "Сохранить как..."');
-        }, 500);
-    }
+    setInterval(() => {
+        const editor = document.getElementById('noteEditor');
+        if (editor && editor.classList.contains('visible') && hasUnsavedChanges) {
+            saveNoteSilent(); // ← сохраняет БЕЗ закрытия
+        }
+    }, 30000);
 
     // Click outside modal to close
     document.getElementById("noteEditor").addEventListener("click", (e) => {

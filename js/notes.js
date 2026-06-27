@@ -98,57 +98,8 @@ function editNote(id) {
 }
 
 function saveNote() {
-    const title = document.getElementById("noteTitle").value.trim();
-    
-    // Берём контент из textarea (всегда из textarea)
-    const content = document.getElementById("noteContent").value.trim();
-
-    if (!title && !content) {
-        hasUnsavedChanges = false;
-        closeEditor();
-        return;
-    }
-
-    const now = new Date();
-    const dateStr =
-        now.toLocaleDateString("ru-RU") +
-        " " +
-        now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-
-    if (currentNoteId) {
-        // Обновляем существующую заметку
-        const index = notes.findIndex((n) => n.id === currentNoteId);
-        if (index > -1) {
-            notes[index] = {
-                ...notes[index],
-                title: title || "Без названия",
-                content: content || "",
-                color: currentColor,
-                pinned: isPinned,
-                archived: isArchived,
-                date: dateStr,
-            };
-        }
-    } else {
-        // Создаём новую заметку
-        const newNote = {
-            id: Date.now(),
-            title: title || "Без названия",
-            content: content || "",
-            color: currentColor,
-            tags: ["Новое"],
-            pinned: isPinned,
-            archived: isArchived,
-            trashed: false,
-            date: dateStr,
-        };
-        notes.unshift(newNote);
-    }
-
-    hasUnsavedChanges = false;
-    saveNotes();
-    closeEditor();
-    renderNotes();
+    saveNoteSilent(); // сохраняем
+    closeEditor();    // закрываем редактор
 }
 
 function deleteNote(id, e) {
@@ -336,14 +287,21 @@ function markEditorChanged() {
 // Сохранить как... (выбор места и имени файла)
 async function saveNotesAs() {
     if (notes.length === 0) {
+        showToast('Нет заметок для сохранения');
         return;
     }
     
     try {
+        // Формируем имя с датой и временем
+        const now = new Date();
+        const dateStr = now.toISOString().slice(0, 10); // 2026-06-27
+        const timeStr = now.toISOString().slice(11, 16).replace(':', '-'); // 14-30
+        const filename = `заметки_${dateStr}_${timeStr}.json`;
+        
         // Используем стандартный диалог сохранения
         if ('showSaveFilePicker' in window) {
             const options = {
-                suggestedName: `заметки_${new Date().toISOString().slice(0,10)}.json`,
+                suggestedName: filename,
                 types: [{
                     description: 'JSON файл',
                     accept: { 'application/json': ['.json'] }
@@ -352,21 +310,19 @@ async function saveNotesAs() {
             
             const fileHandle = await window.showSaveFilePicker(options);
             const writable = await fileHandle.createWritable();
-            
-            // Просто сохраняем массив заметок
             await writable.write(JSON.stringify(notes, null, 2));
             await writable.close();
             
             showToast(`✅ Сохранено ${notes.length} заметок`);
         } else {
-            // Если браузер старый - скачиваем файл
+            // Fallback для старых браузеров
             const blob = new Blob([JSON.stringify(notes, null, 2)], { 
                 type: 'application/json' 
             });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `заметки_${new Date().toISOString().slice(0,10)}.json`;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
