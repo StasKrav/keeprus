@@ -59,7 +59,6 @@ function clearTrash() {
     const trashedNotes = notes.filter(n => n.trashed);
     
     if (trashedNotes.length === 0) {
-        showToast('Корзина уже пуста');
         return;
     }
     
@@ -74,7 +73,6 @@ function clearTrash() {
             notes = notes.filter(n => !n.trashed);
             saveNotes();
             renderNotes();
-            showToast(`Корзина очищена (${trashedNotes.length} заметок удалено)`);
         }
     );
 }

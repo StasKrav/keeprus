@@ -41,7 +41,6 @@ function toggleTheme() {
     localStorage.setItem('material_keep_theme', newTheme);
     updateThemeIcon(newTheme);
     updateLogoColors(newTheme); // <-- добавляем обновление логотипа
-    showToast(isDark ? 'Светлая тема' : 'Тёмная тема');
 }
 
 function updateThemeIcon(theme) {

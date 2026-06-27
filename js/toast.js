@@ -28,9 +28,7 @@ function exportNotes() {
         a.download = `keeprus_backup_${new Date().toISOString().slice(0,10)}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        showToast('Экспорт завершён');
     } catch (err) {
-        showToast('Ошибка экспорта: ' + err.message);
     }
 }
 
@@ -59,9 +57,7 @@ function importNotes() {
             notes = data;
             saveNotes();
             renderNotes();
-            showToast(`Импортировано ${notes.length} заметок`);
         } catch (err) {
-            showToast('Ошибка импорта: ' + err.message);
         }
     };
     
@@ -93,8 +89,8 @@ function exportAllAsMarkdown() {
         a.download = `keeprus_export_${new Date().toISOString().slice(0,10)}.md`;
         a.click();
         URL.revokeObjectURL(url);
-        showToast('Экспорт в Markdown завершён');
+
     } catch (err) {
-        showToast('Ошибка: ' + err.message);
+
     }
 }

@@ -25,7 +25,7 @@ function forceCloseEditor() {
     isMarkdownMode = false;
     document.getElementById("markdownBtn").classList.remove("active");
     document.getElementById("markdownIcon").textContent = "code";
-    document.getElementById("mdHint").style.display = "none";
+    document.getElementById("mdHint").style.display = "block";
     
     // Остальное как было
     document.getElementById("noteEditor").classList.remove("visible");

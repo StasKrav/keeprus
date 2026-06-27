@@ -69,13 +69,13 @@
 
   /* Приглушённые цвета для заметок (тёмная тема) */
   --note-default: #2d2d2d;
-  --note-red: #3a2d2d;
-  --note-orange: #3a342d;
-  --note-yellow: #3a3a2d;
-  --note-green: #2d3a30;
-  --note-teal: #2d3a38;
-  --note-blue: #2d323a;
-  --note-purple: #342d3a;
+      --note-red: #332d2d;
+      --note-orange: #332f2d;
+      --note-yellow: #33332d;
+      --note-green: #2d332e;
+      --note-teal: #2d3332;
+      --note-blue: #2d2e33;
+      --note-purple: #302d33;
 }
 
 * {
@@ -593,7 +593,7 @@ body {
 .note-tag {
     position: relative; /* ⬅️ для позиционирования крестика */
     padding: 6px 8px;
-    background: rgba(0, 0, 0, 0.06);
+    background: rgba(0, 0, 0, 0.04);
     border-radius: 12px;
     font-size: 11px;
     font-weight: 500;
@@ -774,7 +774,7 @@ body {
 .notes-grid.list-view .note-magnet {
   width: 24px;
   height: 24px;
-  top: -8px;
+  top: 8px;
   border-width: 3px;
 }
 
@@ -796,8 +796,8 @@ body {
 
 .note-magnet {
   position: absolute;
-  top: -14px;
-  left: 50%;
+  top: 12px;
+  right: -4px;
   transform: translateX(-50%);
   width: 40px;
   height: 40px;
@@ -822,11 +822,11 @@ body {
 }
 
 .note-card.pinned .note-magnet {
-  background: rgba(240, 155, 135);
+  background: #cccccc;
 }
 
 .note-card.pinned .note-magnet:hover {
-  background: rgba(232, 131, 107);
+  background: #aaaaaa;
 }
 
 [data-theme="dark"] .note-magnet {

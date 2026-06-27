@@ -175,16 +175,30 @@ function createNoteElement(note) {
                         <path d="M80,272 C80,368 176,496 304,496" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
                         </svg>
                     </button>
-                    <button class="action-button" onclick="archiveNote(${note.id}, event)">
-                        <svg width="20" height="20" viewBox="0 0 416 352" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M208,80 L208,208" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
-                        <path d="M144,144 L208,208" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
-                        <path d="M208,208 L272,144" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
-                        <path d="M80,272 L336,272" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
-                        <path d="M336,272 L336,112" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
-                        <path d="M80,112 L80,272" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
-                        </svg>
-                        
+                    <button class="action-button" onclick="archiveNote(${note.id}, event)" title="${note.archived ? 'Разархивировать' : 'Архивировать'}">
+                        ${note.archived ? `
+                            <!-- ИКОНКА РАЗАРХИВАЦИИ (стрелка вверх) -->
+                            <svg width="20" height="20" viewBox="0 0 480 416">
+                            <path d="M80,336 L400,336" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                            <path d="M80,336 L80,304" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                            <path d="M80,304 L80,144" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                            <path d="M400,336 L400,144" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                            <path d="M240,240 L240,80" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                            <path d="M240,80 L176,144" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                            <path d="M240,80 L304,144" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                            </svg>
+                        ` : `
+                            <!-- ИКОНКА АРХИВАЦИИ (стрелка вниз) -->
+                            <svg width="20" height="20" viewBox="0 0 416 352" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M208,80 L208,208" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                            <path d="M144,144 L208,208" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                            <path d="M208,208 L272,144" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                            <path d="M80,272 L336,272" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                            <path d="M336,272 L336,112" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                            <path d="M80,112 L80,272" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                            </svg>
+                            
+                        `}
                     </button>
                     <button class="action-button" onclick="deleteNote(${note.id}, event)">
                         <svg width="20" height="20" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">

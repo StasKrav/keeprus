@@ -10,7 +10,7 @@ function addNote() {
     currentColor = "color-default";
     hasUnsavedChanges = false;
     
-    // ⭐ СБРАСЫВАЕМ MARKDOWN
+    //  СБРАСЫВАЕМ MARKDOWN
     if (isMarkdownMode) {
         isMarkdownMode = false;
         document.getElementById("markdownBtn").classList.remove("active");
@@ -31,6 +31,13 @@ function addNote() {
     document.getElementById("noteEditor").classList.add("visible");
     document.getElementById("noteTitle").focus();
     updateEditorColorPicker();
+
+    //  ПОКАЗЫВАЕМ ПОДСКАЗКУ ПРИ СОЗДАНИИ
+        document.getElementById("mdHint").style.display = "block";
+        
+        document.getElementById("noteEditor").classList.add("visible");
+        document.getElementById("noteTitle").focus();
+        updateEditorColorPicker();
 }
 
 function editNote(id) {
@@ -81,6 +88,13 @@ function editNote(id) {
     document.getElementById("noteEditor").classList.add("visible");
     updateEditorColorPicker();
     document.getElementById("noteTitle").focus();
+
+     //  ПОКАЗЫВАЕМ ПОДСКАЗКУ ПРИ ОТКРЫТИИ
+    document.getElementById("mdHint").style.display = "block";
+    
+    document.getElementById("noteEditor").classList.add("visible");
+    updateEditorColorPicker();
+    document.getElementById("noteTitle").focus();
 }
 
 function saveNote() {
@@ -90,7 +104,6 @@ function saveNote() {
     const content = document.getElementById("noteContent").value.trim();
 
     if (!title && !content) {
-        showToast("Заметка пуста. Закрываю...");
         hasUnsavedChanges = false;
         closeEditor();
         return;
@@ -115,7 +128,6 @@ function saveNote() {
                 archived: isArchived,
                 date: dateStr,
             };
-            showToast("Заметка обновлена");
         }
     } else {
         // Создаём новую заметку
@@ -131,7 +143,6 @@ function saveNote() {
             date: dateStr,
         };
         notes.unshift(newNote);
-        showToast("Заметка создана");
     }
 
     hasUnsavedChanges = false;
@@ -149,7 +160,6 @@ function deleteNote(id, e) {
   note.trashDate = new Date().toISOString();
   saveNotes();
   renderNotes();
-  showToast("Заметка перемещена в корзину");
 }
 
 function deletePermanently(id, e) {
@@ -165,7 +175,6 @@ function deletePermanently(id, e) {
       notes = notes.filter((n) => n.id !== id);
       saveNotes();
       renderNotes();
-      showToast("Заметка удалена навсегда");
     },
   );
 }
@@ -178,7 +187,6 @@ function restoreNote(id, e) {
     note.trashDate = null;
     saveNotes();
     renderNotes();
-    showToast("Заметка восстановлена");
   }
 }
 
@@ -189,9 +197,6 @@ function archiveNote(id, e) {
     note.archived = !note.archived;
     saveNotes();
     renderNotes();
-    showToast(
-      note.archived ? "Заметка архивирована" : "Заметка разархивирована",
-    );
   }
 }
 
@@ -209,7 +214,6 @@ function togglePin(id, e) {
         note.pinned = !note.pinned;
         saveNotes();
         renderNotes();
-        showToast(note.pinned ? "Заметка закреплена" : "Заметка откреплена");
     } else {
         console.error("Заметка с ID", id, "не найдена");
     }
@@ -236,7 +240,7 @@ function toggleMarkdownMode() {
     if (isMarkdownMode) {
         btn.classList.add("active");
         icon.textContent = "visibility";
-        hint.style.display = "block";
+        hint.style.display = "none";
         
         const rawText = content.value;
         content.style.display = "none";
@@ -258,11 +262,10 @@ function toggleMarkdownMode() {
         
         preview.innerHTML = renderMarkdown(rawText);
         
-        showToast("📖 Режим просмотра Markdown");
     } else {
         btn.classList.remove("active");
         icon.textContent = "code";
-        hint.style.display = "none";
+        hint.style.display = "block";
         content.style.display = "block";
         
         const preview = document.getElementById("mdPreview");
@@ -270,7 +273,6 @@ function toggleMarkdownMode() {
             preview.style.display = "none";
         }
         
-        showToast("✏️ Режим редактирования Markdown");
     }
 }
 
@@ -297,7 +299,6 @@ function archiveCurrentNote() {
       btn.classList.remove("active");
     }
     saveNotes();
-    showToast(isArchived ? "Заметка архивирована" : "Заметка разархивирована");
   }
 }
 
@@ -335,7 +336,6 @@ function markEditorChanged() {
 // Сохранить как... (выбор места и имени файла)
 async function saveNotesAs() {
     if (notes.length === 0) {
-        showToast('Нет заметок для сохранения');
         return;
     }
     
