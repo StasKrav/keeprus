@@ -53,18 +53,13 @@
         <div class="actions">
             <!-- Кнопки переключения вида -->
             <div class="view-toggle-header">
-                <button class="view-button-header active" data-view="grid" onclick="setView('grid')" title="Сетка">
-                    <svg width="20" height="20" viewBox="0 0 544 544" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M80,80 L240,80 L240,240 L80,240 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M304,80 L464,80 L464,240 L304,240 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M80,304 L240,304 L240,464 L80,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M304,304 L464,304 L464,464 L304,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
-                <button class="view-button-header" data-view="list" onclick="setView('list')" title="Список">
-                    <svg width="20" height="20" viewBox="0 0 544 544" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M80,80 L464,80 L464,240 L80,240 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M80,304 L464,304 L464,464 L80,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <button class="view-button-header" onclick="toggleView()" title="Переключить вид">
+                    <svg id="viewIcon" width="20" height="20" viewBox="0 0 544 544" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Иконка Сетка (по умолчанию) -->
+                        <path d="M80,80 L240,80 L240,240 L80,240 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M304,80 L464,80 L464,240 L304,240 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M80,304 L240,304 L240,464 L80,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M304,304 L464,304 L464,464 L304,464 Z" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </button>
             </div>
