@@ -1565,10 +1565,10 @@ body {
   position: fixed;
   top: 64px;
   right: 8px;
-  width: 320px;
+  /* width: 320px; */
   max-width: calc(100vw - 16px);
   background: var(--surface-color);
-  border-radius: 12px;
+  border-radius: 6px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
   z-index: 1000;
   padding: 8px 0;
@@ -1611,7 +1611,7 @@ body {
   transition: background 0.15s ease;
   text-align: left;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 12px;
   border-radius: 0;
 }
 

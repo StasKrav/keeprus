@@ -97,9 +97,59 @@ function editNote(id) {
     document.getElementById("noteTitle").focus();
 }
 
+function saveNoteSilent() {
+    const title = document.getElementById("noteTitle").value.trim();
+    const content = document.getElementById("noteContent").value.trim();
+
+    // Не сохраняем пустые заметки
+    if (!title && !content) {
+        return;
+    }
+
+    const now = new Date();
+    const dateStr =
+        now.toLocaleDateString("ru-RU") +
+        " " +
+        now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+
+    if (currentNoteId) {
+        const index = notes.findIndex((n) => n.id === currentNoteId);
+        if (index > -1) {
+            notes[index] = {
+                ...notes[index],
+                title: title || "Без названия",
+                content: content || "",
+                color: currentColor,
+                pinned: isPinned,
+                archived: isArchived,
+                date: dateStr,
+            };
+        }
+    } else {
+        // Новая заметка — создаём и запоминаем ID
+        const newNote = {
+            id: Date.now(),
+            title: title || "Без названия",
+            content: content || "",
+            color: currentColor,
+            tags: ["Новое"],
+            pinned: isPinned,
+            archived: isArchived,
+            trashed: false,
+            date: dateStr,
+        };
+        notes.unshift(newNote);
+        currentNoteId = newNote.id;
+    }
+
+    hasUnsavedChanges = false;
+    saveNotes();
+    renderNotes();
+}
+
 function saveNote() {
-    saveNoteSilent(); // сохраняем
-    closeEditor();    // закрываем редактор
+    saveNoteSilent();
+    closeEditor();
 }
 
 function deleteNote(id, e) {

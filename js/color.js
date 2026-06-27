@@ -8,17 +8,21 @@ function toggleEditorColorPicker() {
 }
 
 function setEditorColor(color) {
-  currentColor = color;
-  document.getElementById("noteEditorContent").style.backgroundColor =
-    getColorValue(color);
-  // Update active state in picker
-  document
-    .querySelectorAll("#editorColorPicker .color-option")
-    .forEach((el) => {
-      el.classList.toggle("active", el.classList.contains(color));
+    currentColor = color;
+    document.getElementById("noteEditorContent").style.backgroundColor = getColorValue(color);
+    
+    // Обновляем активное состояние
+    document.querySelectorAll("#editorColorPicker .color-option").forEach((el) => {
+        el.classList.toggle("active", el.classList.contains(color));
     });
-  // Close picker
-  document.getElementById("editorColorPicker").classList.remove("visible");
+    
+    // Закрываем палитру
+    document.getElementById("editorColorPicker").classList.remove("visible");
+    
+    // ⬇️ ДОБАВЛЯЕМ СОХРАНЕНИЕ
+    if (typeof saveNoteSilent === 'function') {
+        saveNoteSilent();
+    }
 }
 
 function getColorValue(color) {

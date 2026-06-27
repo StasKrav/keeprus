@@ -48,55 +48,6 @@ async function saveNotes() {
     }
 }
 
-// Сохраняет заметку без закрытия редактора (для автосохранения)
-function saveNoteSilent() {
-    const title = document.getElementById("noteTitle").value.trim();
-    const content = document.getElementById("noteContent").value.trim();
-
-    if (!title && !content) {
-        // Если пусто — ничего не делаем
-        return;
-    }
-
-    const now = new Date();
-    const dateStr =
-        now.toLocaleDateString("ru-RU") +
-        " " +
-        now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-
-    if (currentNoteId) {
-        const index = notes.findIndex((n) => n.id === currentNoteId);
-        if (index > -1) {
-            notes[index] = {
-                ...notes[index],
-                title: title || "Без названия",
-                content: content || "",
-                color: currentColor,
-                pinned: isPinned,
-                archived: isArchived,
-                date: dateStr,
-            };
-        }
-    } else {
-        const newNote = {
-            id: Date.now(),
-            title: title || "Без названия",
-            content: content || "",
-            color: currentColor,
-            tags: ["Новое"],
-            pinned: isPinned,
-            archived: isArchived,
-            trashed: false,
-            date: dateStr,
-        };
-        notes.unshift(newNote);
-        currentNoteId = newNote.id; // ⬅️ запоминаем ID новой заметки
-    }
-
-    hasUnsavedChanges = false;
-    saveNotes();
-    renderNotes();
-}
 
 
 // ============================================
@@ -153,19 +104,23 @@ async function init() {
     // Обновляем логотип
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
     updateLogoColors(currentTheme);
-    
-    setInterval(() => {
-        const editor = document.getElementById('noteEditor');
-        if (editor && editor.classList.contains('visible') && hasUnsavedChanges) {
-            saveNoteSilent(); // ← сохраняет БЕЗ закрытия
-        }
-    }, 30000);
 
     // Click outside modal to close
     document.getElementById("noteEditor").addEventListener("click", (e) => {
         if (e.target === e.currentTarget) {
             closeEditor();
         }
+    });
+
+    // В init(), после того как редактор открыт
+    document.getElementById("noteTitle").addEventListener("input", function() {
+        hasUnsavedChanges = true;
+        saveNoteSilent(); // сохраняем мгновенно
+    });
+    
+    document.getElementById("noteContent").addEventListener("input", function() {
+        hasUnsavedChanges = true;
+        saveNoteSilent(); // сохраняем мгновенно
     });
 
     document.getElementById("addNoteBtn").addEventListener("click", addNote);

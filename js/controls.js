@@ -3,10 +3,6 @@
 // ============================================
 
 function closeEditor() {
-  if (hasUnsavedChanges) {
-    document.getElementById("confirmDialog").classList.add("visible");
-    return;
-  }
   forceCloseEditor();
 }
 
@@ -35,15 +31,14 @@ function forceCloseEditor() {
 }
 
 function confirmSave() {
-  document.getElementById("confirmDialog").classList.remove("visible");
-  saveNote();
-  forceCloseEditor();
+    document.getElementById("confirmDialog").classList.remove("visible");
+    saveNote(); // saveNote() уже вызывает closeEditor()
 }
 
 function confirmDiscard() {
-  document.getElementById("confirmDialog").classList.remove("visible");
-  hasUnsavedChanges = false;
-  forceCloseEditor();
+    document.getElementById("confirmDialog").classList.remove("visible");
+    hasUnsavedChanges = false;
+    forceCloseEditor();
 }
 
 function confirmCancel() {
