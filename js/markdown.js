@@ -111,7 +111,7 @@ function createNoteElement(note) {
     const renderedContent = renderMarkdown(contentPreview);
 
     const contentWrapper = document.createElement("div");
-    contentWrapper.style.cssText = "position:relative;z-index:1;flex:1;display:flex;flex-direction:column;max-height:320px;overflow:hidden;";
+    contentWrapper.style.cssText = "position:relative;z-index:1;flex:1;display:flex;flex-direction:column;";
     
     contentWrapper.innerHTML = `
         <div class="note-title">${note.title || "Без названия"}</div>
