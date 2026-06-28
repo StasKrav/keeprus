@@ -1,5 +1,5 @@
 // ============================================
-// TOAST (без эмодзи)
+// TOAST
 // ============================================
 
 let toastTimeout;
@@ -7,15 +7,37 @@ let toastTimeout;
 function showToast(message) {
     const toast = document.getElementById('toast');
     toast.textContent = message;
+    toast.style.display = 'flex';
     toast.classList.add('visible');
     clearTimeout(toastTimeout);
     toastTimeout = setTimeout(() => {
         toast.classList.remove('visible');
+        toast.style.display = 'none';
     }, 2500);
 }
 
+function showReminderToast(message) {
+    const toast = document.getElementById('toast');
+    toast.innerHTML = `
+        <span>${message}</span>
+        <button class="toast-close" onclick="closeToast()">✕</button>
+    `;
+    toast.style.display = 'flex';
+    toast.classList.add('visible');
+    toast.classList.add('toast-with-button');
+}
+
+function closeToast() {
+    const toast = document.getElementById('toast');
+    toast.classList.remove('visible');
+    toast.classList.remove('toast-with-button');
+    toast.innerHTML = '';
+    toast.style.display = 'none';
+    clearTimeout(toastTimeout);
+}
+
 // ============================================
-// ФУНКЦИИ ДЛЯ МЕНЮ (без эмодзи в сообщениях)
+// ФУНКЦИИ ДЛЯ МЕНЮ
 // ============================================
 
 function exportNotes() {
@@ -28,8 +50,7 @@ function exportNotes() {
         a.download = `keeprus_backup_${new Date().toISOString().slice(0,10)}.json`;
         a.click();
         URL.revokeObjectURL(url);
-    } catch (err) {
-    }
+    } catch (err) {}
 }
 
 function importNotes() {
@@ -44,23 +65,18 @@ function importNotes() {
         try {
             const text = await file.text();
             const data = JSON.parse(text);
-            
             if (!Array.isArray(data)) {
                 showToast('Неверный формат файла');
                 return;
             }
-            
             if (!confirm(`Импортировать ${data.length} заметок? Текущие заметки будут заменены.`)) {
                 return;
             }
-            
             notes = data;
             saveNotes();
             renderNotes();
-        } catch (err) {
-        }
+        } catch (err) {}
     };
-    
     input.click();
 }
 
@@ -89,8 +105,5 @@ function exportAllAsMarkdown() {
         a.download = `keeprus_export_${new Date().toISOString().slice(0,10)}.md`;
         a.click();
         URL.revokeObjectURL(url);
-
-    } catch (err) {
-
-    }
+    } catch (err) {}
 }

@@ -674,5 +674,6 @@ function showReminderNotification(note) {
         });
     }
 
-    showToast(`Напоминание: ${note.title || 'Без названия'}`);
+    // ⭐ ТОСТ С КНОПКОЙ (вместо обычного)
+    showReminderToast(` Напоминание: ${note.title || 'Без названия'}`);
 }
