@@ -17,6 +17,9 @@ function renderMarkdown(text) {
     // Экранируем HTML
     let html = escapeHtml(text);
 
+    // 0. Изображения
+        html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="note-image">');
+
     // 1. Заголовки
     html = html.replace(/^### (.+)$/gm, "<h3>$1</h3>");
     html = html.replace(/^## (.+)$/gm, "<h2>$1</h2>");
@@ -130,9 +133,16 @@ function createNoteElement(note) {
     const contentWrapper = document.createElement("div");
     contentWrapper.style.cssText = "position:relative;z-index:1;flex:1;display:flex;flex-direction:column;";
     
+    const contentHtml = renderedContent;
+    
+    // Проверяем, есть ли картинка в содержимом
+    const hasImage = contentHtml.includes('<img');
+    
     contentWrapper.innerHTML = `
-        ${note.title ? `<div class="note-title">${note.title}</div>` : ''}
-        <div class="note-content md-content note-preview">${renderedContent}</div>
+        ${hasImage ? contentHtml : `
+            ${note.title ? `<div class="note-title">${note.title}</div>` : ''}
+            <div class="note-content md-content note-preview">${contentHtml}</div>
+        `}
         <div class="note-footer">
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                 <div class="note-tags">

@@ -50,7 +50,7 @@ function editNote(id) {
     currentColor = note.color || "color-default";
     hasUnsavedChanges = false;
 
-    // ⭐ СБРАСЫВАЕМ MARKDOWN ПРИ ОТКРЫТИИ
+    //  СБРАСЫВАЕМ MARKDOWN ПРИ ОТКРЫТИИ
     if (isMarkdownMode) {
         isMarkdownMode = false;
         document.getElementById("markdownBtn").classList.remove("active");
@@ -254,7 +254,7 @@ function toggleMarkdownMode() {
             content.parentNode.insertBefore(preview, content.nextSibling);
         }
         
-        // ⭐ ПРИНУДИТЕЛЬНО УСТАНАВЛИВАЕМ СТИЛИ
+        // ПРИНУДИТЕЛЬНО УСТАНАВЛИВАЕМ СТИЛИ
         preview.style.display = "block";
         preview.style.maxHeight = "730px";
         preview.style.overflowY = "auto";
@@ -363,7 +363,7 @@ async function saveNotesAs() {
             await writable.write(JSON.stringify(notes, null, 2));
             await writable.close();
             
-            showToast(`✅ Сохранено ${notes.length} заметок`);
+            showToast(`Сохранено заметок ${notes.length}`);
         } else {
             // Fallback для старых браузеров
             const blob = new Blob([JSON.stringify(notes, null, 2)], { 
@@ -378,7 +378,7 @@ async function saveNotesAs() {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            showToast(`✅ Сохранено ${notes.length} заметок`);
+            showToast(`Сохранено заметок ${notes.length}`);
         }
     } catch (e) {
         if (e.name !== 'AbortError') {
@@ -421,7 +421,7 @@ async function openNotesFile() {
             
             renderNotes();
             updateCounts();
-            showToast(`✅ Загружено ${notes.length} заметок`);
+            showToast(`Загружено заметок ${notes.length}`);
             
         } else {
             // Старый браузер - через input
@@ -446,7 +446,7 @@ async function openNotesFile() {
                 localStorage.setItem('keeprus_notes_fallback', JSON.stringify(notes));
                 renderNotes();
                 updateCounts();
-                showToast(`✅ Загружено ${notes.length} заметок`);
+                showToast(`Загружено заметок ${notes.length}`);
             };
             
             input.click();
@@ -456,4 +456,53 @@ async function openNotesFile() {
             showToast('❌ Ошибка: ' + e.message);
         }
     }
+}
+
+// ============================================
+// ЗАГРУЗКА КАРТИНКИ НА СЕРВЕР
+// ============================================
+
+async function insertImage() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    
+    input.onchange = async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        try {
+            showToast('⏳ Загрузка...');
+            const response = await fetch('http://localhost:3000/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Вставляем ссылку в заметку
+                const content = document.getElementById('noteContent');
+                const cursorPos = content.selectionStart || content.value.length;
+                const markdown = `\n![image](${data.url})\n`;
+                
+                const newValue = content.value.slice(0, cursorPos) + markdown + content.value.slice(cursorPos);
+                content.value = newValue;
+                content.focus();
+                content.selectionStart = content.selectionEnd = cursorPos + markdown.length;
+                content.dispatchEvent(new Event('input'));
+                
+                showToast('✅ Картинка загружена и вставлена');
+            } else {
+                showToast('❌ Ошибка: ' + data.error);
+            }
+        } catch (error) {
+            showToast('❌ Ошибка загрузки: ' + error.message);
+        }
+    };
+    
+    input.click();
 }

@@ -501,7 +501,7 @@ body {
   border-radius: 8px;
   border: 1px solid var(--border-color);
   position: relative;
-  padding: 24px 20px 6px;
+  padding: 0;
   transition: all 0.25s ease;
   min-height: 300px;
   display: flex;
@@ -537,6 +537,21 @@ body {
 .note-card:not(.color-default) {
     border-color: transparent !important;
 }
+
+/* Добавляем паддинг только заголовку и тексту */
+.note-title,
+.note-content {
+    padding: 0 16px;
+}
+
+.note-title {
+    padding-top: 16px;
+}
+
+.note-footer {
+    padding: 8px 16px 12px;
+}
+
 
 .note-title,
 .note-content,
@@ -707,13 +722,13 @@ body {
     display: block !important;
     width: 100% !important;
     margin-bottom: 16px;
-    padding: 20px 24px 16px;
+    padding: 0;
     min-height: auto !important; /* убираем min-height */
     /* max-height: none !important; /* убираем max-height */ */
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     border: 1px solid var(--border-color);
-    overflow: visible !important; /* убираем overflow */
+    overflow: hidden; 
+    margin: 0 auto 16px auto;
 }
 
 .notes-grid.list-view .note-card .note-title {
@@ -721,6 +736,8 @@ body {
     font-weight: 600;
     margin-bottom: 8px;
     white-space: normal;
+    padding: 16px 16px 0 16px;
+    margin: 0;
 }
 
 .notes-grid.list-view .note-card .note-content {
@@ -732,17 +749,18 @@ body {
     font-size: 14px;
     line-height: 1.7;
     color: var(--text-secondary);
-    margin-bottom: 12px;
+    padding: 8px 16px;
+    margin: 0;
 }
 
 .notes-grid.list-view .note-card .note-footer {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: left;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 8px;
-    padding-top: 8px;
+    padding: 8px 16px 12px;
+    margin: 0;
     border-top: 1px solid var(--border-color);
 }
 
@@ -761,14 +779,17 @@ body {
     opacity: 1 !important;
 }
 
-/* Магнит в правом углу */
-.notes-grid.list-view .note-magnet {
-    top: 12px;
-    right: 16px;
-    width: 28px;
-    height: 28px;
+/* Картинка — на всю ширину */
+.notes-grid.list-view .note-image {
+    width: 100%;
+    max-width: none;
+    height: auto;
+    max-height: 400px;
+    object-fit: cover;
+    display: block;
+    margin: 0 !important;
+    border-radius: 0;
 }
-
 
 
 /* ============================================
@@ -1715,11 +1736,39 @@ body {
   box-sizing: border-box;
 }
 
+/* ============================================
+   ИЗОБРАЖЕНИЯ В ЗАМЕТКАХ (НА СТЕНЕ)
+   ============================================ */
 
+/* Картинка — на всю ширину, без отступов */
+.note-image {
+    width: 100%;
+    max-width: none;
+    height: auto;
+    max-height: 300px;
+    object-fit: cover;
+    display: block;
+    margin: 0 !important;
+    border-radius: 0;
+}
+
+/* В режиме списка — картинки чуть меньше */
+.notes-grid.list-view .note-image {
+    max-height: 400px;
+}
+
+.note-card .note-image {
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0;
+}
 
 
 
 /* ============================================
    ВСЕ МЕДИА-ЗАПРОСЫ ВЫНЕСЕНЫ В responsive.css
    ============================================ */
+
+
+
 
