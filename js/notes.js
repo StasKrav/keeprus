@@ -117,7 +117,7 @@ function saveNoteSilent() {
         if (index > -1) {
             notes[index] = {
                 ...notes[index],
-                title: title || "Без названия",
+                title: title || "",
                 content: content || "",
                 color: currentColor,
                 pinned: isPinned,

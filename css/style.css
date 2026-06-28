@@ -317,7 +317,6 @@ body {
   bottom: 0;
   width: 280px;
   background: var(--surface-color);
-  border-right: 0px solid var(--border-color);
   padding: 24px 0;
   overflow-y: auto;
   transition: background-color 0.3s, border-color 0.3s;
@@ -482,7 +481,7 @@ body {
 
 .notes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 20px;
   animation: containerIn 0.3s ease;
 }
@@ -547,7 +546,7 @@ body {
 }
 
 .note-title {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 500;
   margin-bottom: 10px;
   color: var(--text-primary);
@@ -555,13 +554,13 @@ body {
 }
 
 .note-content {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.8;
   margin-bottom: 12px;
   word-wrap: break-word;
   flex: 1; 
-  max-height: 200px;
+  max-height: 100%;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 6;
@@ -699,14 +698,14 @@ body {
 
 .notes-grid.list-view {
     display: block !important; /* убираем сетку */
-    max-width: 800px;
+    max-width: 600px;
     margin: 0 auto; /* по центру */
 }
 
 /* ⬇️ УБИРАЕМ ВСЕ ОГРАНИЧЕНИЯ ВЫСОТЫ */
 .notes-grid.list-view .note-card {
     display: block !important;
-    width: 75% !important;
+    width: 100% !important;
     margin-bottom: 16px;
     padding: 20px 24px 16px;
     min-height: auto !important; /* убираем min-height */
@@ -773,7 +772,7 @@ body {
 
 
 /* ============================================
-   КРУЖОК — В ПРАВОМ ВЕРХНЕМ УГЛУ
+   БУЛАВКА — В ПРАВОМ ВЕРХНЕМ УГЛУ
    ============================================ */
 
 .pin-icon {
@@ -792,18 +791,18 @@ body {
     z-index: 5;
 }
 
-/* Показываем кружок при наведении на карточку */
+
 .note-card:hover .pin-icon {
     opacity: 0.4;
 }
 
-/* При наведении на сам кружок — делаем ярче */
+
 .pin-icon:hover {
     opacity: 1 !important;
     color: #777777;
 }
 
-/* ⬇️ ЗАКРЕПЛЁННАЯ ЗАМЕТКА — кружок с заливкой при наведении */
+
 .note-card.pinned:hover .pin-icon {
     opacity: 1;
     color: #777777;
@@ -814,9 +813,11 @@ body {
     transition: fill 0.2s ease;
 }
 
-/* При наведении на закреплённую карточку — заливка появляется */
-.note-card.pinned:hover .pin-icon svg circle {
+
+/* При наведении на закреплённую — заливка */
+.note-card.pinned:hover .pin-icon svg path:first-child {
     fill: #777777;
+
 }
 
 /* Тёмная тема */
@@ -843,69 +844,97 @@ body {
 .md-content h1,
 .md-content h2,
 .md-content h3 {
-  margin: 8px 0 4px;
-  color: var(--text-primary);
-  font-weight: 500;
+    margin: 8px 0 4px;
+    color: var(--text-primary);
+    font-weight: 500;
 }
 
-.md-content h1 { font-size: 18px; }
-.md-content h2 { font-size: 16px; }
-.md-content h3 { font-size: 15px; }
+.md-content h1 { font-size: 16px; }
+.md-content h2 { font-size: 14px; }
+.md-content h3 { font-size: 13px; }
 
-.md-content p { margin: 4px 0; }
-.md-content ul,
-.md-content ol {
-  margin: 4px 0;
-  padding-left: 20px;
+.md-content p {
+    margin: 4px 0;
 }
-.md-content li { margin: 2px 0; }
+
 .md-content strong {
-  color: var(--text-primary);
-  font-weight: 500;
+    color: var(--text-primary);
+    font-weight: 500;
 }
-.md-content em { font-style: italic; }
+
+.md-content em {
+    font-style: italic;
+}
 
 .md-content code {
-  background: var(--tag-bg);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-family: "Roboto Mono", "Consolas", monospace;
-  color: var(--text-primary);
+    background: var(--tag-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: "Roboto Mono", "Consolas", monospace;
+    color: var(--text-primary);
 }
 
 .md-content pre {
-  background: var(--tag-bg);
-  padding: 12px;
-  border-radius: 8px;
-  overflow-x: auto;
-  margin: 8px 0;
+    background: var(--tag-bg);
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 8px 0;
 }
 
 .md-content pre code {
-  background: none;
-  padding: 0;
-  border-radius: 0;
+    background: none;
+    padding: 0;
+    border-radius: 0;
 }
 
 .md-content blockquote {
-  border-left: 3px solid var(--primary-color);
-  padding: 4px 12px;
-  margin: 8px 0;
-  color: var(--text-secondary);
-  background: var(--hover-bg);
-  border-radius: 0 4px 4px 0;
+    border-left: 3px solid var(--primary-color);
+    padding: 4px 12px;
+    margin: 8px 0;
+    color: var(--text-secondary);
+    background: var(--hover-bg);
+    border-radius: 0 4px 4px 0;
 }
 
 .md-content hr {
-  border: none;
-  border-top: 1px solid var(--border-color);
-  margin: 12px 0;
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 12px 0;
 }
 
 .md-content del {
-  text-decoration: line-through;
-  opacity: 0.7;
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+/* ============================================
+   МАРКИРОВАННЫЕ СПИСКИ — ПРИНУДИТЕЛЬНО КОМПАКТНЫЕ
+   ============================================ */
+
+.md-content ul,
+.md-content ol {
+    margin: 2px 0 4px 0 !important;
+    padding-left: 18px !important;
+}
+
+.md-content li {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.3 !important;
+}
+
+.md-content li + li {
+    margin-top: 0 !important;
+}
+
+.md-content ul ul,
+.md-content ol ul,
+.md-content ul ol,
+.md-content ol ol {
+    margin: 0 !important;
+    padding-left: 14px !important;
 }
 
 /* ============================================
@@ -1115,11 +1144,12 @@ body {
 
 .editor-content {
   width: 100%;
-  min-height: 740px;
+  min-height: 400px;
+  max-height: 70vh;
   border: none;
   padding: 12px 20px;
-  font-size: 15px;
-  line-height: 1.8;
+  font-size: 14px;
+  line-height: 1.6;
   resize: vertical;
   outline: none;
   font-family: inherit;
@@ -1229,7 +1259,7 @@ body {
 .md-preview {
     padding: 16px 20px;
     min-height: 300px;
-    max-height: 730px; /* ⭐ ОГРАНИЧИВАЕМ ВЫСОТУ */
+    max-height: 60vh; /* ⭐ ОГРАНИЧИВАЕМ ВЫСОТУ */
     font-size: 15px;
     line-height: 1.8;
     color: var(--text-primary);
@@ -1242,22 +1272,22 @@ body {
 
 /* Стили для Markdown в превью */
 .md-preview h1 {
-    font-size: 28px;
+    font-size: 22px;
     font-weight: 600;
-    margin: 16px 0 8px;
+    margin: 12px 0 8px;
 }
 .md-preview h2 {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 600;
-    margin: 14px 0 8px;
+    margin: 10px 0 8px;
 }
 .md-preview h3 {
-    font-size: 20px;
-    font-weight: 500;
-    margin: 12px 0 6px;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 8px 0 6px;
 }
 .md-preview strong {
-    font-weight: 600;
+    font-weight: 500;
 }
 .md-preview em {
     font-style: italic;
@@ -1692,31 +1722,4 @@ body {
 /* ============================================
    ВСЕ МЕДИА-ЗАПРОСЫ ВЫНЕСЕНЫ В responsive.css
    ============================================ */
-
-
-
-
-/* ============================================
-   МАГНИТЫ — СКРЫВАЕМ, ПОКАЗЫВАЕМ ПРИ НАВЕДЕНИИ
-   ============================================ */
-
-.note-magnet {
-    opacity: 0 !important;
-    transform: translateX(-50%) scale(0.7) !important;
-    pointer-events: none !important;
-    transition: opacity 0.25s ease, transform 0.25s ease !important;
-}
-
-.note-card:hover .note-magnet {
-    opacity: 1 !important;
-    transform: translateX(-50%) scale(1) !important;
-    pointer-events: auto !important;
-}
-
-/* Для закреплённых — всегда видны */
-.note-card.pinned .note-magnet {
-    opacity: 1 !important;
-    transform: translateX(-50%) scale(1) !important;
-    pointer-events: auto !important;
-}
 

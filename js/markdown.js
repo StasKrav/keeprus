@@ -100,8 +100,16 @@ function createNoteElement(note) {
     const pinIcon = document.createElement('div');
     pinIcon.className = 'pin-icon';
     pinIcon.innerHTML = `
-        <svg width="32" height="32" viewBox="0 0 288 288">
-        <circle cx="144" cy="144" r="64" stroke="currentColor" stroke-width="32" fill="none"/>
+        <svg width="32" height="32" viewBox="0 0 352 448">
+            <!-- Заливка (скрыта по умолчанию) -->
+            <path d="M112,80 L240,80 L240,208 L272,272 L80,272 L112,208 Z" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  stroke-width="32" 
+                  stroke-linecap="round" 
+                  stroke-linejoin="round"/>
+            <!-- Нижняя часть булавки -->
+            <path d="M176,304 L176,368" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
         </svg>
     `;
 
