@@ -1763,6 +1763,177 @@ body {
     border-radius: 0;
 }
 
+/* ============================================
+   МОДАЛКА НАПОМИНАНИЯ
+   ============================================ */
+
+.reminder-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+    animation: fadeIn 0.2s ease;
+}
+
+.reminder-modal {
+    background: var(--surface-color);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+.reminder-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.reminder-icon {
+    font-size: 24px;
+}
+
+.reminder-title {
+    font-size: 18px;
+    font-weight: 500;
+    flex: 1;
+}
+
+.reminder-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 0 8px;
+}
+
+.reminder-body label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 12px;
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+}
+
+.reminder-body input[type="date"],
+.reminder-body input[type="time"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--background-color);
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.reminder-current {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    background: var(--tag-bg);
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.reminder-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.reminder-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+    background: transparent;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.reminder-btn:hover {
+    background: var(--hover-bg);
+}
+
+.reminder-btn.primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.reminder-btn.primary:hover {
+    background: var(--primary-dark);
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
+}
+
+.reminder-btn.danger {
+    color: #d32f2f;
+}
+
+.reminder-btn.danger:hover {
+    background: rgba(211, 47, 47, 0.1);
+}
+
+[data-theme="dark"] .reminder-btn.primary {
+    background: #8ab4f8;
+    color: #202124;
+}
+
+[data-theme="dark"] .reminder-btn.primary:hover {
+    background: #669df6;
+}
+
+/* ============================================
+   НАПОМИНАНИЕ НА КАРТОЧКЕ (КАК ТЕГ)
+   ============================================ */
+
+.note-reminder {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    transition: background 0.2s ease;
+}
+
+.note-reminder .reminder-icon {
+    font-size: 12px;
+}
+
+/* Тёмная тема */
+[data-theme="dark"] .note-reminder {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+}
+
+/* При наведении на карточку — подсветка */
+.note-card:hover .note-reminder {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .note-card:hover .note-reminder {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+
+
 
 
 /* ============================================

@@ -144,6 +144,14 @@ function createNoteElement(note) {
             <div class="note-content md-content note-preview">${contentHtml}</div>
         `}
         <div class="note-footer">
+        ${note.reminder ? `<div class="note-reminder"><svg width="20" height="20" viewBox="0 0 416 501">
+                <path d="M112,213 C144,117 272,117 304,213" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                <path d="M112,208 L112,368" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                <path d="M304,208 L304,368" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                <path d="M80,368 L336,368" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                <path d="M208,80 L208,112" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                <path d="M176,400 C196,421 223,419 240,400" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                </svg> ${note.reminder.date} ${note.reminder.time}</div>` : ''}
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                 <div class="note-tags">
                     ${note.tags
@@ -158,6 +166,7 @@ function createNoteElement(note) {
                       .join("")}
                 </div>
             </div>
+            
             <div class="note-actions">
                 ${
                   isTrash
@@ -226,6 +235,16 @@ function createNoteElement(note) {
                             </svg>
                             
                         `}
+                    </button>
+                    <button class="action-button" onclick="showReminderModal(${note.id}, event)" title="Напоминание">
+                        <svg width="24" height="24" viewBox="0 0 416 501">
+                        <path d="M112,213 C144,117 272,117 304,213" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M112,208 L112,368" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M304,208 L304,368" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M80,368 L336,368" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M208,80 L208,112" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        <path d="M176,400 C196,421 223,419 240,400" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                        </svg>
                     </button>
                     <button class="action-button" onclick="deleteNote(${note.id}, event)">
                         <svg width="20" height="20" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">

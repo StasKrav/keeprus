@@ -506,3 +506,173 @@ async function insertImage() {
     
     input.click();
 }
+
+// ============================================
+// НАПОМИНАНИЕ — МОДАЛКА ДЛЯ КАРТОЧКИ
+// ============================================
+
+function showReminderModal(noteId, e) {
+    if (e) e.stopPropagation();
+    
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+
+    // Сохраняем ID для работы
+    window._reminderNoteId = noteId;
+    
+    showReminderDialog(note);
+}
+
+function showReminderDialog(note) {
+    const existing = document.querySelector('.reminder-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'reminder-overlay';
+    overlay.innerHTML = `
+        <div class="reminder-modal">
+            <div class="reminder-header">
+                <span class="reminder-icon"></span>
+                <span class="reminder-title">Напоминание</span>
+                <button class="reminder-close" onclick="this.closest('.reminder-overlay').remove()">✕</button>
+            </div>
+            <div class="reminder-body">
+                <label>Дата:</label>
+                <input type="date" id="reminderDate" value="${note.reminder?.date || ''}">
+                
+                <label>Время:</label>
+                <input type="time" id="reminderTime" value="${note.reminder?.time || ''}">
+                
+                ${note.reminder ? `
+                    <div class="reminder-current">
+                        Текущее: ${note.reminder.date} ${note.reminder.time}
+                    </div>
+                ` : ''}
+            </div>
+            <div class="reminder-footer">
+                ${note.reminder ? `
+                    <button class="reminder-btn danger" onclick="removeReminder(${note.id})">Удалить</button>
+                ` : ''}
+                <button class="reminder-btn" onclick="this.closest('.reminder-overlay').remove()">Отмена</button>
+                <button class="reminder-btn primary" onclick="saveReminder(${note.id})">Установить</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Фокус на дату
+    setTimeout(() => {
+        const dateInput = document.getElementById('reminderDate');
+        if (dateInput) dateInput.focus();
+    }, 100);
+}
+
+function showReminderModalForEditor() {
+    if (!currentNoteId) {
+        showToast('Сначала сохраните заметку');
+        return;
+    }
+    const note = notes.find(n => n.id === currentNoteId);
+    if (note) {
+        showReminderDialog(note);
+    }
+}
+
+function saveReminder(noteId) {
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+
+    const date = document.getElementById('reminderDate').value;
+    const time = document.getElementById('reminderTime').value;
+
+    if (!date || !time) {
+        showToast('Выберите дату и время');
+        return;
+    }
+
+    const timestamp = new Date(`${date}T${time}`).getTime();
+    if (timestamp < Date.now()) {
+        showToast('Нельзя установить напоминание в прошлом');
+        return;
+    }
+
+    note.reminder = { date, time, timestamp };
+    saveNotes();
+    renderNotes();
+    scheduleReminder(note);
+    showToast(`Напоминание установлено на ${date} ${time}`);
+
+    // Закрываем модалку
+    const overlay = document.querySelector('.reminder-overlay');
+    if (overlay) overlay.remove();
+}
+
+function removeReminder(noteId) {
+    const note = notes.find(n => n.id === noteId);
+    if (note) {
+        delete note.reminder;
+        saveNotes();
+        renderNotes();
+        showToast('Напоминание удалено');
+    }
+    const overlay = document.querySelector('.reminder-overlay');
+    if (overlay) overlay.remove();
+}
+
+// ============================================
+// ПЛАНИРОВЩИК НАПОМИНАНИЙ
+// ============================================
+
+let reminderTimeouts = [];
+
+function scheduleAllReminders() {
+    // Очищаем старые таймеры
+    reminderTimeouts.forEach(t => clearTimeout(t));
+    reminderTimeouts = [];
+
+    notes.forEach(note => {
+        if (note.reminder && note.reminder.timestamp > Date.now()) {
+            scheduleReminder(note);
+        }
+    });
+}
+
+function scheduleReminder(note) {
+    if (!note || !note.reminder) return;
+    
+    const delay = note.reminder.timestamp - Date.now();
+    if (delay <= 0) return;
+
+    // Очищаем старый таймер для этой заметки
+    reminderTimeouts.forEach((t, index) => {
+        if (t._noteId === note.id) {
+            clearTimeout(t);
+            reminderTimeouts.splice(index, 1);
+        }
+    });
+
+    const timeout = setTimeout(() => {
+        showReminderNotification(note);
+    }, delay);
+    
+    timeout._noteId = note.id;
+    reminderTimeouts.push(timeout);
+}
+
+function showReminderNotification(note) {
+    // Проверяем разрешение на уведомления
+    if (Notification.permission === 'granted') {
+        new Notification('Keeprus — Напоминание', {
+            body: `${note.title || 'Без названия'}\n${note.reminder.date} ${note.reminder.time}`,
+            icon: '/favicon.svg'
+        });
+    } else if (Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                showReminderNotification(note);
+            }
+        });
+    }
+
+    showToast(`Напоминание: ${note.title || 'Без названия'}`);
+}
