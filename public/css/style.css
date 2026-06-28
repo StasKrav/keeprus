@@ -1923,25 +1923,53 @@ body {
 }
 
 /* ============================================
-   НАПОМИНАНИЕ НА КАРТОЧКЕ (КАК ТЕГ)
+   НАПОМИНАНИЕ НА КАРТОЧКЕ (КАК ПЛАШКА)
    ============================================ */
 
 .note-reminder {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px 6px 12px;
     background: rgba(0, 0, 0, 0.04);
     border-radius: 12px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text-secondary);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    width: 100%;
     transition: background 0.2s ease;
 }
 
 .note-reminder .reminder-icon {
-    font-size: 12px;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.note-reminder .reminder-text {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.note-reminder .reminder-delete {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 4px;
+    opacity: 0.3;
+    transition: opacity 0.2s ease, color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.note-reminder .reminder-delete:hover {
+    opacity: 1;
+    color: #d32f2f;
 }
 
 /* Тёмная тема */
@@ -1950,7 +1978,10 @@ body {
     color: var(--text-secondary);
 }
 
-/* При наведении на карточку — подсветка */
+[data-theme="dark"] .note-reminder .reminder-delete:hover {
+    color: #ef5350;
+}
+
 .note-card:hover .note-reminder {
     background: rgba(0, 0, 0, 0.08);
 }
@@ -1958,28 +1989,6 @@ body {
 [data-theme="dark"] .note-card:hover .note-reminder {
     background: rgba(255, 255, 255, 0.15);
 }
-
-.toast-close {
-    background: none;
-    border: none;
-    color: inherit;
-    font-size: 18px;
-    cursor: pointer;
-    margin-left: 12px;
-    padding: 0 4px;
-    opacity: 0.6;
-}
-
-.toast-close:hover {
-    opacity: 1;
-}
-
-.toast-with-button {
-    display: flex !important;
-    align-items: center;
-    gap: 8px;
-}
-
 
 
 /* ============================================

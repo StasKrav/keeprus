@@ -144,14 +144,20 @@ function createNoteElement(note) {
             <div class="note-content md-content note-preview">${contentHtml}</div>
         `}
         <div class="note-footer">
-        ${note.reminder ? `<div class="note-reminder"><svg width="20" height="20" viewBox="0 0 416 501">
-                <path d="M112,213 C144,117 272,117 304,213" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
-                <path d="M112,208 L112,368" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
-                <path d="M304,208 L304,368" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
-                <path d="M80,368 L336,368" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
-                <path d="M208,80 L208,112" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
-                <path d="M176,400 C196,421 223,419 240,400" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
-                </svg> ${note.reminder.date} ${note.reminder.time}</div>` : ''}
+        ${note.reminder ? `
+            <div class="note-reminder">
+                <svg width="18" height="18" viewBox="0 0 416 501" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round">
+                    <path d="M112,213 C144,117 272,117 304,213"/>
+                    <path d="M112,208 L112,368"/>
+                    <path d="M304,208 L304,368"/>
+                    <path d="M80,368 L336,368"/>
+                    <path d="M208,80 L208,112"/>
+                    <path d="M176,400 C196,421 223,419 240,400"/>
+                </svg>
+                <span class="reminder-text">${note.reminder.date} ${note.reminder.time}</span>
+                <button class="reminder-delete" onclick="event.stopPropagation(); removeReminderFromCard(${note.id})" title="Удалить напоминание">✕</button>
+            </div>
+        ` : ''}
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                 <div class="note-tags">
                     ${note.tags

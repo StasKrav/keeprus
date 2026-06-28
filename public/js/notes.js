@@ -677,3 +677,27 @@ function showReminderNotification(note) {
     // ⭐ ТОСТ С КНОПКОЙ (вместо обычного)
     showReminderToast(` Напоминание: ${note.title || 'Без названия'}`);
 }
+
+// ============================================
+// УДАЛЕНИЕ НАПОМИНАНИЯ ИЗ КАРТОЧКИ
+// ============================================
+
+function removeReminderFromCard(noteId) {
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+
+    delete note.reminder;
+
+    // Удаляем таймер
+    reminderTimeouts = reminderTimeouts.filter(t => {
+        if (t._noteId === noteId) {
+            clearTimeout(t);
+            return false;
+        }
+        return true;
+    });
+
+    saveNotes();
+    renderNotes();
+    showToast('Напоминание удалено');
+}
