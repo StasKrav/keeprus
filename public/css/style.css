@@ -2591,7 +2591,7 @@ body {
 }
 
 .note-similar-title {
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -2615,7 +2615,7 @@ body {
     padding: 2px 10px 2px 6px;
     background: var(--hover-bg);
     border-radius: 12px;
-    font-size: 12px;
+    font-size: 9px;
     color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -2660,6 +2660,202 @@ body {
 [data-theme="dark"] .note-similar-item:hover {
     background: rgba(255, 255, 255, 0.1);
 }
+
+/* ============================================
+   ФИЛЬТР ПО ЦВЕТУ В САЙДБАРЕ
+   ============================================ */
+
+.color-filter-section {
+    padding: 0 0 8px 0;
+}
+
+.color-filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0;
+}
+
+.color-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px 8px 24px;
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.15s ease;
+    font-family: inherit;
+    font-size: 13px;
+    border-radius: 0 24px 24px 0;
+    text-align: left;
+    position: relative;
+}
+
+.color-filter-item:hover {
+    background: var(--hover-bg);
+}
+
+.color-filter-item.active {
+    background: var(--nav-active-bg);
+    color: var(--primary-color);
+}
+
+.color-filter-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--primary-color);
+}
+
+.color-filter-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1.5px solid var(--border-color);
+    transition: border-color 0.2s;
+}
+
+.color-filter-item.active .color-filter-dot {
+    border-color: var(--primary-color);
+}
+
+.color-filter-name {
+    flex: 1;
+    font-size: 13px;
+}
+
+.color-filter-count {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--tag-bg);
+    padding: 0 8px;
+    border-radius: 12px;
+    font-weight: 500;
+    min-width: 20px;
+    text-align: center;
+}
+
+.color-filter-clear {
+    color: var(--text-secondary);
+    font-size: 12px;
+    gap: 8px;
+    padding: 6px 16px 6px 24px;
+    margin-top: 4px;
+}
+
+.color-filter-clear:hover {
+    color: var(--text-primary);
+}
+
+.color-filter-clear svg {
+    flex-shrink: 0;
+}
+
+.color-filter-empty {
+    padding: 8px 24px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+/* Цвета точек */
+.color-filter-dot.color-default {
+    background: var(--note-default);
+    border-color: var(--border-color);
+}
+
+.color-filter-dot.color-red {
+    background: var(--note-red);
+    border-color: #e57373;
+}
+
+.color-filter-dot.color-orange {
+    background: var(--note-orange);
+    border-color: #ffb74d;
+}
+
+.color-filter-dot.color-yellow {
+    background: var(--note-yellow);
+    border-color: #ffd54f;
+}
+
+.color-filter-dot.color-green {
+    background: var(--note-green);
+    border-color: #81c784;
+}
+
+.color-filter-dot.color-teal {
+    background: var(--note-teal);
+    border-color: #4dd0e1;
+}
+
+.color-filter-dot.color-blue {
+    background: var(--note-blue);
+    border-color: #64b5f6;
+}
+
+.color-filter-dot.color-purple {
+    background: var(--note-purple);
+    border-color: #ce93d8;
+}
+
+.section-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 8px 24px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: color 0.2s;
+}
+
+.section-toggle:hover {
+    color: var(--text-primary);
+}
+
+.section-toggle-title {
+    flex: 1;
+    text-align: left;
+}
+
+.section-toggle-icon {
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.color-filter-section .color-filter-content {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* Тёмная тема */
+[data-theme="dark"] .color-filter-item.active {
+    background: rgba(138, 180, 248, 0.15);
+}
+
+[data-theme="dark"] .color-filter-dot {
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .color-filter-item.active .color-filter-dot {
+    border-color: #8ab4f8;
+}
+
 
 /* ============================================
    ВСЕ МЕДИА-ЗАПРОСЫ ВЫНЕСЕНЫ В responsive.css

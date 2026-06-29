@@ -226,6 +226,22 @@
         
         <!-- РАЗДЕЛИТЕЛЬ -->
         <div class="sidebar-divider"></div>
+
+        <!-- ФИЛЬТР ПО ЦВЕТУ -->
+        <div class="color-filter-section">
+            <button class="section-toggle" onclick="toggleColorFilter()">
+                <span class="section-toggle-title">Фильтр по цвету</span>
+                <svg class="section-toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div class="color-filter-content" id="colorFilterContent">
+                <div class="color-filter-list" id="colorFilterList"></div>
+            </div>
+        </div>
+        
+        <!-- РАЗДЕЛИТЕЛЬ -->
+        <div class="sidebar-divider"></div>
                
         <div id="tagList"></div>
     </nav>
@@ -402,6 +418,7 @@
 <script src="js/dialogs.js"></script>
 <script src="js/history.js"></script>  
 <script src="js/text-links.js"></script> 
+<script src="js/color-filter.js"></script> 
 <script src="js/shortcuts.js"></script>   
 <script src="js/render-optimized.js"></script>
 

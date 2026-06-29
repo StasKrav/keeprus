@@ -167,8 +167,8 @@ function renderSimilarNotesBlock(note) {
     if (similar.length === 0) return '';
     
     let html = '';
-    html += '<div class="note-similar">';
-    html += '<div class="note-similar-title">Похожие заметки</div>';
+    // html += '<div class="note-similar">';
+    // html += '<div class="note-similar-title">Похожие заметки</div>';
     html += '<div class="note-similar-list">';
     
     similar.forEach(function(n) {

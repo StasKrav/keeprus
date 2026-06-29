@@ -326,6 +326,7 @@ function updateSimilarNotes(element, note) {
         if (similarHtml) {
             const footer = element.querySelector('.note-footer');
             if (footer) {
+                // Вставляем перед footer
                 footer.insertAdjacentHTML('beforebegin', similarHtml);
             }
         }

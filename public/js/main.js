@@ -100,6 +100,7 @@ async function init() {
     renderNotes();
     setupSearch();
     updateCounts();
+    loadColorFilterState();
     
     // Обновляем логотип
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
