@@ -100,7 +100,6 @@ async function init() {
     renderNotes();
     setupSearch();
     updateCounts();
-    renderStats();
     
     // Обновляем логотип
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
@@ -113,15 +112,15 @@ async function init() {
         }
     });
 
-    // В init(), после того как редактор открыт
+    // Автосохранение при вводе
     document.getElementById("noteTitle").addEventListener("input", function() {
         hasUnsavedChanges = true;
-        saveNoteSilent(); // сохраняем мгновенно
+        saveNoteSilent();
     });
     
     document.getElementById("noteContent").addEventListener("input", function() {
         hasUnsavedChanges = true;
-        saveNoteSilent(); // сохраняем мгновенно
+        saveNoteSilent();
     });
 
     document.getElementById("addNoteBtn").addEventListener("click", addNote);
@@ -170,6 +169,50 @@ async function init() {
             confirmCancel();
         }
     });
+
+    // ============================================
+    // ✅ ИСПРАВЛЕННОЕ ЗАКРЫТИЕ РЕДАКТОРА С СОХРАНЕНИЕМ ВЕРСИИ
+    // ============================================
+    
+    const originalCloseEditor = window.closeEditor;
+    if (originalCloseEditor) {
+        window.closeEditor = function() {
+            // Сохраняем версию при закрытии, если есть изменения
+            if (currentNoteId && hasUnsavedChanges) {
+                // Берём актуальные данные из редактора
+                const title = document.getElementById('noteTitle').value.trim();
+                const content = document.getElementById('noteContent').value.trim();
+                
+                const note = notes.find(n => n.id === currentNoteId);
+                if (note) {
+                    // Обновляем заметку перед сохранением версии
+                    note.title = title;
+                    note.content = content;
+                    
+                    // ✅ Используем createVersion (не saveVersion)
+                    if (typeof createVersion === 'function') {
+                        createVersion(currentNoteId);
+                    } else {
+                        console.warn('⚠️ createVersion не найдена');
+                    }
+                }
+            }
+            
+            // Вызываем оригинальную функцию
+            originalCloseEditor.apply(this, arguments);
+        };
+    }
+
+    // ============================================
+    // ДОБАВЛЯЕМ КНОПКУ ИСТОРИИ В РЕДАКТОР
+    // ============================================
+    
+    // Ждём, пока загрузится редактор
+    setTimeout(() => {
+        if (typeof addHistoryButtonToEditor === 'function') {
+            addHistoryButtonToEditor();
+        }
+    }, 100);
 
     // Register Service Worker for PWA offline support
     if ("serviceWorker" in navigator) {

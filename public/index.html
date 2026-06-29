@@ -331,6 +331,13 @@
                         <path d="M176,400 C196,421 223,419 240,400" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
                         </svg>
                     </button>
+                    <!-- В .editor-actions, добавь эту кнопку -->
+                    <button class="action-button" onclick="showHistoryForCurrentNote()" id="historyEditorBtn" title="История версий">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </button>
                     <button class="action-button" onclick="toggleMarkdownMode()" id="markdownBtn" title="Markdown">
                         <span class="material-icons" id="markdownIcon"><svg width="20" height="20" viewBox="0 0 480 352" xmlns="http://www.w3.org/2000/svg">
                         <path d="M80,176 L176,80" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
@@ -393,6 +400,7 @@
 <script src="js/search.js"></script>
 <script src="js/controls.js"></script>     
 <script src="js/dialogs.js"></script>
+<script src="js/history.js"></script>  
 <script src="js/shortcuts.js"></script>   
 <script src="js/render-optimized.js"></script>
 

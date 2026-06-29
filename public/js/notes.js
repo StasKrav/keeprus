@@ -102,26 +102,11 @@ function saveNoteSilent() {
     let isNew = false;
 
     if (currentNoteId) {
-        // Обновляем существующую заметку
         const index = notes.findIndex(n => n.id === currentNoteId);
         if (index > -1) {
-            const oldNote = notes[index];
-            
-            // Проверяем, изменилось ли что-то
-            const hasChanges = 
-                oldNote.title !== title ||
-                oldNote.content !== content ||
-                oldNote.color !== currentColor ||
-                oldNote.pinned !== isPinned ||
-                oldNote.archived !== isArchived;
-
-            if (!hasChanges && !isNew) {
-                // Ничего не изменилось — не сохраняем
-                return;
-            }
-
+            // ❌ НЕТ saveVersion() — только обновляем заметку
             notes[index] = {
-                ...oldNote,
+                ...notes[index],
                 title: title || "",
                 content: content || "",
                 color: currentColor,
@@ -131,7 +116,7 @@ function saveNoteSilent() {
             };
         }
     } else {
-        // Создаём новую заметку
+        // Создаём новую заметку с пустой историей
         const newNote = {
             id: Date.now(),
             title: title || "",
@@ -142,6 +127,7 @@ function saveNoteSilent() {
             archived: isArchived,
             trashed: false,
             date: dateStr,
+            history: [] // ← пустая история
         };
         notes.unshift(newNote);
         currentNoteId = newNote.id;
@@ -149,22 +135,17 @@ function saveNoteSilent() {
     }
 
     hasUnsavedChanges = false;
-    
-    // Сохраняем в localStorage
     saveNotes();
 
-    // ✅ ОПТИМИЗАЦИЯ: Обновляем только одну карточку
+    // Обновляем карточку
     if (isNew) {
-        // Новая заметка — добавляем карточку
         const note = notes.find(n => n.id === currentNoteId);
         if (note && typeof addNoteCard === 'function') {
             addNoteCard(note);
         } else {
-            // Fallback: полная перерисовка
             renderNotes();
         }
     } else {
-        // Обновляем существующую карточку
         if (typeof updateNoteCard === 'function') {
             updateNoteCard(currentNoteId);
         } else {
