@@ -571,16 +571,25 @@ body {
 .note-content {
   font-size: 13px;
   color: var(--text-secondary);
-  line-height: 1.8;
-  margin-bottom: 12px;
+  line-height: 1.6;
   word-wrap: break-word;
-  flex: 1; 
-  max-height: 100%;
+  flex-shrink: 0; 
+  max-height: 150px; /* 6 строк * 25px ≈ 150px */
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 6;
-  -webkit-box-orient: vertical;
+  position: relative;
 }
+
+/* /* Градиент для обрезанного текста */ */
+/* .note-content::after { */
+/*   content: ''; */
+/*   position: absolute; */
+/*   bottom: 0; */
+/*   left: 0; */
+/*   right: 0; */
+/*   height: 30px; */
+/*   background: linear-gradient(to bottom, transparent, var(--surface-color)); */
+/*   pointer-events: none; */
+/* } */
 
 .note-footer {
   display: flex;
@@ -1767,27 +1776,26 @@ body {
    ИЗОБРАЖЕНИЯ В ЗАМЕТКАХ (НА СТЕНЕ)
    ============================================ */
 
-/* Картинка — на всю ширину, без отступов */
-.note-image {
+/* В style.css */
+.note-image-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0;
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+}
+
+.note-image-wrapper img {
     width: 100%;
-    max-width: none;
     height: auto;
     max-height: 300px;
     object-fit: cover;
     display: block;
-    margin: 0 !important;
-    border-radius: 0;
 }
 
-/* В режиме списка — картинки чуть меньше */
-.notes-grid.list-view .note-image {
+/* Для режима списка */
+.notes-grid.list-view .note-image-wrapper img {
     max-height: 400px;
-}
-
-.note-card .note-image {
-    margin: 0 !important;
-    padding: 0 !important;
-    border-radius: 0;
 }
 
 /* ============================================
@@ -2879,7 +2887,205 @@ body {
     flex-shrink: 0;
 }
 
+.note-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+  max-height: 420px;
+  padding: 0;
+  position: relative;
+}
 
+/* Основной контент — растягивается */
+.note-content {
+  flex: 1;
+  padding: 0 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  overflow: hidden;
+  max-height: 200px;
+  position: relative;
+}
+
+/* Градиент обрезки */
+.note-content::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to bottom, transparent, var(--surface-color));
+  pointer-events: none;
+}
+
+/* ============================================
+   ПОХОЖИЕ ЗАМЕТКИ — ПРИЛИПАЮТ К ЛЕВОМУ КРАЮ
+   ============================================ */
+
+.note-similar {
+  padding: 8px 16px 4px;
+  margin: 0;
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+/* .note-similar-title { */
+/*   font-size: 10px; */
+/*   font-weight: 600; */
+/*   color: var(--text-secondary); */
+/*   text-transform: uppercase; */
+/*   letter-spacing: 0.3px; */
+/*   margin-bottom: 4px; */
+/*   display: block; */
+/* } */
+
+.note-similar-list {
+  padding: 12px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.note-similar-item {
+  display: inline-block;
+  padding: 2px 10px;
+  background: var(--hover-bg);
+  border-radius: 12px;
+  font-size: 9px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.note-similar-item:hover {
+  background: var(--hover-bg-dark);
+  color: var(--text-primary);
+}
+
+/* ============================================
+   ТЭГИ — ОДНА СТРОКА
+   ============================================ */
+
+.note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 14px 16px 2px;
+  flex-shrink: 0;
+  min-height: 28px;
+  align-items: center;
+}
+
+.note-tag {
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  position: relative;
+}
+
+.note-tag:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.tag-remove {
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.note-tag:hover .tag-remove {
+  opacity: 0.6;
+}
+
+/* ============================================
+   ФУТЕР С ИКОНКАМИ — ВСЕГДА ВНИЗУ
+   ============================================ */
+
+.note-actions {
+  display: flex;
+  gap: 4px;
+  padding: 4px 12px 2px 12px;
+  flex-shrink: 0;
+  margin-top: auto; /* ⬅️ ПРИЖИМАЕМ К НИЗУ */
+}
+
+.note-actions .action-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  opacity: 0;
+}
+
+.note-card:hover .note-actions .action-button {
+  opacity: 1;
+}
+
+.action-button:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+/* ============================================
+   РЕЖИМ СПИСКА
+   ============================================ */
+
+.notes-grid.list-view .note-card {
+  max-height: none !important;
+  min-height: auto !important;
+}
+
+.notes-grid.list-view .note-content {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.notes-grid.list-view .note-content::after {
+  display: none !important;
+}
+
+.notes-grid.list-view .note-actions .action-button {
+  opacity: 1 !important;
+}
+
+.note-image-wrapper {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.note-image-wrapper img {
+  width: 100%;
+  height: auto;
+  max-height: 250px;
+  object-fit: cover;
+  display: block;
+  border-radius: 8px 8px 0 0;
+}
+
+.note-content::after { display: none; }
+.note-content ul, .note-content ol { margin: 4px 0 4px 20px !important; }
 
 /* ============================================
    ВСЕ МЕДИА-ЗАПРОСЫ ВЫНЕСЕНЫ В responsive.css

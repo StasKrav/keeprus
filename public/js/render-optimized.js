@@ -2,22 +2,8 @@
 // ОПТИМИЗИРОВАННЫЙ РЕНДЕР С КЭШИРОВАНИЕМ
 // ============================================
 
-/**
- * Кэш карточек: хранит ссылки на DOM-элементы
- * Ключ: id заметки
- * Значение: DOM-элемент (.note-card)
- */
 const cardCache = new Map();
-
-/**
- * Множество ID заметок, которые сейчас отображаются
- * Используется для быстрой проверки наличия
- */
 let renderedIds = new Set();
-
-/**
- * Флаг: нужно ли обновить счётчики после рендера
- */
 let needsCountUpdate = false;
 
 // ============================================
@@ -28,7 +14,6 @@ function renderNotes(keepScroll = true) {
     const container = document.getElementById("notesContainer");
     if (!container) return;
 
-    // Сохраняем позицию скролла
     let scrollTop = 0;
     if (keepScroll) {
         scrollTop = container.scrollTop || window.scrollY;
@@ -37,10 +22,7 @@ function renderNotes(keepScroll = true) {
     const filtered = getFilteredNotes();
     const newIds = new Set(filtered.map(n => n.id));
 
-    // ============================================
-    // ШАГ 1: Удаляем карточки, которых больше нет
-    // ============================================
-    
+    // Удаляем карточки, которых больше нет
     const toRemove = [];
     for (const id of renderedIds) {
         if (!newIds.has(id)) {
@@ -51,19 +33,13 @@ function renderNotes(keepScroll = true) {
         }
     }
 
-    // Удаляем за один проход (меньше reflow)
     for (const { id, element } of toRemove) {
         element.remove();
         cardCache.delete(id);
-        // Очищаем обработчики (если нужно)
         element._cleanup?.();
     }
 
-    // ============================================
-    // ШАГ 2: Добавляем/обновляем карточки
-    // ============================================
-    
-    // Используем DocumentFragment для массовой вставки
+    // Добавляем/обновляем карточки
     const fragment = document.createDocumentFragment();
     const cardsToInsert = [];
 
@@ -71,30 +47,28 @@ function renderNotes(keepScroll = true) {
         let element = cardCache.get(note.id);
 
         if (!element) {
-            // Создаём новую карточку
             element = createNoteElement(note);
             cardCache.set(note.id, element);
             cardsToInsert.push({ element, note });
         } else {
-            // Обновляем существующую (если данные изменились)
-            updateNoteElement(element, note);
+            // Полностью пересоздаём карточку при обновлении
+            const newElement = createNoteElement(note);
+            element.parentNode?.replaceChild(newElement, element);
+            cardCache.set(note.id, newElement);
+            element = newElement;
         }
 
         fragment.appendChild(element);
     });
 
-    // Если есть новые карточки — вставляем их
     if (cardsToInsert.length > 0) {
         container.innerHTML = '';
         container.appendChild(fragment);
     } else {
-        // Если ничего не изменилось, просто обновляем порядок
-        // (для сортировки)
         const sortedElements = filtered
             .map(n => cardCache.get(n.id))
             .filter(el => el !== undefined);
 
-        // Проверяем, нужно ли менять порядок
         let needsReorder = false;
         const currentChildren = Array.from(container.children);
         
@@ -115,16 +89,8 @@ function renderNotes(keepScroll = true) {
         }
     }
 
-    // ============================================
-    // ШАГ 3: Обновляем renderedIds
-    // ============================================
-    
     renderedIds = newIds;
 
-    // ============================================
-    // ШАГ 4: Восстанавливаем скролл
-    // ============================================
-    
     if (keepScroll && scrollTop > 0) {
         if (container.scrollTop !== undefined) {
             container.scrollTop = scrollTop;
@@ -133,10 +99,6 @@ function renderNotes(keepScroll = true) {
         }
     }
 
-    // ============================================
-    // ШАГ 5: Обновляем счётчики (если нужно)
-    // ============================================
-    
     if (needsCountUpdate) {
         updateCounts();
         needsCountUpdate = false;
@@ -144,24 +106,29 @@ function renderNotes(keepScroll = true) {
 }
 
 // ============================================
-// ТОЧЕЧНОЕ ОБНОВЛЕНИЕ ОДНОЙ КАРТОЧКИ
+// ОБНОВЛЕНИЕ ОДНОЙ КАРТОЧКИ (ПОЛНОЕ ПЕРЕСОЗДАНИЕ)
 // ============================================
 
 function updateNoteCard(noteId) {
     const note = notes.find(n => n.id === noteId);
     if (!note) return;
 
-    const element = cardCache.get(noteId);
-    if (!element) {
-        // Если карточка не в кэше — добавляем её
+    const oldElement = cardCache.get(noteId);
+    if (!oldElement) {
         addNoteCard(note);
         return;
     }
 
-    // Обновляем элемент
-    updateNoteElement(element, note);
+    // Полностью пересоздаём карточку
+    const newElement = createNoteElement(note);
     
-    // Обновляем счётчики (могли измениться теги)
+    // Заменяем старую карточку на новую
+    oldElement.parentNode.replaceChild(newElement, oldElement);
+    
+    // Обновляем кэш
+    cardCache.set(noteId, newElement);
+    
+    // Обновляем счётчики
     updateCounts();
 }
 
@@ -173,7 +140,6 @@ function addNoteCard(note) {
     const container = document.getElementById("notesContainer");
     if (!container) return;
 
-    // Проверяем, не существует ли уже
     if (cardCache.has(note.id)) {
         updateNoteCard(note.id);
         return;
@@ -183,16 +149,11 @@ function addNoteCard(note) {
     cardCache.set(note.id, element);
     renderedIds.add(note.id);
 
-    // Вставляем в правильное место (с учётом сортировки)
     const filtered = getFilteredNotes();
     const index = filtered.findIndex(n => n.id === note.id);
     
-    if (index === -1) {
-        // Заметка не проходит фильтр — не показываем
-        return;
-    }
+    if (index === -1) return;
 
-    // Находим позицию для вставки
     let beforeElement = null;
     for (let i = index + 1; i < filtered.length; i++) {
         const nextId = filtered[i].id;
@@ -213,7 +174,7 @@ function addNoteCard(note) {
 }
 
 // ============================================
-// УДАЛЕНИЕ КАРТОЧКИ ИЗ DOM И КЭША
+// УДАЛЕНИЕ КАРТОЧКИ
 // ============================================
 
 function removeNoteCard(noteId) {
@@ -223,134 +184,19 @@ function removeNoteCard(noteId) {
     }
     cardCache.delete(noteId);
     renderedIds.delete(noteId);
-    
     updateCounts();
 }
 
 // ============================================
-// ОБНОВЛЕНИЕ СУЩЕСТВУЮЩЕГО ЭЛЕМЕНТА
-// ============================================
-
-function updateNoteElement(element, note) {
-    // Обновляем data-атрибут
-    element.dataset.id = note.id;
-
-    // Обновляем классы (цвет, закрепление, архив)
-    const classes = ['note-card', note.color || 'color-default'];
-    if (note.pinned) classes.push('pinned');
-    if (note.archived) classes.push('archived');
-    if (note.trashed) classes.push('trashed');
-    element.className = classes.join(' ');
-
-    // Обновляем булавку
-    updatePinIcon(element, note.pinned);
-
-    // Обновляем заголовок
-    const titleEl = element.querySelector('.note-title');
-    if (titleEl) {
-        if (note.title) {
-            titleEl.textContent = note.title;
-            titleEl.style.display = '';
-        } else {
-            titleEl.style.display = 'none';
-        }
-    }
-
-    // ============================================
-    // ОБНОВЛЯЕМ СОДЕРЖИМОЕ С УМНЫМИ ССЫЛКАМИ
-    // ============================================
-    
-    const contentEl = element.querySelector('.note-content');
-    if (contentEl) {
-        if (note.content) {
-            // Рендерим Markdown
-            let renderedContent = renderMarkdown(note.content);
-            
-            // Добавляем умные ссылки (если функция существует)
-            if (typeof renderTextWithLinks === 'function') {
-                renderedContent = renderTextWithLinks(renderedContent, note.id);
-            }
-            
-            contentEl.innerHTML = renderedContent;
-            contentEl.style.display = '';
-        } else {
-            contentEl.style.display = 'none';
-        }
-    }
-
-    // Обновляем изображения (если есть)
-    const imageEl = element.querySelector('.note-image');
-    if (imageEl) {
-        const match = note.content.match(/!\[.*?\]\((.*?)\)/);
-        if (match) {
-            imageEl.src = match[1];
-            imageEl.style.display = '';
-        } else {
-            imageEl.style.display = 'none';
-        }
-    }
-
-    // Обновляем теги
-    updateTags(element, note);
-
-    // Обновляем напоминание
-    updateReminder(element, note);
-
-    // Обновляем дату
-    const dateEl = element.querySelector('.note-date');
-    if (dateEl) {
-        dateEl.textContent = note.date || '';
-    }
-
-    // Обновляем блок "Похожие заметки"
-    updateSimilarNotes(element, note);
-
-    // Обновляем кнопки действий
-    updateActionButtons(element, note);
-}
-
-// ============================================
-// НОВАЯ ФУНКЦИЯ: обновление похожих заметок
-// ============================================
-
-function updateSimilarNotes(element, note) {
-    // Удаляем старый блок
-    const oldSimilar = element.querySelector('.note-similar');
-    if (oldSimilar) {
-        oldSimilar.remove();
-    }
-    
-    // Добавляем новый (если есть)
-    if (typeof renderSimilarNotesBlock === 'function') {
-        const similarHtml = renderSimilarNotesBlock(note);
-        if (similarHtml) {
-            const footer = element.querySelector('.note-footer');
-            if (footer) {
-                // Вставляем перед footer
-                footer.insertAdjacentHTML('beforebegin', similarHtml);
-            }
-        }
-    }
-}
-
-// ============================================
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ ОБНОВЛЕНИЯ
+// ОБНОВЛЕНИЕ ЭЛЕМЕНТОВ (ДЛЯ СОВМЕСТИМОСТИ)
 // ============================================
 
 function updatePinIcon(element, isPinned) {
     const pinIcon = element.querySelector('.pin-icon');
     if (pinIcon) {
-        if (isPinned) {
-            // Заливаем булавку
-            const path = pinIcon.querySelector('path');
-            if (path) {
-                path.setAttribute('fill', 'currentColor');
-            }
-        } else {
-            const path = pinIcon.querySelector('path');
-            if (path) {
-                path.setAttribute('fill', 'none');
-            }
+        const path = pinIcon.querySelector('path');
+        if (path) {
+            path.setAttribute('fill', isPinned ? 'currentColor' : 'none');
         }
     }
 }
@@ -379,13 +225,11 @@ function updateReminder(element, note) {
     
     if (note.reminder) {
         if (existingReminder) {
-            // Обновляем существующее
             const textEl = existingReminder.querySelector('.reminder-text');
             if (textEl) {
                 textEl.textContent = `${note.reminder.date} ${note.reminder.time}`;
             }
         } else {
-            // Добавляем новое
             const footer = element.querySelector('.note-footer');
             if (footer) {
                 const reminderHtml = `
@@ -406,7 +250,6 @@ function updateReminder(element, note) {
             }
         }
     } else {
-        // Удаляем напоминание
         if (existingReminder) {
             existingReminder.remove();
         }
@@ -418,7 +261,6 @@ function updateActionButtons(element, note) {
     const actionsContainer = element.querySelector('.note-actions');
     if (!actionsContainer) return;
 
-    // Пересоздаём кнопки (проще, чем обновлять каждую)
     actionsContainer.innerHTML = getActionButtonsHTML(note, isTrash);
 }
 
@@ -509,10 +351,6 @@ function getActionButtonsHTML(note, isTrash) {
     `;
 }
 
-// ============================================
-// ЭКРАНИРОВАНИЕ ДЛЯ БЕЗОПАСНОСТИ
-// ============================================
-
 function escapeHtml(str) {
     if (!str) return '';
     return str
@@ -523,26 +361,12 @@ function escapeHtml(str) {
         .replace(/'/g, '&#039;');
 }
 
-// ============================================
-// ОЧИСТКА КЭША (при загрузке/перезагрузке)
-// ============================================
-
 function clearCardCache() {
     cardCache.clear();
     renderedIds.clear();
 }
 
-// ============================================
-// ИНИЦИАЛИЗАЦИЯ
-// ============================================
-
-// Патчим renderNotes для использования оптимизированной версии
-// Если функция уже существует, заменяем её
-if (typeof window.renderNotes === 'function') {
-    window.renderNotes = renderNotes;
-}
-
-// Экспортируем новые функции
+// Экспорт
 window.updateNoteCard = updateNoteCard;
 window.addNoteCard = addNoteCard;
 window.removeNoteCard = removeNoteCard;
