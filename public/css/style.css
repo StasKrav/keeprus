@@ -2180,6 +2180,50 @@ body {
     opacity: 0.6;
 }
 
+.stats-section-title svg,
+.stats-busiest svg,
+.stats-footer svg {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+}
+
+.stats-section-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stats-busiest {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.stats-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.stats-footer span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stats-empty svg {
+    display: block;
+    margin: 0 auto 8px;
+    opacity: 0.4;
+    width: 48px;
+    height: 48px;
+}
+
 /* Тёмная тема */
 [data-theme="dark"] .stats-card {
     background: rgba(255, 255, 255, 0.05);
