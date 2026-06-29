@@ -242,7 +242,7 @@ function updateNoteElement(element, note) {
     if (note.trashed) classes.push('trashed');
     element.className = classes.join(' ');
 
-    // Обновляем булавку (если изменилось состояние закрепления)
+    // Обновляем булавку
     updatePinIcon(element, note.pinned);
 
     // Обновляем заголовок
@@ -256,11 +256,22 @@ function updateNoteElement(element, note) {
         }
     }
 
-    // Обновляем содержимое
+    // ============================================
+    // ОБНОВЛЯЕМ СОДЕРЖИМОЕ С УМНЫМИ ССЫЛКАМИ
+    // ============================================
+    
     const contentEl = element.querySelector('.note-content');
     if (contentEl) {
         if (note.content) {
-            contentEl.innerHTML = renderMarkdown(note.content);
+            // Рендерим Markdown
+            let renderedContent = renderMarkdown(note.content);
+            
+            // Добавляем умные ссылки (если функция существует)
+            if (typeof renderTextWithLinks === 'function') {
+                renderedContent = renderTextWithLinks(renderedContent, note.id);
+            }
+            
+            contentEl.innerHTML = renderedContent;
             contentEl.style.display = '';
         } else {
             contentEl.style.display = 'none';
@@ -270,7 +281,6 @@ function updateNoteElement(element, note) {
     // Обновляем изображения (если есть)
     const imageEl = element.querySelector('.note-image');
     if (imageEl) {
-        // Извлекаем URL из Markdown
         const match = note.content.match(/!\[.*?\]\((.*?)\)/);
         if (match) {
             imageEl.src = match[1];
@@ -292,8 +302,34 @@ function updateNoteElement(element, note) {
         dateEl.textContent = note.date || '';
     }
 
-    // Обновляем кнопки действий (в зависимости от состояния)
+    // Обновляем блок "Похожие заметки"
+    updateSimilarNotes(element, note);
+
+    // Обновляем кнопки действий
     updateActionButtons(element, note);
+}
+
+// ============================================
+// НОВАЯ ФУНКЦИЯ: обновление похожих заметок
+// ============================================
+
+function updateSimilarNotes(element, note) {
+    // Удаляем старый блок
+    const oldSimilar = element.querySelector('.note-similar');
+    if (oldSimilar) {
+        oldSimilar.remove();
+    }
+    
+    // Добавляем новый (если есть)
+    if (typeof renderSimilarNotesBlock === 'function') {
+        const similarHtml = renderSimilarNotesBlock(note);
+        if (similarHtml) {
+            const footer = element.querySelector('.note-footer');
+            if (footer) {
+                footer.insertAdjacentHTML('beforebegin', similarHtml);
+            }
+        }
+    }
 }
 
 // ============================================
