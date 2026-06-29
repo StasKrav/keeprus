@@ -10,34 +10,19 @@ function addNote() {
     currentColor = "color-default";
     hasUnsavedChanges = false;
     
-    //  СБРАСЫВАЕМ MARKDOWN
-    if (isMarkdownMode) {
-        isMarkdownMode = false;
-        document.getElementById("markdownBtn").classList.remove("active");
-        document.getElementById("markdownIcon").textContent = "code";
-        document.getElementById("mdHint").style.display = "none";
-        
-        const preview = document.getElementById("mdPreview");
-        if (preview) {
-            preview.remove();
-        }
-        document.getElementById("noteContent").style.display = "block";
-    }
-    
+    // Сбрасываем редактор
     document.getElementById("noteTitle").value = "";
     document.getElementById("noteContent").value = "";
     document.getElementById("pinEditorBtn").classList.remove("active");
     document.getElementById("archiveEditorBtn").classList.remove("active");
+    
+    // Показываем редактор
     document.getElementById("noteEditor").classList.add("visible");
     document.getElementById("noteTitle").focus();
     updateEditorColorPicker();
-
-    //  ПОКАЗЫВАЕМ ПОДСКАЗКУ ПРИ СОЗДАНИИ
-        document.getElementById("mdHint").style.display = "block";
-        
-        document.getElementById("noteEditor").classList.add("visible");
-        document.getElementById("noteTitle").focus();
-        updateEditorColorPicker();
+    
+    // Показываем подсказку
+    document.getElementById("mdHint").style.display = "block";
 }
 
 function editNote(id) {
@@ -97,26 +82,46 @@ function editNote(id) {
     document.getElementById("noteTitle").focus();
 }
 
+// ============================================
+// СОХРАНЕНИЕ ЗАМЕТКИ (ОПТИМИЗИРОВАННАЯ ВЕРСИЯ)
+// ============================================
+
 function saveNoteSilent() {
     const title = document.getElementById("noteTitle").value.trim();
     const content = document.getElementById("noteContent").value.trim();
 
-    // Не сохраняем пустые заметки
-    if (!title && !content) {
+    // Не сохраняем совсем пустые заметки
+    if (!title && !content && !currentNoteId) {
         return;
     }
 
     const now = new Date();
-    const dateStr =
-        now.toLocaleDateString("ru-RU") +
-        " " +
-        now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+    const dateStr = now.toLocaleDateString("ru-RU") + " " + 
+                    now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+
+    let isNew = false;
 
     if (currentNoteId) {
-        const index = notes.findIndex((n) => n.id === currentNoteId);
+        // Обновляем существующую заметку
+        const index = notes.findIndex(n => n.id === currentNoteId);
         if (index > -1) {
+            const oldNote = notes[index];
+            
+            // Проверяем, изменилось ли что-то
+            const hasChanges = 
+                oldNote.title !== title ||
+                oldNote.content !== content ||
+                oldNote.color !== currentColor ||
+                oldNote.pinned !== isPinned ||
+                oldNote.archived !== isArchived;
+
+            if (!hasChanges && !isNew) {
+                // Ничего не изменилось — не сохраняем
+                return;
+            }
+
             notes[index] = {
-                ...notes[index],
+                ...oldNote,
                 title: title || "",
                 content: content || "",
                 color: currentColor,
@@ -126,7 +131,7 @@ function saveNoteSilent() {
             };
         }
     } else {
-        // Новая заметка — создаём и запоминаем ID
+        // Создаём новую заметку
         const newNote = {
             id: Date.now(),
             title: title || "",
@@ -140,11 +145,32 @@ function saveNoteSilent() {
         };
         notes.unshift(newNote);
         currentNoteId = newNote.id;
+        isNew = true;
     }
 
     hasUnsavedChanges = false;
+    
+    // Сохраняем в localStorage
     saveNotes();
-    renderNotes();
+
+    // ✅ ОПТИМИЗАЦИЯ: Обновляем только одну карточку
+    if (isNew) {
+        // Новая заметка — добавляем карточку
+        const note = notes.find(n => n.id === currentNoteId);
+        if (note && typeof addNoteCard === 'function') {
+            addNoteCard(note);
+        } else {
+            // Fallback: полная перерисовка
+            renderNotes();
+        }
+    } else {
+        // Обновляем существующую карточку
+        if (typeof updateNoteCard === 'function') {
+            updateNoteCard(currentNoteId);
+        } else {
+            renderNotes();
+        }
+    }
 }
 
 function saveNote() {
@@ -153,14 +179,22 @@ function saveNote() {
 }
 
 function deleteNote(id, e) {
-  e?.stopPropagation();
-  const note = notes.find((n) => n.id === id);
-  if (!note) return;
+    e?.stopPropagation();
+    const note = notes.find(n => n.id === id);
+    if (!note) return;
 
-  note.trashed = true;
-  note.trashDate = new Date().toISOString();
-  saveNotes();
-  renderNotes();
+    note.trashed = true;
+    note.trashDate = new Date().toISOString();
+    saveNotes();
+    
+    // ✅ Удаляем карточку из DOM
+    if (typeof removeNoteCard === 'function') {
+        removeNoteCard(id);
+    } else {
+        renderNotes();
+    }
+    
+    updateCounts();
 }
 
 function deletePermanently(id, e) {
@@ -192,31 +226,42 @@ function restoreNote(id, e) {
 }
 
 function archiveNote(id, e) {
-  e?.stopPropagation();
-  const note = notes.find((n) => n.id === id);
-  if (note) {
-    note.archived = !note.archived;
-    saveNotes();
-    renderNotes();
-  }
+    e?.stopPropagation();
+    const note = notes.find(n => n.id === id);
+    if (note) {
+        note.archived = !note.archived;
+        saveNotes();
+        
+        // ✅ Обновляем карточку
+        if (typeof updateNoteCard === 'function') {
+            updateNoteCard(id);
+        } else {
+            renderNotes();
+        }
+        
+        updateCounts();
+    }
 }
 
 function togglePin(id, e) {
-    // Останавливаем всплытие, если событие передано
     if (e) {
         e.stopPropagation();
         e.preventDefault();
     }
     
-    console.log("togglePin вызван для ID:", id); // Для отладки
-    
-    const note = notes.find((n) => n.id === id);
+    const note = notes.find(n => n.id === id);
     if (note) {
         note.pinned = !note.pinned;
         saveNotes();
-        renderNotes();
-    } else {
-        console.error("Заметка с ID", id, "не найдена");
+        
+        // ✅ Обновляем карточку
+        if (typeof updateNoteCard === 'function') {
+            updateNoteCard(id);
+        } else {
+            renderNotes();
+        }
+        
+        updateCounts();
     }
 }
 
@@ -304,25 +349,31 @@ function archiveCurrentNote() {
 }
 
 function changeNoteColor(id, e) {
-  e?.stopPropagation();
-  const note = notes.find((n) => n.id === id);
-  if (note) {
-    const colors = [
-      "color-default",
-      "color-red",
-      "color-orange",
-      "color-yellow",
-      "color-green",
-      "color-teal",
-      "color-blue",
-      "color-purple",
-    ];
-    const currentIndex = colors.indexOf(note.color);
-    const nextIndex = (currentIndex === -1 ? 0 : (currentIndex + 1) % colors.length);
-    note.color = colors[nextIndex];
-    saveNotes();
-    renderNotes();
-  }
+    e?.stopPropagation();
+    const note = notes.find(n => n.id === id);
+    if (note) {
+        const colors = [
+            "color-default",
+            "color-red",
+            "color-orange",
+            "color-yellow",
+            "color-green",
+            "color-teal",
+            "color-blue",
+            "color-purple",
+        ];
+        const currentIndex = colors.indexOf(note.color);
+        const nextIndex = (currentIndex === -1 ? 0 : (currentIndex + 1) % colors.length);
+        note.color = colors[nextIndex];
+        saveNotes();
+        
+        // ✅ Обновляем карточку
+        if (typeof updateNoteCard === 'function') {
+            updateNoteCard(id);
+        } else {
+            renderNotes();
+        }
+    }
 }
 
 function markEditorChanged() {
@@ -598,7 +649,14 @@ function saveReminder(noteId) {
 
     note.reminder = { date, time, timestamp };
     saveNotes();
-    renderNotes();
+    
+    // ✅ Обновляем карточку
+    if (typeof updateNoteCard === 'function') {
+        updateNoteCard(noteId);
+    } else {
+        renderNotes();
+    }
+    
     scheduleReminder(note);
     showToast(`Напоминание установлено на ${date} ${time}`);
 
@@ -698,6 +756,13 @@ function removeReminderFromCard(noteId) {
     });
 
     saveNotes();
-    renderNotes();
+    
+    // ✅ Обновляем карточку
+    if (typeof updateNoteCard === 'function') {
+        updateNoteCard(noteId);
+    } else {
+        renderNotes();
+    }
+    
     showToast('Напоминание удалено');
 }

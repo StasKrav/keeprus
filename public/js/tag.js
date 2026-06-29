@@ -3,54 +3,62 @@
 // ============================================
 
 function addTagToNote() {
-  showPromptDialog((tag) => {
-    if (!tag || tag.trim() === "") return;
-    const trimmedTag = tag.trim();
+    showPromptDialog((tag) => {
+        if (!tag || tag.trim() === "") return;
+        const trimmedTag = tag.trim();
 
-    if (currentNoteId) {
-      const note = notes.find((n) => n.id === currentNoteId);
-      if (note) {
-        if (!note.tags.includes(trimmedTag)) {
-          note.tags.push(trimmedTag);
-          saveNotes();
-          renderNotes();
-          showToast(`Ярлык "${trimmedTag}" добавлен`);
+        if (currentNoteId) {
+            const note = notes.find(n => n.id === currentNoteId);
+            if (note) {
+                if (!note.tags.includes(trimmedTag)) {
+                    note.tags.push(trimmedTag);
+                    saveNotes();
+                    
+                    // ✅ Обновляем карточку
+                    if (typeof updateNoteCard === 'function') {
+                        updateNoteCard(currentNoteId);
+                    } else {
+                        renderNotes();
+                    }
+                    
+                    showToast(`Ярлык "${trimmedTag}" добавлен`);
+                } else {
+                    showToast(`Ярлык "${trimmedTag}" уже существует`);
+                }
+            }
         } else {
-          showToast(`Ярлык "${trimmedTag}" уже существует`);
-        }
-      }
-    } else {
-      // For new note, we'll store tags in a temporary array
-      // Actually let's just save the note with the tag
-      const title =
-        document.getElementById("noteTitle").value.trim() || "Без названия";
-      const content = document.getElementById("noteContent").value.trim() || "";
+            // Создаём новую заметку с тегом
+            const title = document.getElementById("noteTitle").value.trim() || "Без названия";
+            const content = document.getElementById("noteContent").value.trim() || "";
 
-      const newNote = {
-        id: Date.now(),
-        title: title,
-        content: content,
-        color: currentColor,
-        tags: [trimmedTag],
-        pinned: isPinned,
-        archived: isArchived,
-        trashed: false,
-        date:
-          new Date().toLocaleDateString("ru-RU") +
-          " " +
-          new Date().toLocaleTimeString("ru-RU", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-      };
-      notes.unshift(newNote);
-      currentNoteId = newNote.id;
-      saveNotes();
-      renderNotes();
-      showToast(`Ярлык "${trimmedTag}" добавлен к новой заметке`);
-      closeEditor();
-    }
-  });
+            const newNote = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                color: currentColor,
+                tags: [trimmedTag],
+                pinned: isPinned,
+                archived: isArchived,
+                trashed: false,
+                date: new Date().toLocaleDateString("ru-RU") + " " +
+                      new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }),
+            };
+            
+            notes.unshift(newNote);
+            currentNoteId = newNote.id;
+            saveNotes();
+            
+            // ✅ Добавляем карточку
+            if (typeof addNoteCard === 'function') {
+                addNoteCard(newNote);
+            } else {
+                renderNotes();
+            }
+            
+            showToast(`Ярлык "${trimmedTag}" добавлен к новой заметке`);
+            closeEditor();
+        }
+    });
 }
 
 function removeTagFromNote(tag, e) {
@@ -72,17 +80,24 @@ function removeTagFromNote(tag, e) {
 }
 
 function removeTagFromCard(noteId, tag, e) {
-  e?.stopPropagation();
-  const note = notes.find((n) => n.id === noteId);
-  if (note) {
-    const index = note.tags.indexOf(tag);
-    if (index > -1) {
-      note.tags.splice(index, 1);
-      saveNotes();
-      renderNotes();
-      showToast(`Ярлык "${tag}" удалён`);
+    e?.stopPropagation();
+    const note = notes.find(n => n.id === noteId);
+    if (note) {
+        const index = note.tags.indexOf(tag);
+        if (index > -1) {
+            note.tags.splice(index, 1);
+            saveNotes();
+            
+            // ✅ Обновляем карточку
+            if (typeof updateNoteCard === 'function') {
+                updateNoteCard(noteId);
+            } else {
+                renderNotes();
+            }
+            
+            showToast(`Ярлык "${tag}" удалён`);
+        }
     }
-  }
 }
 
 function filterByTag(tag, e) {
