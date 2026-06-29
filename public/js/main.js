@@ -48,8 +48,6 @@ async function saveNotes() {
     }
 }
 
-
-
 // ============================================
 // ДЕФОЛТНЫЕ ЗАМЕТКИ
 // ============================================
@@ -65,7 +63,8 @@ function getDefaultNotes() {
             pinned: true,
             archived: false,
             trashed: false,
-            date: new Date().toLocaleDateString('ru-RU')
+            date: new Date().toLocaleDateString('ru-RU'),
+            history: []
         }
     ];
 }
@@ -101,6 +100,12 @@ async function init() {
     setupSearch();
     updateCounts();
     loadColorFilterState();
+    
+    // Рендерим фильтр по цвету
+    if (typeof renderColorFilter === 'function') {
+        renderColorFilter();
+        console.log('✅ Фильтр по цвету отрисован при загрузке');
+    }
     
     // Обновляем логотип
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
@@ -178,19 +183,15 @@ async function init() {
     const originalCloseEditor = window.closeEditor;
     if (originalCloseEditor) {
         window.closeEditor = function() {
-            // Сохраняем версию при закрытии, если есть изменения
             if (currentNoteId && hasUnsavedChanges) {
-                // Берём актуальные данные из редактора
                 const title = document.getElementById('noteTitle').value.trim();
                 const content = document.getElementById('noteContent').value.trim();
                 
                 const note = notes.find(n => n.id === currentNoteId);
                 if (note) {
-                    // Обновляем заметку перед сохранением версии
                     note.title = title;
                     note.content = content;
                     
-                    // ✅ Используем createVersion (не saveVersion)
                     if (typeof createVersion === 'function') {
                         createVersion(currentNoteId);
                     } else {
@@ -199,16 +200,19 @@ async function init() {
                 }
             }
             
-            // Вызываем оригинальную функцию
             originalCloseEditor.apply(this, arguments);
         };
     }
+
+    // Экспортируем функции для глобального доступа
+    window.applyAllFilters = applyAllFilters;
+    window.clearTagFilter = clearTagFilter;
+    window.applyTagFilter = applyTagFilter;
 
     // ============================================
     // ДОБАВЛЯЕМ КНОПКУ ИСТОРИИ В РЕДАКТОР
     // ============================================
     
-    // Ждём, пока загрузится редактор
     setTimeout(() => {
         if (typeof addHistoryButtonToEditor === 'function') {
             addHistoryButtonToEditor();

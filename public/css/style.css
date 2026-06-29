@@ -2856,6 +2856,30 @@ body {
     border-color: #8ab4f8;
 }
 
+/* ============================================
+   КНОПКА СБРОСА ФИЛЬТРА ПО ТЕГАМ
+   ============================================ */
+
+.tag-clear-btn {
+    color: var(--text-secondary) !important;
+    font-size: 12px !important;
+    gap: 8px !important;
+    padding: 6px 24px !important;
+    margin-bottom: 4px !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    border-radius: 0 !important;
+}
+
+.tag-clear-btn:hover {
+    color: var(--text-primary) !important;
+    background: var(--hover-bg) !important;
+}
+
+.tag-clear-btn svg {
+    flex-shrink: 0;
+}
+
+
 
 /* ============================================
    ВСЕ МЕДИА-ЗАПРОСЫ ВЫНЕСЕНЫ В responsive.css

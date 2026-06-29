@@ -91,7 +91,7 @@ function filterByColor(color) {
         el.classList.toggle('active', el.dataset.color === color);
     });
     
-    applyFilters();
+    applyColorFilter();
 }
 
 function clearColorFilter() {
@@ -101,39 +101,48 @@ function clearColorFilter() {
         el.classList.remove('active');
     });
     
-    applyFilters();
+    applyColorFilter();
 }
 
-function applyFilters() {
-    window._colorFilter = currentColorFilter;
-    
-    // Полная перерисовка с очисткой кэша
-    if (typeof clearCardCache === 'function') {
-        clearCardCache();
-    }
-    
-    renderNotes();
-    renderColorFilter();
-}
-
-// Патчим getFilteredNotes
-const originalGetFilteredNotes = window.getFilteredNotes;
-if (originalGetFilteredNotes) {
-    window.getFilteredNotes = function() {
-        let filtered = originalGetFilteredNotes();
-        
-        if (currentColorFilter) {
-            filtered = filtered.filter(n => {
-                const noteColor = n.color || 'color-default';
-                return noteColor === currentColorFilter;
-            });
+function applyColorFilter() {
+    if (typeof applyAllFilters === 'function') {
+        applyAllFilters();
+    } else {
+        if (typeof clearCardCache === 'function') {
+            clearCardCache();
         }
-        
-        return filtered;
-    };
+        renderNotes();
+        renderColorFilter();
+    }
 }
 
-// Патчим updateCounts
+// ============================================
+// ПАТЧИМ getFilteredNotes (только один раз)
+// ============================================
+
+if (!window._colorFilterPatched) {
+    const originalGetFilteredNotes = window.getFilteredNotes;
+    if (originalGetFilteredNotes) {
+        window.getFilteredNotes = function() {
+            let filtered = originalGetFilteredNotes();
+            
+            if (currentColorFilter) {
+                filtered = filtered.filter(n => {
+                    const noteColor = n.color || 'color-default';
+                    return noteColor === currentColorFilter;
+                });
+            }
+            
+            return filtered;
+        };
+        window._colorFilterPatched = true;
+    }
+}
+
+// ============================================
+// ПАТЧИМ updateCounts
+// ============================================
+
 const originalUpdateCounts = window.updateCounts;
 if (originalUpdateCounts) {
     window.updateCounts = function() {
