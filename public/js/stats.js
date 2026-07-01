@@ -246,14 +246,7 @@ function scheduleStatsUpdate() {
     }, 300);
 }
 
-// Патчим saveNotes для обновления статистики
-const originalSaveNotes = window.saveNotes;
-if (originalSaveNotes) {
-    window.saveNotes = function() {
-        originalSaveNotes.apply(this, arguments);
-        scheduleStatsUpdate();
-    };
-}
+// scheduleStatsUpdate вызывается из saveNotes (notes.js)
 
 // Экспортируем
 window.renderStats = renderStats;

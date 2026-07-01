@@ -42,6 +42,11 @@ async function saveNotes() {
         localStorage.setItem('keeprus_notes_fallback', JSON.stringify(notes));
         hasUnsavedChanges = false;
         updateCounts();
+        
+        // Обновляем статистику, если она открыта
+        if (typeof scheduleStatsUpdate === 'function') {
+            scheduleStatsUpdate();
+        }
     } catch (e) {
         console.error('Ошибка сохранения:', e);
         showToast('❌ Ошибка сохранения');
@@ -218,6 +223,17 @@ async function init() {
             addHistoryButtonToEditor();
         }
     }, 100);
+
+    // Планируем напоминания после загрузки заметок
+    if (typeof scheduleAllReminders === 'function') {
+        scheduleAllReminders();
+        console.log('⏰ Напоминания запланированы');
+    }
+    
+    // Запрашиваем разрешение на уведомления (не блокируем инициализацию)
+    if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+    }
 
     // Register Service Worker for PWA offline support
     if ("serviceWorker" in navigator) {

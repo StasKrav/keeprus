@@ -27,32 +27,22 @@ function addTagToNote() {
                 }
             }
         } else {
-            // Создаём новую заметку с тегом
-            const title = document.getElementById("noteTitle").value.trim() || "Без названия";
-            const content = document.getElementById("noteContent").value.trim() || "";
-
-            const newNote = {
-                id: Date.now(),
-                title: title,
-                content: content,
-                color: currentColor,
-                tags: [trimmedTag],
-                pinned: isPinned,
-                archived: isArchived,
-                trashed: false,
-                date: new Date().toLocaleDateString("ru-RU") + " " +
-                      new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }),
-            };
+            // Сначала сохраняем заметку через saveNoteSilent (создаст currentNoteId)
+            if (typeof saveNoteSilent === 'function') {
+                saveNoteSilent();
+            }
             
-            notes.unshift(newNote);
-            currentNoteId = newNote.id;
-            saveNotes();
-            
-            // ✅ Добавляем карточку
-            if (typeof addNoteCard === 'function') {
-                addNoteCard(newNote);
-            } else {
-                renderNotes();
+            if (currentNoteId) {
+                const note = notes.find(n => n.id === currentNoteId);
+                if (note) {
+                    note.tags = [trimmedTag];
+                    saveNotes();
+                    if (typeof updateNoteCard === 'function') {
+                        updateNoteCard(currentNoteId);
+                    } else {
+                        renderNotes();
+                    }
+                }
             }
             
             showToast(`Ярлык "${trimmedTag}" добавлен к новой заметке`);
@@ -152,23 +142,7 @@ function applyTagFilter() {
     updateCounts();
 }
 
-// ============================================
-// ПАТЧИМ getFilteredNotes ДЛЯ УЧЁТА ТЕГОВ
-// ============================================
-
-const originalGetFilteredNotes = window.getFilteredNotes;
-if (originalGetFilteredNotes) {
-    window.getFilteredNotes = function() {
-        let filtered = originalGetFilteredNotes();
-        
-        // Фильтр по тегам
-        if (tagFilter) {
-            filtered = filtered.filter(n => n.tags.includes(tagFilter));
-        }
-        
-        return filtered;
-    };
-}
+// Фильтр по тегам встроен в getFilteredNotes (render-optimized.js)
 
 function renderTags() {
     const container = document.getElementById('tagList');

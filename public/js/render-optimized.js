@@ -7,6 +7,50 @@ let renderedIds = new Set();
 let needsCountUpdate = false;
 
 // ============================================
+// ФИЛЬТРАЦИЯ ЗАМЕТОК
+// ============================================
+
+function getFilteredNotes() {
+  let filtered = notes.filter((n) => !n.trashed);
+
+  if (currentFilter === "pinned") {
+    filtered = filtered.filter((n) => n.pinned);
+  } else if (currentFilter === "archive") {
+    filtered = filtered.filter((n) => n.archived);
+  } else if (currentFilter === "trash") {
+    filtered = notes.filter((n) => n.trashed);
+  } else {
+    filtered = filtered.filter((n) => !n.archived);
+  }
+
+  // Search filter
+  if (searchTerm) {
+    const term = searchTerm.toLowerCase();
+    filtered = filtered.filter(
+      (n) =>
+        n.title.toLowerCase().includes(term) ||
+        n.content.toLowerCase().includes(term) ||
+        n.tags.some((t) => t.toLowerCase().includes(term)),
+    );
+  }
+
+  // Tag filter
+  if (tagFilter) {
+    filtered = filtered.filter((n) => n.tags.includes(tagFilter));
+  }
+
+  // Color filter
+  if (currentColorFilter) {
+    filtered = filtered.filter((n) => {
+      const noteColor = n.color || 'color-default';
+      return noteColor === currentColorFilter;
+    });
+  }
+
+  return filtered;
+}
+
+// ============================================
 // ОСНОВНАЯ ФУНКЦИЯ РЕНДЕРА
 // ============================================
 
@@ -14,12 +58,46 @@ function renderNotes(keepScroll = true) {
     const container = document.getElementById("notesContainer");
     if (!container) return;
 
+    const filtered = getFilteredNotes();
+
+    // Empty state
+    if (filtered.length === 0) {
+        cardCache.clear();
+        renderedIds.clear();
+        container.innerHTML = `
+            <div class="empty-state" style="grid-column: 1/-1;">
+                ${currentFilter === 'trash' ? `
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"/>
+                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                        <path d="M10 11v6"/>
+                        <path d="M14 11v6"/>
+                    </svg>
+                ` : `
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v4"/>
+                        <path d="M12 18v4"/>
+                        <path d="M4.93 4.93l2.83 2.83"/>
+                        <path d="M16.24 16.24l2.83 2.83"/>
+                        <path d="M2 12h4"/>
+                        <path d="M18 12h4"/>
+                        <path d="M4.93 19.07l2.83-2.83"/>
+                        <path d="M16.24 7.76l2.83-2.83"/>
+                    </svg>
+                `}
+                <h2>${currentFilter === 'trash' ? 'Корзина пуста' : 'Нет заметок'}</h2>
+                <p>${currentFilter === 'trash' ? 'Удаленные заметки будут здесь' : 'Создайте новую заметку, нажав на кнопку +'}</p>
+            </div>
+        `;
+        return;
+    }
+
     let scrollTop = 0;
     if (keepScroll) {
         scrollTop = container.scrollTop || window.scrollY;
     }
 
-    const filtered = getFilteredNotes();
     const newIds = new Set(filtered.map(n => n.id));
 
     // Удаляем карточки, которых больше нет
@@ -102,6 +180,11 @@ function renderNotes(keepScroll = true) {
     if (needsCountUpdate) {
         updateCounts();
         needsCountUpdate = false;
+    }
+
+    // Обновляем статистику, если она открыта
+    if (typeof updateStatsIfVisible === 'function') {
+        updateStatsIfVisible();
     }
 }
 
@@ -367,6 +450,8 @@ function clearCardCache() {
 }
 
 // Экспорт
+window.getFilteredNotes = getFilteredNotes;
+window.renderNotes = renderNotes;
 window.updateNoteCard = updateNoteCard;
 window.addNoteCard = addNoteCard;
 window.removeNoteCard = removeNoteCard;

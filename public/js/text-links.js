@@ -183,37 +183,8 @@ function renderSimilarNotesBlock(note) {
     return html;
 }
 
-// Патчим createNoteElement
-const originalCreateNoteElement = window.createNoteElement;
-if (originalCreateNoteElement) {
-    window.createNoteElement = function(note) {
-        const element = originalCreateNoteElement(note);
-        
-        if (!note.trashed && !note.archived) {
-            const similarHtml = renderSimilarNotesBlock(note);
-            if (similarHtml) {
-                const footer = element.querySelector('.note-footer');
-                if (footer) {
-                    footer.insertAdjacentHTML('beforebegin', similarHtml);
-                }
-            }
-        }
-        
-        return element;
-    };
-}
-
-// Патчим renderMarkdown
-const originalRenderMarkdown = window.renderMarkdown;
-if (originalRenderMarkdown) {
-    window.renderMarkdown = function(text, currentNoteId) {
-        let html = originalRenderMarkdown(text);
-        if (currentNoteId && typeof renderTextWithLinks === 'function') {
-            html = renderTextWithLinks(html, currentNoteId);
-        }
-        return html;
-    };
-}
+// createNoteElement уже вызывает renderSimilarNotesBlock напрямую (в markdown.js)
+// renderMarkdown вызывает renderTextWithLinks напрямую (в markdown.js)
 
 // Экспорт
 window.findNoteLinks = findNoteLinks;

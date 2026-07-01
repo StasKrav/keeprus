@@ -2,20 +2,19 @@
 // MARKDOWN PARSER
 // ============================================
 
-function escapeHtml(str) {
-  return str
-    .replace(/&/g, '&')
-    .replace(/</g, '<')
-    .replace(/>/g, '>')
-    .replace(/"/g, '"')
-    .replace(/'/g, '&#039;');
-}
+// escapeHtml определён в render-optimized.js (window.escapeHtml)
+// Используем его напрямую — он гарантированно доступен к моменту вызова renderMarkdown
 
-function renderMarkdown(text) {
+function renderMarkdown(text, currentNoteId) {
     if (!text) return "";
 
-    // Экранируем HTML
-    let html = escapeHtml(text);
+    // Экранируем HTML (функция из render-optimized.js)
+    let html = window.escapeHtml(text);
+    
+    // Умные ссылки (если передан ID заметки)
+    if (currentNoteId && typeof renderTextWithLinks === 'function') {
+        html = renderTextWithLinks(html, currentNoteId);
+    }
 
     // 0. Изображения
     html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="note-image">');
@@ -128,11 +127,7 @@ function createNoteElement(note) {
         ? note.content.slice(0, 250) + "..." 
         : note.content;
     
-    let renderedContent = renderMarkdown(contentPreview);
-    
-    if (note.content && typeof renderTextWithLinks === 'function') {
-        renderedContent = renderTextWithLinks(renderedContent, note.id);
-    }
+    let renderedContent = renderMarkdown(contentPreview, note.id);
 
     // ⬇️⬇️⬇️ ЕДИНСТВЕННОЕ ИЗМЕНЕНИЕ ⬇️⬇️⬇️
     // Вырезаем картинку из контента

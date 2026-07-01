@@ -51,10 +51,6 @@ function closePromptDialog() {
   promptCallback = null;
 }
 
-function markEditorChanged() {
-  hasUnsavedChanges = true;
-}
-
 function clearTrash() {
     const trashedNotes = notes.filter(n => n.trashed);
     

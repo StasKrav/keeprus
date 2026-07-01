@@ -36,50 +36,6 @@ function closeToast() {
     clearTimeout(toastTimeout);
 }
 
-// ============================================
-// ФУНКЦИИ ДЛЯ МЕНЮ
-// ============================================
-
-function exportNotes() {
-    try {
-        const data = JSON.stringify(notes, null, 2);
-        const blob = new Blob([data], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `keeprus_backup_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-    } catch (err) {}
-}
-
-function importNotes() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    
-    input.onchange = async function() {
-        const file = this.files[0];
-        if (!file) return;
-        
-        try {
-            const text = await file.text();
-            const data = JSON.parse(text);
-            if (!Array.isArray(data)) {
-                showToast('Неверный формат файла');
-                return;
-            }
-            if (!confirm(`Импортировать ${data.length} заметок? Текущие заметки будут заменены.`)) {
-                return;
-            }
-            notes = data;
-            saveNotes();
-            renderNotes();
-        } catch (err) {}
-    };
-    input.click();
-}
-
 function exportAllAsMarkdown() {
     try {
         let md = '# Keeprus Export\n\n';

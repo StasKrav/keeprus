@@ -48,6 +48,11 @@ function updateCounts() {
     document.getElementById("countTrash").textContent = trashed;
 
     renderTags();
+    
+    // Обновляем фильтр по цвету
+    if (typeof renderColorFilter === 'function') {
+        renderColorFilter();
+    }
 }
 // ============================================
 // СТАТИСТИКА — ОТКРЫТИЕ/ЗАКРЫТИЕ
@@ -78,11 +83,4 @@ function updateStatsIfVisible() {
     }
 }
 
-// Патчим renderNotes для обновления статистики
-const originalRenderNotes = window.renderNotes;
-if (originalRenderNotes) {
-    window.renderNotes = function() {
-        originalRenderNotes.apply(this, arguments);
-        updateStatsIfVisible();
-    };
-}
+// renderNotes вызывает updateStatsIfVisible напрямую (в render-optimized.js)

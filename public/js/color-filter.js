@@ -116,40 +116,8 @@ function applyColorFilter() {
     }
 }
 
-// ============================================
-// ПАТЧИМ getFilteredNotes (только один раз)
-// ============================================
-
-if (!window._colorFilterPatched) {
-    const originalGetFilteredNotes = window.getFilteredNotes;
-    if (originalGetFilteredNotes) {
-        window.getFilteredNotes = function() {
-            let filtered = originalGetFilteredNotes();
-            
-            if (currentColorFilter) {
-                filtered = filtered.filter(n => {
-                    const noteColor = n.color || 'color-default';
-                    return noteColor === currentColorFilter;
-                });
-            }
-            
-            return filtered;
-        };
-        window._colorFilterPatched = true;
-    }
-}
-
-// ============================================
-// ПАТЧИМ updateCounts
-// ============================================
-
-const originalUpdateCounts = window.updateCounts;
-if (originalUpdateCounts) {
-    window.updateCounts = function() {
-        originalUpdateCounts();
-        renderColorFilter();
-    };
-}
+// Фильтр по цвету встроен в getFilteredNotes (render-optimized.js)
+// renderColorFilter вызывается из updateCounts (navigation.js)
 
 // ============================================
 // СВОРАЧИВАНИЕ/РАЗВОРАЧИВАНИЕ

@@ -654,6 +654,11 @@ function removeReminder(noteId) {
         renderNotes();
         showToast('Напоминание удалено');
     }
+    
+    // Экспорт
+    window.saveNoteSilent = saveNoteSilent;
+    window.scheduleAllReminders = scheduleAllReminders;
+    
     const overlay = document.querySelector('.reminder-overlay');
     if (overlay) overlay.remove();
 }
@@ -699,6 +704,9 @@ function scheduleReminder(note) {
 }
 
 function showReminderNotification(note) {
+    // Показываем toast в любом случае
+    showReminderToast(` Напоминание: ${note.title || 'Без названия'}`);
+    
     // Проверяем разрешение на уведомления
     if (Notification.permission === 'granted') {
         new Notification('Keeprus — Напоминание', {
@@ -708,13 +716,13 @@ function showReminderNotification(note) {
     } else if (Notification.permission === 'default') {
         Notification.requestPermission().then(permission => {
             if (permission === 'granted') {
-                showReminderNotification(note);
+                new Notification('Keeprus — Напоминание', {
+                    body: `${note.title || 'Без названия'}\n${note.reminder.date} ${note.reminder.time}`,
+                    icon: '/favicon.svg'
+                });
             }
         });
     }
-
-    // ⭐ ТОСТ С КНОПКОЙ (вместо обычного)
-    showReminderToast(` Напоминание: ${note.title || 'Без названия'}`);
 }
 
 // ============================================
