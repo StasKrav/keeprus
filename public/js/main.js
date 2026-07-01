@@ -101,7 +101,7 @@ async function init() {
     const savedView = localStorage.getItem('material_keep_view');
     setView(savedView || 'grid');
     
-    renderNotes();
+    renderNotes(false);
     setupSearch();
     updateCounts();
     loadColorFilterState();

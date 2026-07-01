@@ -451,7 +451,7 @@ async function openNotesFile() {
             // Сохраняем в localStorage как резервную копию
             localStorage.setItem('keeprus_notes_fallback', JSON.stringify(notes));
             
-            renderNotes();
+            renderNotes(false);
             updateCounts();
             showToast(`Загружено заметок ${notes.length}`);
             
@@ -476,7 +476,7 @@ async function openNotesFile() {
                 notes = loadedNotes;
                 hasUnsavedChanges = false;
                 localStorage.setItem('keeprus_notes_fallback', JSON.stringify(notes));
-                renderNotes();
+                renderNotes(false);
                 updateCounts();
                 showToast(`Загружено заметок ${notes.length}`);
             };

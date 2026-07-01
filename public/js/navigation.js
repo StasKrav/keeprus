@@ -30,7 +30,7 @@ function applyAllFilters() {
     if (typeof clearCardCache === 'function') {
         clearCardCache();
     }
-    renderNotes();
+    renderNotes(false);
     updateCounts();
 }
 

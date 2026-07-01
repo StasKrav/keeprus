@@ -68,7 +68,7 @@ function clearTrash() {
         () => {
             notes = notes.filter(n => !n.trashed);
             saveNotes();
-            renderNotes();
+            renderNotes(false);
         }
     );
 }
