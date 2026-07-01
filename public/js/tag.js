@@ -1,5 +1,5 @@
 // ============================================
-// TAGS
+// TAGS (ИСПРАВЛЕННАЯ ВЕРСИЯ)
 // ============================================
 
 function addTagToNote() {
@@ -14,12 +14,8 @@ function addTagToNote() {
                     note.tags.push(trimmedTag);
                     saveNotes();
                     
-                    // ✅ Обновляем карточку
-                    if (typeof updateNoteCard === 'function') {
-                        updateNoteCard(currentNoteId);
-                    } else {
-                        renderNotes();
-                    }
+                    // ✅ ПРИНУДИТЕЛЬНО ОБНОВЛЯЕМ КАРТОЧКУ
+                    forceUpdateNoteCard(currentNoteId);
                     
                     showToast(`Ярлык "${trimmedTag}" добавлен`);
                 } else {
@@ -27,7 +23,6 @@ function addTagToNote() {
                 }
             }
         } else {
-            // Сначала сохраняем заметку через saveNoteSilent (создаст currentNoteId)
             if (typeof saveNoteSilent === 'function') {
                 saveNoteSilent();
             }
@@ -37,11 +32,7 @@ function addTagToNote() {
                 if (note) {
                     note.tags = [trimmedTag];
                     saveNotes();
-                    if (typeof updateNoteCard === 'function') {
-                        updateNoteCard(currentNoteId);
-                    } else {
-                        renderNotes();
-                    }
+                    forceUpdateNoteCard(currentNoteId);
                 }
             }
             
@@ -52,41 +43,109 @@ function addTagToNote() {
 }
 
 function removeTagFromNote(tag, e) {
-  e?.stopPropagation();
-  if (!currentNoteId) {
-    showToast("Сначала сохраните заметку");
-    return;
-  }
-  const note = notes.find((n) => n.id === currentNoteId);
-  if (note) {
-    const index = note.tags.indexOf(tag);
-    if (index > -1) {
-      note.tags.splice(index, 1);
-      saveNotes();
-      renderNotes();
-      showToast(`Ярлык "${tag}" удалён`);
-    }
-  }
-}
-
-function removeTagFromCard(noteId, tag, e) {
     e?.stopPropagation();
-    const note = notes.find(n => n.id === noteId);
+    if (!currentNoteId) {
+        showToast("Сначала сохраните заметку");
+        return;
+    }
+    const note = notes.find((n) => n.id === currentNoteId);
     if (note) {
         const index = note.tags.indexOf(tag);
         if (index > -1) {
             note.tags.splice(index, 1);
             saveNotes();
             
-            // ✅ Обновляем карточку
-            if (typeof updateNoteCard === 'function') {
-                updateNoteCard(noteId);
-            } else {
-                renderNotes();
-            }
+            // ✅ ПРИНУДИТЕЛЬНО ОБНОВЛЯЕМ
+            forceUpdateNoteCard(currentNoteId);
             
             showToast(`Ярлык "${tag}" удалён`);
         }
+    }
+}
+
+function removeTagFromCard(noteId, tag, e) {
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+    
+    const index = note.tags.indexOf(tag);
+    if (index === -1) return;
+    
+    note.tags.splice(index, 1);
+    saveNotes();
+    
+    // Принудительное обновление
+    if (typeof forceUpdateNoteCard === 'function') {
+        forceUpdateNoteCard(noteId);
+    } else {
+        renderNotes();
+    }
+    
+    showToast(`Ярлык "${tag}" удалён`);
+}
+
+// ============================================
+// ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ КАРТОЧКИ
+// ============================================
+
+function forceUpdateNoteCard(noteId) {
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+    
+    // 1. Удаляем из кэша
+    if (typeof cardCache !== 'undefined' && cardCache) {
+        cardCache.delete(noteId);
+    }
+    
+    // 2. Удаляем старую карточку из DOM
+    const oldCard = document.querySelector(`.note-card[data-id="${noteId}"]`);
+    if (oldCard) {
+        oldCard.remove();
+    }
+    
+    // 3. Создаём новую карточку
+    const newCard = createNoteElement(note);
+    
+    // 4. Вставляем на правильное место
+    const container = document.getElementById('notesContainer');
+    if (!container) return;
+    
+    // Находим место для вставки
+    const filtered = getFilteredNotes();
+    const index = filtered.findIndex(n => n.id === noteId);
+    
+    if (index === -1) {
+        // Если заметка не в текущем фильтре, просто добавляем в конец
+        container.appendChild(newCard);
+    } else {
+        // Вставляем перед следующей карточкой
+        let inserted = false;
+        for (let i = index + 1; i < filtered.length; i++) {
+            const nextId = filtered[i].id;
+            const nextCard = document.querySelector(`.note-card[data-id="${nextId}"]`);
+            if (nextCard) {
+                container.insertBefore(newCard, nextCard);
+                inserted = true;
+                break;
+            }
+        }
+        if (!inserted) {
+            container.appendChild(newCard);
+        }
+    }
+    
+    // 5. Обновляем кэш
+    if (typeof cardCache !== 'undefined' && cardCache) {
+        cardCache.set(noteId, newCard);
+    }
+    
+    // 6. Перезапускаем DND
+    if (typeof setupDragAndDrop === 'function') {
+        setTimeout(setupDragAndDrop, 100);
     }
 }
 
@@ -95,16 +154,26 @@ function removeTagFromCard(noteId, tag, e) {
 // ============================================
 
 function filterByTag(tag, e) {
-    e?.stopPropagation();
+    if (e) {
+        e.stopPropagation();
+        // Предотвращаем двойной вызов
+        if (e.target && e.target.closest('.tag-remove')) {
+            return;
+        }
+    }
+    
+    // Если клик по крестику — игнорируем
+    if (e && e.target && e.target.classList.contains('tag-remove')) {
+        return;
+    }
+    
     tagFilter = tag;
     currentFilter = "all";
     
-    // Снимаем выделение со всех пунктов навигации
     document.querySelectorAll(".nav-item").forEach((el) => 
         el.classList.remove("active")
     );
     
-    // Подсвечиваем выбранный тег
     const tagItems = document.querySelectorAll("#tagList .nav-item");
     tagItems.forEach((el) => {
         const label = el.querySelector('.nav-label');
@@ -113,7 +182,6 @@ function filterByTag(tag, e) {
         }
     });
     
-    // Применяем фильтр
     applyTagFilter();
 }
 
@@ -125,7 +193,6 @@ function clearTagFilter() {
         el.classList.remove("active")
     );
     
-    // Подсвечиваем "Все заметки"
     const allBtn = document.querySelector('.nav-item[data-filter="all"]');
     if (allBtn) allBtn.classList.add("active");
     
@@ -133,7 +200,6 @@ function clearTagFilter() {
 }
 
 function applyTagFilter() {
-    // Полная перерисовка с очисткой кэша
     if (typeof clearCardCache === 'function') {
         clearCardCache();
     }
@@ -142,47 +208,6 @@ function applyTagFilter() {
     updateCounts();
 }
 
-// Фильтр по тегам встроен в getFilteredNotes (render-optimized.js)
-
-function renderTags() {
-    const container = document.getElementById('tagList');
-    
-    // Очищаем контейнер
-    container.innerHTML = '';
-    
-    // Собираем все теги
-    const tagMap = new Map();
-    notes.filter(n => !n.trashed && !n.archived).forEach(n => {
-        n.tags.forEach(t => {
-            tagMap.set(t, (tagMap.get(t) || 0) + 1);
-        });
-    });
-    
-    // Если тегов нет, ничего не показываем
-    if (tagMap.size === 0) {
-        return;
-    }
-    
-    // Создаём элементы для каждого тега
-    for (const [tag, count] of tagMap) {
-        const btn = document.createElement('button');
-        btn.className = 'nav-item';
-        
-        // SVG иконка
-        btn.innerHTML = `
-            <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2H2v10l9.29 9.29a2 2 0 0 0 2.83 0l7.17-7.17a2 2 0 0 0 0-2.83L12 2z"/>
-                <path d="M7 7h.01"/>
-            </svg>
-            <span class="nav-label">${tag}</span>
-            <span class="tag-count">${count}</span>
-        `;
-        
-        btn.onclick = () => filterByTag(tag);
-        container.appendChild(btn);
-    }
-}
-
 function renderTags() {
     const container = document.getElementById('tagList');
     container.innerHTML = '';
@@ -198,11 +223,9 @@ function renderTags() {
         return;
     }
     
-    // Сортируем теги по популярности
     const sortedTags = Array.from(tagMap.entries())
         .sort((a, b) => b[1] - a[1]);
     
-    // Кнопка "Сбросить фильтр", если активен фильтр по тегу
     if (tagFilter) {
         const clearBtn = document.createElement('button');
         clearBtn.className = 'nav-item tag-clear-btn';
@@ -218,7 +241,6 @@ function renderTags() {
         container.appendChild(clearBtn);
     }
     
-    // Список тегов
     for (const [tag, count] of sortedTags) {
         const btn = document.createElement('button');
         btn.className = 'nav-item';
@@ -239,3 +261,6 @@ function renderTags() {
         container.appendChild(btn);
     }
 }
+
+// Экспортируем новую функцию
+window.forceUpdateNoteCard = forceUpdateNoteCard;

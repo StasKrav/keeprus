@@ -157,13 +157,12 @@ function createNoteElement(note) {
     let tagsHtml = '';
     if (note.tags && note.tags.length > 0) {
         tagsHtml = note.tags.map(tag => `
-            <span class="note-tag" onclick="filterByTag('${tag}', event)">
-                <span class="tag-text">${tag}</span>
-                <span class="tag-remove" onclick="removeTagFromCard(${note.id}, '${tag}', event)">&times;</span>
+            <span class="note-tag" data-tag="${escapeHtml(tag)}">
+                <span class="tag-text" onclick="filterByTag('${escapeHtml(tag)}', event)">${escapeHtml(tag)}</span>
+                <span class="tag-remove" onclick="event.stopPropagation(); removeTagFromCard(${note.id}, '${escapeHtml(tag)}', event)" title="Удалить ярлык">×</span>
             </span>
         `).join('');
     }
-
     // ============================================
     // НАПОМИНАНИЕ
     // ============================================

@@ -132,35 +132,91 @@
 }
 
 .note-tag {
-  padding: 4px 8px;
-  background: rgba(0, 0, 0, 0.04);
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: background 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  white-space: nowrap;
-  position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px 6px 3px 10px;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: default;
+    transition: background 0.2s;
+    white-space: nowrap;
+    position: relative;
+    user-select: none;
 }
 
 .note-tag:hover {
-  background: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.08);
 }
 
-.tag-remove {
-  font-size: 12px;
-  opacity: 0;
-  transition: opacity 0.2s;
+.note-tag .tag-text {
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.note-tag .tag-text:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--text-primary);
+}
+
+.note-tag .tag-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--text-secondary);
+    opacity: 0;
+    transition: all 0.15s ease;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-left: 2px;
+    font-weight: 700;
 }
 
 .note-tag:hover .tag-remove {
-  opacity: 0.6;
+    opacity: 0.5;
 }
 
+.note-tag .tag-remove:hover {
+    opacity: 1 !important;
+    background: rgba(211, 47, 47, 0.15);
+    color: #d32f2f;
+    transform: scale(1.15);
+}
+
+.note-tag .tag-remove:active {
+    transform: scale(0.9);
+}
+
+/* Тёмная тема */
+[data-theme="dark"] .note-tag {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .note-tag:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+[data-theme="dark"] .note-tag .tag-text:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .note-tag .tag-remove:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef5350;
+}
 /* ============================================
    ДЕЙСТВИЯ НА КАРТОЧКЕ
    ============================================ */

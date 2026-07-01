@@ -499,3 +499,25 @@ window.clearCardCache = clearCardCache;
 window.escapeHtml = escapeHtml;
 
 console.log('✅ Оптимизированный рендер загружен');
+
+// ============================================
+// ПОДДЕРЖКА ПРИНУДИТЕЛЬНОГО ОБНОВЛЕНИЯ
+// ============================================
+
+// Переопределяем updateNoteCard для совместимости
+const originalUpdateNoteCard = window.updateNoteCard;
+window.updateNoteCard = function(noteId) {
+    // Если есть forceUpdateNoteCard, используем её
+    if (typeof forceUpdateNoteCard === 'function') {
+        forceUpdateNoteCard(noteId);
+    } else {
+        // Fallback
+        if (originalUpdateNoteCard) {
+            originalUpdateNoteCard(noteId);
+        } else {
+            renderNotes();
+        }
+    }
+};
+
+console.log('✅ Принудительное обновление карточек добавлено');
