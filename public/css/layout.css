@@ -1,0 +1,339 @@
+/* ============================================
+   KEEPRUS — LAYOUT: APP-BAR, SIDEBAR, MAIN
+   ============================================ */
+
+/* ============================================
+   TOP APP BAR
+   ============================================ */
+
+.app-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: var(--surface-color);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: background-color 0.3s;
+}
+
+.app-bar .logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding-left: 8px;
+  min-width: 160px;
+  flex-shrink: 0;
+  margin-right: 16px;
+  text-decoration: none;
+  user-select: none;
+  transition: transform 0.2s ease;
+}
+
+.app-bar .logo:hover {
+  opacity: 0.8;
+  transform: scale(1.02);
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: var(--logo-color-3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+}
+
+.logo svg {
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 2px 4px var(--logo-shadow));
+}
+
+.logo:hover svg {
+  transform: rotate(-8deg) scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+[data-theme="dark"] .logo-text {
+  background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="dark"] .logo svg {
+  filter: drop-shadow(0 2px 8px rgba(96, 165, 250, 0.3));
+}
+
+.app-bar .search {
+  flex: 1;
+  max-width: 720px;
+  margin: 0 32px 0 90px;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px 12px 48px;
+  background: var(--search-bg);
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: background 0.2s, color 0.3s;
+  color: var(--text-primary);
+}
+
+.search-input:focus {
+  outline: none;
+  background: var(--surface-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.app-bar .actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  gap: 4px;
+}
+
+.app-bar .actions .icon-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background 0.2s, color 0.2s;
+}
+
+.app-bar .actions .icon-button:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.app-bar .actions .icon-button svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+}
+
+.icon-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background 0.2s;
+}
+
+.icon-button:hover {
+  background: var(--hover-bg);
+}
+
+[data-theme="dark"] .icon-button svg {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .icon-button:hover svg {
+  color: var(--text-primary);
+}
+
+/* ============================================
+   КНОПКИ В ВЕРХНЕЙ ПАНЕЛИ
+   ============================================ */
+
+.view-toggle-header {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.view-button-header {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.view-button-header:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.view-button-header.active {
+  background: var(--hover-bg);
+  color: var(--primary-color);
+}
+
+[data-theme="dark"] .view-button-header:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .view-button-header.active {
+  background: rgba(138, 180, 248, 0.15);
+  color: #8ab4f8;
+}
+
+/* ============================================
+   SIDEBAR NAVIGATION
+   ============================================ */
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 64px;
+  bottom: 0;
+  width: 280px;
+  background: var(--surface-color);
+  padding: 24px 0;
+  overflow-y: auto;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 24px;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: background 0.2s;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.nav-item:hover {
+  background: var(--hover-bg);
+}
+
+.nav-item.active {
+  background: var(--nav-active-bg);
+  color: var(--primary-color);
+  border-radius: 0 24px 24px 0;
+  position: relative;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--primary-color);
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.section-title {
+  padding: 32px 24px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tag-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--tag-bg);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 8px 16px;
+  opacity: 0.5;
+  transition: background-color 0.3s;
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+
+.main-content {
+  margin-left: 280px;
+  margin-top: 64px;
+  padding: 32px;
+}
+
+.notes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.notes-title {
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text-primary);
+}
+
+.notes-count {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-left: 12px;
+  font-weight: 400;
+}

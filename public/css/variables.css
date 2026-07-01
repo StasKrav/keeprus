@@ -1,0 +1,136 @@
+/* ============================================
+   KEEPRUS — CSS-ПЕРЕМЕННЫЕ, СБРОС, БАЗА
+   ============================================ */
+
+:root {
+  --primary-color: #1a73e8;
+  --primary-dark: #0d47a1;
+  --surface-color: #ffffff;
+  --background-color: #f8f9fa;
+  --text-primary: #202124;
+  --text-secondary: #5f6368;
+  --border-color: #dadce0;
+  --shadow-1:
+    0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+  --shadow-2:
+    0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
+  --shadow-3:
+    0 4px 8px 3px rgba(60, 64, 67, 0.15), 0 1px 3px rgba(60, 64, 67, 0.3);
+  --radius: 8px;
+  --spacing: 16px;
+  --hover-bg: rgba(0, 0, 0, 0.04);
+  --hover-bg-dark: rgba(0, 0, 0, 0.08);
+  --search-bg: #f1f3f4;
+  --tag-bg: #f1f3f4;
+  --tag-hover: #e8eaed;
+  --modal-overlay: rgba(0, 0, 0, 0.5);
+  --toast-bg: #323232;
+  --toast-color: #ffffff;
+  --nav-active-bg: #e8f0fe;
+  --card-border-hover: var(--border-color);
+  --logo-color-1: #374151;
+  --logo-color-2: #6b7280;
+  --logo-color-3: #4b5563;
+  --logo-shadow: rgba(107, 114, 128, 0.2);
+
+  /* Пастельные цвета для заметок (светлая тема) */
+  --note-default: #ffffff;
+  --note-red: #fce8e6;
+  --note-orange: #fef3d7;
+  --note-yellow: #fef9e7;
+  --note-green: #e6f4ea;
+  --note-teal: #e0f7f5;
+  --note-blue: #e8f0fe;
+  --note-purple: #f3e8fd;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --primary-color: #8ab4f8;
+  --primary-dark: #669df6;
+  --surface-color: #1e1e1e;
+  --background-color: #121212;
+  --text-primary: #e8eaed;
+  --text-secondary: #9aa0a6;
+  --border-color: #3c4043;
+  --shadow-1: 0 1px 2px 0 rgba(0, 0, 0, 0.6), 0 1px 3px 1px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 1px 2px 0 rgba(0, 0, 0, 0.6), 0 2px 6px 2px rgba(0, 0, 0, 0.4);
+  --shadow-3: 0 4px 8px 3px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.5);
+  --hover-bg: rgba(255, 255, 255, 0.08);
+  --hover-bg-dark: rgba(255, 255, 255, 0.12);
+  --search-bg: #303134;
+  --tag-bg: #303134;
+  --tag-hover: #3c4043;
+  --modal-overlay: rgba(0, 0, 0, 0.7);
+  --toast-bg: #e8eaed;
+  --toast-color: #202124;
+  --nav-active-bg: rgba(138, 180, 248, 0.15);
+  --card-border-hover: #5f6368;
+
+  /* Приглушённые цвета для заметок (тёмная тема) */
+  --note-default: #2d2d2d;
+  --note-red: #332d2d;
+  --note-orange: #332f2d;
+  --note-yellow: #33332d;
+  --note-green: #2d332e;
+  --note-teal: #2d3332;
+  --note-blue: #2d2e33;
+  --note-purple: #302d33;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Comfortaa", "Roboto", sans-serif;
+  background: var(--surface-color);
+  color: var(--text-primary);
+  overflow-y: scroll;
+  scrollbar-width: thin;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Стилизация скроллбара */
+::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Убираем стандартную ручку ресайза */
+.editor-content::-webkit-resizer {
+  display: none !important;
+  background: transparent !important;
+}
+
+.editor-content {
+  resize: vertical;
+}

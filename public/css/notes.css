@@ -1,0 +1,524 @@
+/* ============================================
+   KEEPRUS — СТИЛИ ЗАМЕТОК: GRID, CARD, LIST, PIN, TAGS, ACTIONS
+   ============================================ */
+
+/* ============================================
+   NOTES GRID
+   ============================================ */
+
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  animation: containerIn 0.3s ease;
+}
+
+@keyframes containerIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ============================================
+   NOTE CARD
+   ============================================ */
+
+.note-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+  max-height: 420px;
+  padding: 0;
+  position: relative;
+  background: var(--surface-color);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transition: all 0.25s ease;
+  animation: cardAppear 0.3s ease-out;
+}
+
+.note-card:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+  border-color: var(--card-border-hover);
+}
+
+.note-card.removing {
+  animation: cardDisappear 0.25s ease-in forwards;
+}
+
+@keyframes cardAppear {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardDisappear {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+/* У белых заметок — рамка есть */
+.note-card.color-default {
+  border-color: var(--border-color);
+}
+
+/* У цветных — рамки нет */
+.note-card:not(.color-default) {
+  border-color: transparent !important;
+}
+
+/* ============================================
+   NOTE TITLE / CONTENT / FOOTER
+   ============================================ */
+
+.note-title {
+  padding: 16px 16px 0;
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+  word-wrap: break-word;
+}
+
+.note-content {
+  flex: 1;
+  padding: 0 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  overflow: hidden;
+  max-height: 200px;
+  position: relative;
+  word-wrap: break-word;
+}
+
+/* Градиент обрезки */
+.note-content::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to bottom, transparent, var(--surface-color));
+  pointer-events: none;
+}
+
+.note-date {
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  margin-left: auto;
+}
+
+.note-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+  padding: 8px 16px 12px;
+}
+
+/* ============================================
+   ТЭГИ НА КАРТОЧКЕ
+   ============================================ */
+
+.note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 14px 16px 2px;
+  flex-shrink: 0;
+  min-height: 28px;
+  align-items: center;
+}
+
+.note-tag {
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  position: relative;
+}
+
+.note-tag:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.tag-remove {
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.note-tag:hover .tag-remove {
+  opacity: 0.6;
+}
+
+/* ============================================
+   ДЕЙСТВИЯ НА КАРТОЧКЕ
+   ============================================ */
+
+.note-actions {
+  display: flex;
+  gap: 4px;
+  padding: 4px 12px 2px 12px;
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.note-actions .action-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  opacity: 0;
+}
+
+.note-card:hover .note-actions .action-button {
+  opacity: 1;
+}
+
+.action-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background 0.2s;
+}
+
+.action-button:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.action-button.active {
+  color: var(--primary-color);
+}
+
+/* ============================================
+   БУЛАВКА
+   ============================================ */
+
+.pin-icon {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  opacity: 0;
+  transition: opacity 0.2s ease, color 0.2s ease;
+  z-index: 5;
+}
+
+.note-card:hover .pin-icon {
+  opacity: 0.4;
+}
+
+.pin-icon:hover {
+  opacity: 1 !important;
+  color: #777777;
+}
+
+.note-card.pinned:hover .pin-icon {
+  opacity: 1;
+  color: #777777;
+}
+
+.note-card.pinned .pin-icon svg circle {
+  fill: none;
+  transition: fill 0.2s ease;
+}
+
+.note-card.pinned:hover .pin-icon svg path:first-child {
+  fill: #777777;
+}
+
+[data-theme="dark"] .pin-icon {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .pin-icon:hover {
+  color: #8ab4f8;
+}
+
+[data-theme="dark"] .note-card.pinned:hover .pin-icon {
+  color: #8ab4f8;
+}
+
+[data-theme="dark"] .note-card.pinned:hover .pin-icon svg circle {
+  fill: #8ab4f8;
+}
+
+/* ============================================
+   РЕЖИМ СПИСКА
+   ============================================ */
+
+.notes-grid.list-view {
+  display: block !important;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.notes-grid.list-view .note-card {
+  display: block !important;
+  width: 100% !important;
+  margin-bottom: 16px;
+  padding: 0;
+  min-height: auto !important;
+  max-height: none !important;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  margin: 0 auto 16px auto;
+}
+
+.notes-grid.list-view .note-card .note-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  white-space: normal;
+  padding: 16px 16px 0 16px;
+  margin: 0;
+}
+
+.notes-grid.list-view .note-card .note-content {
+  display: block !important;
+  max-height: none !important;
+  -webkit-line-clamp: unset !important;
+  -webkit-box-orient: unset !important;
+  overflow: visible !important;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  margin: 0;
+}
+
+.notes-grid.list-view .note-card .note-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: left;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 16px 12px;
+  margin: 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.notes-grid.list-view .note-card .note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.notes-grid.list-view .note-card .note-actions {
+  opacity: 0 !important;
+  transition: opacity 0.2s ease;
+}
+
+.notes-grid.list-view .note-card:hover .note-actions {
+  opacity: 1 !important;
+}
+
+.notes-grid.list-view .note-image {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+  display: block;
+  margin: 0 !important;
+  border-radius: 0;
+}
+
+.notes-grid.list-view .note-content::after {
+  display: none !important;
+}
+
+.notes-grid.list-view .note-actions .action-button {
+  opacity: 1 !important;
+}
+
+/* ============================================
+   ИЗОБРАЖЕНИЯ В ЗАМЕТКАХ
+   ============================================ */
+
+.note-image-wrapper {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+  border-radius: 8px 8px 0 0;
+}
+
+.note-image-wrapper img {
+  width: 100%;
+  height: auto;
+  max-height: 250px;
+  object-fit: cover;
+  display: block;
+  border-radius: 8px 8px 0 0;
+}
+
+.notes-grid.list-view .note-image-wrapper img {
+  max-height: 400px;
+}
+
+/* ============================================
+   ПОХОЖИЕ ЗАМЕТКИ
+   ============================================ */
+
+.note-similar {
+  padding: 8px 16px 4px;
+  margin: 0;
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.note-card:hover .note-similar {
+  opacity: 1;
+}
+
+.note-similar-title {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.note-similar-list {
+  padding: 12px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.note-similar-item {
+  display: inline-block;
+  padding: 2px 10px;
+  background: var(--hover-bg);
+  border-radius: 12px;
+  font-size: 9px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.note-similar-item:hover {
+  background: var(--hover-bg-dark);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .note-similar-item {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .note-similar-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================
+   НАПОМИНАНИЕ НА КАРТОЧКЕ
+   ============================================ */
+
+.note-reminder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px 6px 12px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  width: 100%;
+  transition: background 0.2s ease;
+}
+
+.note-reminder .reminder-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.note-reminder .reminder-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.note-reminder .reminder-delete {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 4px;
+  opacity: 0.3;
+  transition: opacity 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.note-reminder .reminder-delete:hover {
+  opacity: 1;
+  color: #d32f2f;
+}
+
+.note-card:hover .note-reminder {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .note-reminder {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .note-reminder .reminder-delete:hover {
+  color: #ef5350;
+}
+
+[data-theme="dark"] .note-card:hover .note-reminder {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================
+   ДОПОЛНИТЕЛЬНЫЕ ПЕРЕОПРЕДЕЛЕНИЯ
+   ============================================ */
+
+.note-content::after { display: none; }
+.note-content ul, .note-content ol { margin: 4px 0 4px 20px !important; }
