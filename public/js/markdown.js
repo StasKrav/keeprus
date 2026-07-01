@@ -96,6 +96,7 @@ function createNoteElement(note) {
     const div = document.createElement("div");
     div.className = `note-card ${note.color} ${note.pinned ? "pinned" : ""}`;
     div.setAttribute("data-id", note.id);
+    div.draggable = true;
 
     // Булавка
     const pinIcon = document.createElement('div');

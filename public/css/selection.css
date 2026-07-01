@@ -1,0 +1,220 @@
+/* js/styles/selection.css */
+
+/* ============================================
+   ВЫДЕЛЕННАЯ ЗАМЕТКА
+   ============================================ */
+
+.note-card {
+    transition: transform 0.15s ease, 
+                outline 0.15s ease,
+                background 0.15s ease;
+}
+
+.note-card.selected {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    background: var(--selection-bg);
+    transform: scale(1.02);
+    z-index: 5;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .note-card.selected {
+    background: rgba(138, 180, 248, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.note-card.selected .note-actions .action-button {
+    opacity: 1; /* Показываем кнопки на выделенной заметке */
+}
+
+/* ============================================
+   ИНДИКАТОР ВЫДЕЛЕНИЯ (рамка)
+   ============================================ */
+
+.note-card.selected::before {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--surface-color), 0 0 0 4px var(--primary-color);
+}
+
+[data-theme="dark"] .note-card.selected::before {
+    box-shadow: 0 0 0 2px var(--surface-color), 0 0 0 4px #8ab4f8;
+}
+
+/* ============================================
+   КОНТЕКСТНОЕ МЕНЮ
+   ============================================ */
+
+.context-menu {
+    position: fixed;
+    min-width: 200px;
+    background: var(--surface-color);
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    padding: 6px 0;
+    z-index: 1000;
+    border: 1px solid var(--border-color);
+    animation: contextMenuIn 0.12s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+@keyframes contextMenuIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+[data-theme="dark"] .context-menu {
+    background: rgba(30, 30, 30, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-color: var(--border-color);
+}
+
+.context-info {
+    padding: 8px 16px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    cursor: default;
+    user-select: none;
+}
+
+.context-divider {
+    height: 1px;
+    margin: 4px 12px;
+    background: var(--border-color);
+}
+
+.context-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.1s ease;
+    text-align: left;
+}
+
+.context-item:hover {
+    background: var(--hover-bg);
+}
+
+.context-item:active {
+    background: var(--hover-bg-dark);
+}
+
+.context-item.danger {
+    color: #dc2626;
+}
+
+.context-item.danger:hover {
+    background: rgba(220, 38, 38, 0.08);
+}
+
+[data-theme="dark"] .context-item.danger {
+    color: #ef4444;
+}
+
+[data-theme="dark"] .context-item.danger:hover {
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.context-icon {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.context-label {
+    flex: 1;
+}
+
+/* ============================================
+   ЦВЕТОВОЙ ПИКЕР (для массового изменения)
+   ============================================ */
+
+.color-picker-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: overlayIn 0.2s ease;
+}
+
+.color-picker-dialog {
+    background: var(--surface-color);
+    border-radius: 12px;
+    padding: 20px;
+    min-width: 280px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.color-picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.color-picker-header button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 0 4px;
+}
+
+.color-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.color-picker-grid .color-option {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.color-picker-grid .color-option:hover {
+    transform: scale(1.1);
+}
+
+.color-picker-grid .color-option:active {
+    transform: scale(0.95);
+}
+
+[data-theme="dark"] .color-picker-dialog-overlay {
+    background: rgba(0, 0, 0, 0.6);
+}

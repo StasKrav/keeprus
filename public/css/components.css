@@ -475,3 +475,57 @@
 [data-theme="dark"] .menu-item:hover .menu-icon {
   color: var(--text-primary);
 }
+
+/* ============================================
+   КНОПКА "ОЧИСТИТЬ КОРЗИНУ" (как в Google Keep)
+   ============================================ */
+
+.trash-clear-inline {
+    display: none;
+    text-align: center;
+    padding: 12px 0 20px 0;
+    grid-column: 1 / -1;
+    /* border-bottom: 1px solid var(--border-color); */
+    margin-bottom: 20px;
+}
+
+.trash-clear-text {
+    font-size: 13px;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    user-select: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+}
+
+.trash-clear-text:hover {
+    background: var(--hover-bg);
+    color: var(--primary-dark);
+}
+
+.trash-clear-text:active {
+    transform: scale(0.97);
+}
+
+[data-theme="dark"] .trash-clear-text {
+    color: #8ab4f8;
+}
+
+[data-theme="dark"] .trash-clear-text:hover {
+    background: rgba(138, 180, 248, 0.08);
+    color: #8ab4f8;
+}
+
+/* Стиль для пустой корзины — без кнопки */
+.empty-state h2 {
+    font-weight: 400;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    font-size: 14px;
+}

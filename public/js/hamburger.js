@@ -46,7 +46,7 @@ function closeHamburgerMenu() {
 }
 
 // ============================================
-// ОБНОВЛЕНИЕ СОДЕРЖИМОГО МЕНЮ (БЕЗ ЭМОДЗИ)
+// ОБНОВЛЕНИЕ СОДЕРЖИМОГО МЕНЮ (БЕЗ ОЧИСТКИ КОРЗИНЫ)
 // ============================================
 
 function updateMenuContent() {
@@ -66,13 +66,7 @@ function updateMenuContent() {
             </button>
         </div>
         
-        <div class="menu-section">
-            <button class="menu-item" onclick="clearTrash(); closeHamburgerMenu();">
-                <span class="menu-label">Очистить корзину</span>
-            </button>
-        </div>
-        
-
+        <!-- Пункт "Очистить корзину" удалён — теперь он в корзине -->
     `;
 }
 

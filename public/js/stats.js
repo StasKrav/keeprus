@@ -201,7 +201,6 @@ function renderStats() {
         ${stats.topTags.length > 0 ? `
             <div class="stats-section">
                 <div class="stats-section-title">
-                    ${Icons.tag}
                     Популярные теги
                 </div>
                 <div class="stats-tags-list">
@@ -212,8 +211,7 @@ function renderStats() {
         
         <div class="stats-section">
             <div class="stats-section-title">
-                ${Icons.chart}
-                Активность по дням
+             Активность по дням
             </div>
             <div class="stats-bars">
                 ${barsHtml}

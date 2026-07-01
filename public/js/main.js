@@ -102,6 +102,7 @@ async function init() {
     setView(savedView || 'grid');
     
     renderNotes(false);
+    setupDragAndDrop();
     setupSearch();
     updateCounts();
     loadColorFilterState();
@@ -252,3 +253,4 @@ async function init() {
 
 // Start the app
 init();
+

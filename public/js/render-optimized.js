@@ -54,6 +54,10 @@ function getFilteredNotes() {
 // ОСНОВНАЯ ФУНКЦИЯ РЕНДЕРА
 // ============================================
 
+// ============================================
+// ОСНОВНАЯ ФУНКЦИЯ РЕНДЕРА
+// ============================================
+
 function renderNotes(keepScroll = true) {
     const container = document.getElementById("notesContainer");
     if (!container) return;
@@ -64,33 +68,65 @@ function renderNotes(keepScroll = true) {
     if (filtered.length === 0) {
         cardCache.clear();
         renderedIds.clear();
+        
+        // === ДЛЯ КОРЗИНЫ ПОКАЗЫВАЕМ ОСОБЫЙ EMPTY-STATE ===
+        if (currentFilter === 'trash') {
+            container.innerHTML = `
+                <div class="empty-state" style="grid-column: 1/-1;">
+                    <svg width="64" height="64" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M80,144 L432,144" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                                        <path d="M176,80 L336,80" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                                        <path d="M112,144 L144,432" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                                        <path d="M400,144 L368,432" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                                        <path d="M368,432 L144,432" stroke="currentColor" stroke-width="32" fill="none" stroke-linecap="round"/>
+                                    </svg>
+                    <h2>Корзина пуста</h2>
+                    <p>Удаленные заметки будут здесь</p>
+                </div>
+            `;
+            return;
+        }
+        
         container.innerHTML = `
             <div class="empty-state" style="grid-column: 1/-1;">
-                ${currentFilter === 'trash' ? `
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 6h18"/>
-                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-                        <path d="M10 11v6"/>
-                        <path d="M14 11v6"/>
-                    </svg>
-                ` : `
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v4"/>
-                        <path d="M12 18v4"/>
-                        <path d="M4.93 4.93l2.83 2.83"/>
-                        <path d="M16.24 16.24l2.83 2.83"/>
-                        <path d="M2 12h4"/>
-                        <path d="M18 12h4"/>
-                        <path d="M4.93 19.07l2.83-2.83"/>
-                        <path d="M16.24 7.76l2.83-2.83"/>
-                    </svg>
-                `}
-                <h2>${currentFilter === 'trash' ? 'Корзина пуста' : 'Нет заметок'}</h2>
-                <p>${currentFilter === 'trash' ? 'Удаленные заметки будут здесь' : 'Создайте новую заметку, нажав на кнопку +'}</p>
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v4"/>
+                    <path d="M12 18v4"/>
+                    <path d="M4.93 4.93l2.83 2.83"/>
+                    <path d="M16.24 16.24l2.83 2.83"/>
+                    <path d="M2 12h4"/>
+                    <path d="M18 12h4"/>
+                    <path d="M4.93 19.07l2.83-2.83"/>
+                    <path d="M16.24 7.76l2.83-2.83"/>
+                </svg>
+                <h2>Нет заметок</h2>
+                <p>Создайте новую заметку, нажав на кнопку +</p>
             </div>
         `;
         return;
+    }
+
+    // === ЕСЛИ МЫ В КОРЗИНЕ И ЕСТЬ ЗАМЕТКИ — ПОКАЗЫВАЕМ КНОПКУ "ОЧИСТИТЬ" ===
+    if (currentFilter === 'trash') {
+        // Проверяем, есть ли уже кнопка очистки
+        let clearBtn = document.getElementById('trashClearBtnInline');
+        if (!clearBtn) {
+            clearBtn = document.createElement('div');
+            clearBtn.id = 'trashClearBtnInline';
+            clearBtn.className = 'trash-clear-inline';
+            clearBtn.innerHTML = `
+                <span class="trash-clear-text" onclick="clearTrash()">Очистить корзину</span>
+            `;
+            // Вставляем перед контейнером заметок
+            container.parentNode.insertBefore(clearBtn, container);
+        }
+        clearBtn.style.display = 'block';
+    } else {
+        // Убираем кнопку, если не в корзине
+        const clearBtn = document.getElementById('trashClearBtnInline');
+        if (clearBtn) {
+            clearBtn.style.display = 'none';
+        }
     }
 
     let scrollTop = 0;
@@ -185,6 +221,10 @@ function renderNotes(keepScroll = true) {
     // Обновляем статистику, если она открыта
     if (typeof updateStatsIfVisible === 'function') {
         updateStatsIfVisible();
+    }
+
+    if (typeof setupDragAndDrop === 'function') {
+        setTimeout(setupDragAndDrop, 100);
     }
 }
 
