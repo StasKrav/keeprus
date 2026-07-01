@@ -235,14 +235,14 @@ async function init() {
         Notification.requestPermission();
     }
 
-    // Register Service Worker for PWA offline support
-    if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("./sw.js").then((reg) => {
-            console.log("✅ Service Worker registered:", reg.scope);
-        }).catch((err) => {
-            console.warn("⚠️ Service Worker registration failed:", err);
-        });
-    }
+    // // Register Service Worker for PWA offline support
+    // if ("serviceWorker" in navigator) {
+    //     navigator.serviceWorker.register("./sw.js").then((reg) => {
+    //         console.log("✅ Service Worker registered:", reg.scope);
+    //     }).catch((err) => {
+    //         console.warn("⚠️ Service Worker registration failed:", err);
+    //     });
+    // }
 
     console.log("✨ Keeprus полностью функционален!");
     console.log("📝 Горячие клавиши: Ctrl+N - новая заметка, Ctrl+S - сохранить");
