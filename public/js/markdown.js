@@ -130,7 +130,6 @@ function createNoteElement(note) {
     
     let renderedContent = renderMarkdown(contentPreview, note.id);
 
-    // ⬇️⬇️⬇️ ЕДИНСТВЕННОЕ ИЗМЕНЕНИЕ ⬇️⬇️⬇️
     // Вырезаем картинку из контента
     let imageHtml = '';
     let textHtml = renderedContent;
@@ -139,7 +138,7 @@ function createNoteElement(note) {
         imageHtml = imgMatch[0];
         textHtml = renderedContent.replace(imgMatch[0], '');
     }
-    // ⬆️⬆️⬆️ КОНЕЦ ИЗМЕНЕНИЯ ⬆️⬆️⬆️
+
 
     // ============================================
     // ПОХОЖИЕ ЗАМЕТКИ
@@ -283,7 +282,6 @@ function createNoteElement(note) {
     const contentWrapper = document.createElement("div");
     contentWrapper.style.cssText = "position:relative;z-index:1;flex:1;display:flex;flex-direction:column;";
     
-    // ⬇️⬇️⬇️ СБОРКА С КАРТИНКОЙ ⬇️⬇️⬇️
     let html = '';
     
     if (imageHtml) {
@@ -311,7 +309,7 @@ function createNoteElement(note) {
     html += `<div class="note-actions">${actionsHtml}</div>`;
     
     contentWrapper.innerHTML = html;
-    // ⬆️⬆️⬆️ КОНЕЦ СБОРКИ ⬆️⬆️⬆️
+
 
     div.appendChild(pinIcon);
     div.appendChild(contentWrapper);
