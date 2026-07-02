@@ -23,6 +23,17 @@ async function loadNotes() {
     if (saved) {
         try {
             notes = JSON.parse(saved);
+            
+            // ✅ МИГРАЦИЯ ДАННЫХ: добавляем поле tags если его нет
+            notes.forEach(note => {
+                if (!note.tags || !Array.isArray(note.tags)) {
+                    note.tags = [];
+                }
+                if (!note.history || !Array.isArray(note.history)) {
+                    note.history = [];
+                }
+            });
+            
             return;
         } catch (e) {
             console.error('Ошибка загрузки:', e);
@@ -39,11 +50,17 @@ async function loadNotes() {
 
 async function saveNotes() {
     try {
+        // ✅ Убеждаемся, что у всех заметок есть поле tags
+        notes.forEach(n => {
+            if (!n.tags || !Array.isArray(n.tags)) {
+                n.tags = [];
+            }
+        });
+        
         localStorage.setItem('keeprus_notes_fallback', JSON.stringify(notes));
         hasUnsavedChanges = false;
         updateCounts();
         
-        // Обновляем статистику, если она открыта
         if (typeof scheduleStatsUpdate === 'function') {
             scheduleStatsUpdate();
         }

@@ -117,6 +117,7 @@
   gap: 10px;
   margin-top: auto;
   padding: 8px 16px 12px;
+  min-height: 50px;
 }
 
 /* ============================================
@@ -127,11 +128,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  padding: 14px 16px 2px;
+  padding: 2px 16px 2px;
   flex-shrink: 0;
   min-height: 28px;
   align-items: center;
   margin-top: auto;
+  visibility: visible;
 }
 
 .note-tag {
@@ -229,7 +231,9 @@
   gap: 4px;
   padding: 4px 12px 2px 12px;
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: auto;
+  min-height: 32px;
+  visibility: visible;
 }
 
 .note-actions .action-button {
@@ -582,3 +586,16 @@
 .note-content::after { display: none; }
 .note-content ul, .note-content ol { margin: 4px 0 4px 20px !important; }
 
+/* Вариант: проверяем наличие дочернего элемента .note-title */
+.note-card:not(:has(.note-title)) .note-content {
+    padding-top: 16px;
+}
+
+/* Или для старых браузеров — используем общий отступ */
+.note-content {
+    padding: 16px 16px 0 16px;  /* ← ОТСТУПЫ ВСЕГДА */
+}
+
+.note-card .note-title + .note-content {
+    padding-top: 0;  /* ← УБИРАЕМ ОТСТУП, ЕСЛИ ЕСТЬ ЗАГОЛОВОК */
+}

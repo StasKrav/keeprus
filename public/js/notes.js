@@ -122,7 +122,6 @@ function saveNoteSilent() {
             title: title || "",
             content: content || "",
             color: currentColor,
-            tags: ["Новое"],
             pinned: isPinned,
             archived: isArchived,
             trashed: false,

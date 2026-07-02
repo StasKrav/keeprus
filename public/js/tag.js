@@ -210,12 +210,18 @@ function applyTagFilter() {
 
 function renderTags() {
     const container = document.getElementById('tagList');
+    if (!container) return;
+    
     container.innerHTML = '';
     
     const tagMap = new Map();
     notes.filter(n => !n.trashed && !n.archived).forEach(n => {
+        // ✅ ЗАЩИТА ОТ UNDEFINED
+        if (!n.tags || !Array.isArray(n.tags)) return;
         n.tags.forEach(t => {
-            tagMap.set(t, (tagMap.get(t) || 0) + 1);
+            if (t && typeof t === 'string') {
+                tagMap.set(t, (tagMap.get(t) || 0) + 1);
+            }
         });
     });
     

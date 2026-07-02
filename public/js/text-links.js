@@ -147,10 +147,14 @@ function findSimilarNotes(text, currentNoteId, limit) {
         
         const noteObj = notes.find(function(n) { return n.id === currentNoteId; });
         if (noteObj) {
-            const commonTags = noteObj.tags.filter(function(t) {
-                return note.tags.includes(t);
-            });
-            score += commonTags.length * 2;
+            // ✅ ПРОВЕРКА НА СУЩЕСТВОВАНИЕ ТЕГОВ
+            if (noteObj.tags && Array.isArray(noteObj.tags) && 
+                note.tags && Array.isArray(note.tags)) {
+                const commonTags = noteObj.tags.filter(function(t) {
+                    return note.tags.includes(t);
+                });
+                score += commonTags.length * 2;
+            }
         }
         
         return { ...note, score: score };
@@ -163,12 +167,13 @@ function findSimilarNotes(text, currentNoteId, limit) {
 }
 
 function renderSimilarNotesBlock(note) {
+    // ✅ ПРОВЕРКА: есть ли контент для поиска похожих
+    if (!note || !note.content || note.content.length < 10) return '';
+    
     const similar = findSimilarNotes(note.content, note.id);
     if (similar.length === 0) return '';
     
     let html = '';
-    // html += '<div class="note-similar">';
-    // html += '<div class="note-similar-title">Похожие заметки</div>';
     html += '<div class="note-similar-list">';
     
     similar.forEach(function(n) {
