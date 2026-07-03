@@ -607,62 +607,178 @@
 }
 
 /* ============================================
-   ПОХОЖИЕ ЗАМЕТКИ
+   ПОХОЖИЕ ЗАМЕТКИ — УЛУЧШЕННАЯ ВЕРСИЯ
    ============================================ */
 
 .note-similar {
-  padding: 8px 16px 4px;
-  margin: 0;
-  border-top: 1px solid var(--border-color);
-  flex-shrink: 0;
+    padding: 4px 16px 2px 16px;
+    margin: 0;
+    flex-shrink: 0;
+    border-top: 1px solid var(--border-color);
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
 }
 
 .note-card:hover .note-similar {
-  opacity: 1;
+    opacity: 1;
 }
 
 .note-similar-title {
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.6;
 }
 
 .note-similar-list {
-  padding: 12px 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+    display: flex;
+    flex-wrap: wrap;           /* ← РАЗРЕШАЕМ ПЕРЕНОС НА НЕСКОЛЬКО СТРОК */
+    gap: 4px;
+    padding: 2px 0 4px 0;
+    max-height: 60px;          /* ← ОГРАНИЧИВАЕМ ВЫСОТУ */
+    overflow-y: auto;          /* ← СКРОЛЛ, ЕСЛИ МНОГО */
+    align-items: center;
 }
 
 .note-similar-item {
-  display: inline-block;
-  padding: 2px 10px;
-  background: var(--hover-bg);
-  border-radius: 12px;
-  font-size: 9px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
+    display: inline-block;
+    padding: 2px 10px;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    font-size: 9px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    max-width: 100px;          /* ← ОГРАНИЧИВАЕМ ШИРИНУ */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: none;
+    flex-shrink: 0;
 }
 
 .note-similar-item:hover {
-  background: var(--hover-bg-dark);
-  color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.08);  /* ← такой же hover как у тэгов */
+    color: var(--text-secondary);      /* ← цвет не меняется */
+    transform: translateY(-1px);
+    opacity: 1;
 }
 
+.note-similar-more {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 8px;
+    color: var(--text-secondary);
+    opacity: 0.5;
+    cursor: pointer; 
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Скрываем скроллбар для похожих заметок */
+.note-similar-list::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+}
+
+.note-similar-list::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+}
+
+/* Тёмная тема */
 [data-theme="dark"] .note-similar-item {
-  background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 [data-theme="dark"] .note-similar-item:hover {
-  background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+    color: #8ab4f8;
+    border-color: #8ab4f8;
+}
+
+[data-theme="dark"] .note-similar-more {
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   ПОПАП СО ВСЕМИ ПОХОЖИМИ ЗАМЕТКАМИ
+   ============================================ */
+
+.similar-popup {
+    position: fixed;
+    background: var(--surface-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 6px 0;
+    z-index: 1000;
+    min-width: 200px;
+    max-width: 300px;
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    animation: popupIn 0.15s ease;
+}
+
+.similar-popup-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.similar-popup-item:last-child {
+    border-bottom: none;
+}
+
+.similar-popup-item:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.similar-popup-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.similar-popup-preview {
+    font-size: 11px;
+    color: var(--text-secondary);
+    opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Тёмная тема */
+[data-theme="dark"] .similar-popup {
+    background: rgba(30, 30, 30, 0.95);
+    backdrop-filter: blur(8px);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .similar-popup-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Стили для скролла */
+.similar-popup::-webkit-scrollbar {
+    width: 3px;
+}
+
+.similar-popup::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
 }
 
 /* ============================================

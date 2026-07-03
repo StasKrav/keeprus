@@ -167,25 +167,110 @@ function findSimilarNotes(text, currentNoteId, limit) {
 }
 
 function renderSimilarNotesBlock(note) {
-    // ✅ ПРОВЕРКА: есть ли контент для поиска похожих
+    // Проверка: есть ли контент для поиска похожих
     if (!note || !note.content || note.content.length < 10) return '';
     
-    const similar = findSimilarNotes(note.content, note.id);
+    const similar = findSimilarNotes(note.content, note.id, 5);
+    
     if (similar.length === 0) return '';
     
-    let html = '';
+    // Ограничиваем количество отображаемых
+    const maxDisplay = 4;
+    const displaySimilar = similar.slice(0, maxDisplay);
+    const hasMore = similar.length > maxDisplay;
+    
+    let html = '<div class="note-similar">';
     html += '<div class="note-similar-list">';
     
-    similar.forEach(function(n) {
-        html += '<span class="note-similar-item" onclick="openNoteFromLink(' + n.id + ', event)">';
-        html += (n.title || 'Без названия');
+    displaySimilar.forEach(function(n) {
+        let title = n.title || 'Без названия';
+        if (title.length > 18) {
+            title = title.slice(0, 16) + '…';
+        }
+        html += '<span class="note-similar-item" onclick="openNoteFromLink(' + n.id + ', event)" title="' + escapeHtml(n.title || 'Без названия') + '">';
+        html += escapeHtml(title);
         html += '</span>';
     });
+    
+    if (hasMore) {
+        // ✅ ДОБАВЛЯЕМ КЛИК ДЛЯ ПОКАЗА ВСЕХ ПОХОЖИХ
+        html += '<span class="note-similar-more" onclick="showAllSimilarNotes(' + note.id + ', event)">+' + (similar.length - maxDisplay) + '</span>';
+    }
     
     html += '</div>';
     html += '</div>';
     
     return html;
+}
+
+// ============================================
+// ПОКАЗ ВСЕХ ПОХОЖИХ ЗАМЕТОК
+// ============================================
+
+function showAllSimilarNotes(noteId, event) {
+    event.stopPropagation();
+    
+    const note = notes.find(n => n.id === noteId);
+    if (!note || !note.content) return;
+    
+    const similar = findSimilarNotes(note.content, note.id, 10); // показываем до 10
+    
+    if (similar.length === 0) return;
+    
+    // Закрываем старый попап
+    closeSimilarPopup();
+    
+    // Создаём попап
+    const popup = document.createElement('div');
+    popup.className = 'similar-popup';
+    popup.id = 'similarPopup';
+    
+    popup.innerHTML = similar.map(function(n) {
+        let title = n.title || 'Без названия';
+        return `
+            <div class="similar-popup-item" onclick="openNoteFromLink(${n.id}, event)">
+                <span class="similar-popup-title">${escapeHtml(title)}</span>
+                <span class="similar-popup-preview">${escapeHtml(n.content.slice(0, 40))}${n.content.length > 40 ? '…' : ''}</span>
+            </div>
+        `;
+    }).join('');
+    
+    // Позиционируем
+    const rect = event.target.getBoundingClientRect();
+    const popupWidth = 260;
+    let left = rect.left;
+    let top = rect.bottom + 4;
+    
+    if (left + popupWidth > window.innerWidth - 10) {
+        left = window.innerWidth - popupWidth - 10;
+    }
+    if (top + 250 > window.innerHeight - 10) {
+        top = rect.top - 250 - 4;
+    }
+    
+    popup.style.left = left + 'px';
+    popup.style.top = top + 'px';
+    
+    document.body.appendChild(popup);
+    window._similarPopup = popup;
+    
+    // Закрытие по клику вне
+    setTimeout(function() {
+        document.addEventListener('click', closeSimilarPopupHandler, { once: true });
+    }, 10);
+}
+
+function closeSimilarPopupHandler(e) {
+    if (e && e.target.closest && e.target.closest('.similar-popup')) return;
+    closeSimilarPopup();
+}
+
+function closeSimilarPopup() {
+    const popup = document.getElementById('similarPopup');
+    if (popup) {
+        popup.remove();
+    }
+    document.removeEventListener('click', closeSimilarPopupHandler);
 }
 
 // createNoteElement уже вызывает renderSimilarNotesBlock напрямую (в markdown.js)
@@ -197,5 +282,6 @@ window.renderTextWithLinks = renderTextWithLinks;
 window.openNoteFromLink = openNoteFromLink;
 window.findSimilarNotes = findSimilarNotes;
 window.renderSimilarNotesBlock = renderSimilarNotesBlock;
-
+window.showAllSimilarNotes = showAllSimilarNotes;
+window.closeSimilarPopup = closeSimilarPopup;
 console.log('Умные ссылки загружены');

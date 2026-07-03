@@ -754,3 +754,19 @@ function removeReminderFromCard(noteId) {
     
     showToast('Напоминание удалено');
 }
+
+// ============================================
+// ОБНОВЛЕНИЕ ВСЕХ ПОХОЖИХ ЗАМЕТОК
+// ============================================
+
+function updateAllSimilarNotes() {
+    document.querySelectorAll('.note-card').forEach(card => {
+        const id = parseInt(card.dataset.id);
+        if (!isNaN(id) && typeof updateSimilarNotes === 'function') {
+            updateSimilarNotes(id);
+        }
+    });
+}
+
+// Экспортируем
+window.updateAllSimilarNotes = updateAllSimilarNotes;

@@ -429,8 +429,32 @@ function createTagsWithMore(note) {
     return html;
 }
 
+// ============================================
+// ОБНОВЛЕНИЕ ПОХОЖИХ ЗАМЕТОК
+// ============================================
 
-// В конце файла tag.js
+function updateSimilarNotes(noteId) {
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+    
+    const card = document.querySelector(`.note-card[data-id="${noteId}"]`);
+    if (!card) return;
+    
+    // Находим блок похожих заметок
+    const similarBlock = card.querySelector('.note-similar');
+    if (!similarBlock) return;
+    
+    // Пересоздаём блок
+    const newSimilarHtml = renderSimilarNotesBlock(note);
+    if (newSimilarHtml) {
+        similarBlock.outerHTML = newSimilarHtml;
+    } else {
+        similarBlock.remove();
+    }
+}
+
+// Вызывать при добавлении/удалении заметок
+window.updateSimilarNotes = updateSimilarNotes;
 window.createTagsWithMore = createTagsWithMore;
 window.showTagsPopup = showTagsPopup;
 window.closeTagsPopup = closeTagsPopup;

@@ -61,6 +61,11 @@ async function saveNotes() {
         hasUnsavedChanges = false;
         updateCounts();
         
+        // ✅ ОБНОВЛЯЕМ ПОХОЖИЕ ЗАМЕТКИ
+        if (typeof updateAllSimilarNotes === 'function') {
+            updateAllSimilarNotes();
+        }
+        
         if (typeof scheduleStatsUpdate === 'function') {
             scheduleStatsUpdate();
         }
