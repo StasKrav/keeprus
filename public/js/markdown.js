@@ -149,17 +149,23 @@ function createNoteElement(note) {
     }
 
     // ============================================
-    // ТЭГИ
+    // ТЭГИ С АВТО-СВЁРТЫВАНИЕМ
     // ============================================
     
     let tagsHtml = '';
     if (note.tags && note.tags.length > 0) {
-        tagsHtml = note.tags.map(tag => `
-            <span class="note-tag" data-tag="${escapeHtml(tag)}">
-                <span class="tag-text" onclick="filterByTag('${escapeHtml(tag)}', event)">${escapeHtml(tag)}</span>
-                <span class="tag-remove" onclick="event.stopPropagation(); removeTagFromCard(${note.id}, '${escapeHtml(tag)}', event)" title="Удалить ярлык">×</span>
-            </span>
-        `).join('');
+        // Используем функцию из tag.js для умного отображения
+        if (typeof createTagsWithMore === 'function') {
+            tagsHtml = createTagsWithMore(note);
+        } else {
+            // Fallback
+            tagsHtml = note.tags.map(tag => `
+                <span class="note-tag" data-tag="${escapeHtml(tag)}" title="${escapeHtml(tag)}">
+                    <span class="tag-text" onclick="filterByTag('${escapeHtml(tag)}', event)">${escapeHtml(tag)}</span>
+                    <span class="tag-remove" onclick="event.stopPropagation(); removeTagFromCard(${note.id}, '${escapeHtml(tag)}', event)" title="Удалить ярлык">×</span>
+                </span>
+            `).join('');
+        }
     }
 
     // ============================================

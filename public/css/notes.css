@@ -121,22 +121,26 @@
 }
 
 /* ============================================
-   ТЭГИ НА КАРТОЧКЕ
+   ТЭГИ С АВТО-СВЁРТЫВАНИЕМ
    ============================================ */
 
 .note-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 2px 16px 2px;
-  flex-shrink: 0;
-  min-height: 28px;
-  align-items: center;
-  /* margin-top: auto; */
-  /* visibility: visible; */
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 4px;
+    padding: 0;
+    min-height: 24px;
+    align-items: center;
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
 }
 
 .note-tag {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     display: inline-flex;
     align-items: center;
     gap: 2px;
@@ -147,14 +151,162 @@
     font-weight: 500;
     color: var(--text-secondary);
     cursor: default;
-    transition: background 0.2s;
-    white-space: nowrap;
+    transition: all 0.2s ease;
+    position: relative;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.note-tag:hover {
+	max-width: 150px;  
+    background: rgba(0, 0, 0, 0.08);
+}
+
+/* Кнопка "ещё" (+N) */
+.note-tags-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.04); 
+    color: var(--text-secondary); 
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    border: none;
     position: relative;
     user-select: none;
 }
 
-.note-tag:hover {
-    background: rgba(0, 0, 0, 0.08);
+.note-tags-more:hover {
+	background: rgba(0, 0, 0, 0.08);
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
+}
+
+.note-tags-more:active {
+    transform: scale(0.95);
+}
+
+[data-theme="dark"] .note-tag {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .note-tag:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+[data-theme="dark"] .note-tags-more {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+}
+
+/* Подсказка при наведении на обрезанный тэг */
+.note-tag[title]:hover::after {
+    content: attr(title);
+    position: fixed;
+    background: var(--surface-color);
+    color: var(--text-primary);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 100;
+    border: 1px solid var(--border-color);
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateY(-30px);
+}
+
+/* ============================================
+   ВСПЛЫВАЮЩИЙ СПИСОК ТЭГОВ
+   ============================================ */
+
+.tags-popup {
+    position: fixed;
+    background: var(--surface-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 8px;
+    z-index: 1000;
+    min-width: 150px;
+    max-width: 250px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    animation: popupIn 0.15s ease;
+}
+
+@keyframes popupIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.tags-popup-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    font-size: 13px;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.tags-popup-item:hover {
+    background: var(--hover-bg);
+}
+
+.tags-popup-item .tag-color {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--primary-color);
+}
+
+.tags-popup-item .tag-name {
+    flex: 1;
+}
+
+.tags-popup-item .tag-remove-popup {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding: 0 4px;
+}
+
+.tags-popup-item:hover .tag-remove-popup {
+    opacity: 0.5;
+}
+
+.tags-popup-item .tag-remove-popup:hover {
+    opacity: 1 !important;
+    color: #d32f2f;
+}
+
+[data-theme="dark"] .tags-popup {
+    background: rgba(30, 30, 30, 0.95);
+    backdrop-filter: blur(8px);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .tags-popup-item:hover {
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .note-tag .tag-text {
