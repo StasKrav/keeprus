@@ -139,7 +139,6 @@ function createNoteElement(note) {
         textHtml = renderedContent.replace(imgMatch[0], '');
     }
 
-
     // ============================================
     // ПОХОЖИЕ ЗАМЕТКИ
     // ============================================
@@ -162,6 +161,7 @@ function createNoteElement(note) {
             </span>
         `).join('');
     }
+
     // ============================================
     // НАПОМИНАНИЕ
     // ============================================
@@ -289,7 +289,7 @@ function createNoteElement(note) {
     }
     
     if (note.title) {
-        html += `<div class="note-title">${note.title}</div>`;
+        html += `<div class="note-title">${escapeHtml(note.title)}</div>`;
     }
     
     if (textHtml.trim()) {
@@ -302,15 +302,31 @@ function createNoteElement(note) {
         html += `<div style="padding: 0 16px;">${reminderHtml}</div>`;
     }
     
-    if (tagsHtml) {
-        html += `<div class="note-tags">${tagsHtml}</div>`;
-    }
-    
-    html += `<div class="note-actions">${actionsHtml}</div>`;
-    
     contentWrapper.innerHTML = html;
 
+    // ============================================
+    // ⭐ НИЖНИЙ КОНТЕЙНЕР (ТЭГИ + ДЕЙСТВИЯ) — ФИКСИРОВАННОЕ РАССТОЯНИЕ
+    // ============================================
+    
+    const bottomContainer = document.createElement("div");
+    bottomContainer.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        min-height: 76px;
+        padding: 0 16px 2px 16px;
+        margin-top: auto;
+        flex-shrink: 0;
+    `;
 
+    // Собираем тэги и действия в bottomContainer
+    bottomContainer.innerHTML = `
+        ${tagsHtml ? `<div class="note-tags" style="padding: 4px 0 0 0;">${tagsHtml}</div>` : `<div class="note-tags" style="padding: 4px 0 6px 0; min-height: 28px;"></div>`}
+        <div class="note-actions" style="padding: 2px 0 0 0; min-height: 36px; display: flex; align-items: center; gap: 4px;">${actionsHtml}</div>
+    `;
+
+    // Добавляем bottomContainer в contentWrapper
+    contentWrapper.appendChild(bottomContainer);
     div.appendChild(pinIcon);
     div.appendChild(contentWrapper);
 
