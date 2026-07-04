@@ -340,14 +340,13 @@ function closeSimilarPopup() {
 function renderWikiLinks(text, currentNoteId) {
     if (!text) return text;
     
-    // Ищем все [[Заголовок]]
-    const linkRegex = /\[\[([^\]]+)\]\]/g;
+    // Простое и надёжное регулярное выражение
+    const linkRegex = /\[\[([^\]]+?)(?:\|([^\]]+?))?\]\]/g;
     
-    // Заменяем каждое совпадение
-    return text.replace(linkRegex, function(match, title) {
+    return text.replace(linkRegex, function(match, title, altText) {
         const cleanTitle = title.trim();
+        const displayText = (altText || cleanTitle).trim();
         
-        // Ищем заметку с таким заголовком
         const note = notes.find(function(n) {
             return n.title && n.title.toLowerCase() === cleanTitle.toLowerCase() && 
                    !n.trashed && 
@@ -355,22 +354,22 @@ function renderWikiLinks(text, currentNoteId) {
         });
         
         if (note) {
-            // ✅ Нашли заметку — создаем ссылку
-            return `<span class="text-link" onclick="openNoteFromLink(${note.id}, event)" 
-                          data-note-id="${note.id}"
-                          title="Открыть заметку: ${cleanTitle}">
-                          ${cleanTitle}
-                          <svg class="link-icon" width="14" height="14" viewBox="0 0 24 24" 
-                               fill="none" stroke="currentColor" stroke-width="2.5" 
-                               stroke-linecap="round" stroke-linejoin="round">
-                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                              <polyline points="15 3 21 3 21 9"/>
-                              <line x1="10" y1="14" x2="21" y2="3"/>
-                          </svg>
-                      </span>`;
+            return '<span class="text-link" onclick="openNoteFromLink(' + note.id + ', event)" ' +
+                   'data-note-id="' + note.id + '" ' +
+                   'title="Открыть заметку: ' + cleanTitle.replace(/"/g, '&quot;') + '">' +
+                   displayText.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+                   '<svg class="link-icon" width="14" height="14" viewBox="0 0 24 24" ' +
+                   'fill="none" stroke="currentColor" stroke-width="2.5" ' +
+                   'stroke-linecap="round" stroke-linejoin="round">' +
+                   '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>' +
+                   '<polyline points="15 3 21 3 21 9"/>' +
+                   '<line x1="10" y1="14" x2="21" y2="3"/>' +
+                   '</svg>' +
+                   '</span>';
         } else {
-            // ❌ Заметка не найдена — показываем как есть
-            return `[[${cleanTitle}]]`;
+            return '<span style="color: var(--text-secondary); opacity: 0.5; cursor: default;" title="Заметка не найдена">' + 
+                   displayText.replace(/</g, '&lt;').replace(/>/g, '&gt;') + 
+                   '</span>';
         }
     });
 }
