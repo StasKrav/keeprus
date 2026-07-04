@@ -432,4 +432,3 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(setupDragAndDrop, 300);
 });
 
-console.log('✅ Плавный DND в стиле Google Keep');

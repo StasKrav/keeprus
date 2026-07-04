@@ -250,4 +250,3 @@ function scheduleStatsUpdate() {
 window.renderStats = renderStats;
 window.scheduleStatsUpdate = scheduleStatsUpdate;
 
-console.log('📊 Статистика загружена (без эмодзи)');

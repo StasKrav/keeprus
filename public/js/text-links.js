@@ -5,7 +5,7 @@
 function findNoteLinks(text, currentNoteId) {
     if (!text || text.length < 2) return [];
     
-    // Разбиваем текст на слова (учитываем дефисы, точки, запятые)
+    // Разбиваем на слова
     const words = text.split(/[\s\n\r\t,.;:!?()"']+/);
     const found = [];
     const processed = new Set();
@@ -16,6 +16,9 @@ function findNoteLinks(text, currentNoteId) {
     
     words.forEach(function(word) {
         const clean = word.replace(/^[-]+/, '').replace(/[-]+$/, '').toLowerCase();
+        
+        // ✅ ПРОПУСКАЕМ ЧИСЛА
+        if (/^[\d.,:]+$/.test(clean)) return;
         if (clean.length < 2) return;
         if (processed.has(clean)) return;
         
@@ -35,24 +38,6 @@ function findNoteLinks(text, currentNoteId) {
             });
             return;
         }
-        
-        // Частичное совпадение
-        allNotes.forEach(function(note) {
-            if (processed.has(clean)) return;
-            const titleWords = note.title.toLowerCase().split(/\s+/);
-            if (titleWords.some(function(tw) {
-                return tw.includes(clean) || clean.includes(tw);
-            })) {
-                processed.add(clean);
-                found.push({
-                    word: word,
-                    clean: clean,
-                    noteId: note.id,
-                    title: note.title,
-                    type: 'partial'
-                });
-            }
-        });
     });
     
     return found.slice(0, 5);
@@ -61,7 +46,6 @@ function findNoteLinks(text, currentNoteId) {
 function renderTextWithLinks(text, currentNoteId) {
     if (!text) return text;
     
-    // Получаем чистый текст для поиска
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = text;
     const plainText = tempDiv.textContent || tempDiv.innerText || '';
@@ -76,13 +60,11 @@ function renderTextWithLinks(text, currentNoteId) {
     });
     
     links.forEach(function(link) {
-        // Экранируем для regex
         const escaped = link.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         
-        // Создаём regex с учётом регистра и границ слова
-        const regex = new RegExp('\\b' + escaped + '\\b', 'gi');
+        // ✅ ИСПРАВЛЕНО: не трогаем числа с точками
+        const regex = new RegExp('(?<![\\w.])' + escaped + '(?![\\w.])', 'gi');
         
-        // Заменяем все вхождения
         result = result.replace(regex, function(match) {
             return '<span class="text-link" onclick="openNoteFromLink(' + link.noteId + ', event)" ' +
                    'data-note-id="' + link.noteId + '" ' +
@@ -123,14 +105,54 @@ function findSimilarNotes(text, currentNoteId, limit) {
     if (limit === undefined) limit = 3;
     if (!text || text.length < 10) return [];
     
+    // 1. Извлекаем ключевые слова
     const words = text
         .toLowerCase()
         .split(/[\s\n\r\t,.;:!?()"']+/)
-        .filter(function(w) { return w.length > 3; })
-        .slice(0, 20);
+        .filter(function(w) { 
+            if (w.length < 3) return false;
+            if (/^[\d.,:]+$/.test(w)) return false;
+            
+            const stopWords = [
+                'это', 'все', 'так', 'для', 'без', 'или', 'и', 
+                'на', 'по', 'с', 'у', 'к', 'от', 'до', 'за', 
+                'в', 'о', 'а', 'но', 'да', 'не', 'ни', 
+                'что', 'как', 'еще', 'уже', 'можно', 'нужно', 
+                'надо', 'будет', 'было', 'только', 'если', 
+                'когда', 'потом', 'теперь', 'всегда', 'никогда',
+                'сегодня', 'завтра', 'вчера', 'сейчас', 'потом',
+                'тут', 'там', 'здесь', 'везде', 'нигде'
+            ];
+            return !stopWords.includes(w);
+        });
     
     if (words.length === 0) return [];
     
+    // 2. Обрабатываем имена (Анне → Анна, Кате → Катя)
+    const processedWords = [];
+    words.forEach(function(word) {
+        // Имена в дательном падеже (Анне → Анна, Кате → Катя)
+        if (word.endsWith('е') && word.length > 3) {
+            const base = word.slice(0, -1) + 'а';
+            processedWords.push(base);
+            processedWords.push(word);
+        } else if (word.endsWith('ы') && word.length > 3) {
+            const base = word.slice(0, -1) + 'а';
+            processedWords.push(base);
+            processedWords.push(word);
+        } else if (word.endsWith('ой') && word.length > 4) {
+            const base = word.slice(0, -2) + 'а';
+            processedWords.push(base);
+            processedWords.push(word);
+        } else {
+            processedWords.push(word);
+        }
+    });
+    
+    // 3. Убираем дубликаты
+    const uniqueWords = [...new Set(processedWords)];
+    
+    // 4. Для каждой заметки считаем релевантность
     const allNotes = notes.filter(function(n) {
         return n.id !== currentNoteId && !n.trashed && !n.archived;
     });
@@ -138,69 +160,107 @@ function findSimilarNotes(text, currentNoteId, limit) {
     const scored = allNotes.map(function(note) {
         const noteText = (note.title + ' ' + note.content).toLowerCase();
         let score = 0;
+        let matches = [];
         
-        words.forEach(function(word) {
+        uniqueWords.forEach(function(word) {
+            // ✅ ИСПРАВЛЕНИЕ: проверяем наличие слова в тексте заметки
             if (noteText.includes(word)) {
-                score++;
+                const titleBonus = note.title && note.title.toLowerCase().includes(word) ? 10 : 0;
+                const contentBonus = note.content && note.content.toLowerCase().includes(word) ? 5 : 0;
+                const lengthBonus = Math.min(word.length, 5);
+                
+                // ✅ ИСПРАВЛЕНИЕ: безопасный подсчёт частоты
+                let freqInText = 0;
+                try {
+                    // Экранируем спецсимволы для RegExp
+                    const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(escapedWord, 'g');
+                    const matches = text.match(regex);
+                    freqInText = matches ? matches.length : 0;
+                } catch (e) {
+                    freqInText = 0;
+                }
+                
+                const rarityBonus = Math.max(1, 5 - freqInText);
+                const wordScore = 5 + titleBonus + contentBonus + lengthBonus + rarityBonus;
+                score += wordScore;
+                matches.push(word);
             }
         });
         
-        const noteObj = notes.find(function(n) { return n.id === currentNoteId; });
-        if (noteObj) {
-            // ✅ ПРОВЕРКА НА СУЩЕСТВОВАНИЕ ТЕГОВ
-            if (noteObj.tags && Array.isArray(noteObj.tags) && 
-                note.tags && Array.isArray(note.tags)) {
-                const commonTags = noteObj.tags.filter(function(t) {
-                    return note.tags.includes(t);
-                });
-                score += commonTags.length * 2;
+        // Бонус за общие теги
+        const currentNote = notes.find(function(n) { return n.id === currentNoteId; });
+        if (currentNote && currentNote.tags && note.tags) {
+            const commonTags = currentNote.tags.filter(function(t) {
+                return note.tags.includes(t);
+            });
+            if (commonTags.length > 0) {
+                score += commonTags.length * 25;
             }
         }
         
-        return { ...note, score: score };
+        return { 
+            ...note, 
+            score: score, 
+            matches: matches,
+            matchCount: matches.length 
+        };
     });
     
-    return scored
-        .filter(function(n) { return n.score > 0; })
-        .sort(function(a, b) { return b.score - a.score; })
+    // 5. Сортируем и фильтруем
+    const sorted = scored
+        .filter(function(n) { 
+            const hasCommonTags = n.score > 25;
+            const result = n.matchCount >= 2 || hasCommonTags;
+            return result;
+        })
+        .sort(function(a, b) { 
+            return b.score - a.score; 
+        })
         .slice(0, limit);
+    
+    return sorted;
 }
 
 function renderSimilarNotesBlock(note) {
     // Проверка: есть ли контент для поиска похожих
     if (!note || !note.content || note.content.length < 10) return '';
     
-    const similar = findSimilarNotes(note.content, note.id, 5);
-    
-    if (similar.length === 0) return '';
-    
-    // Ограничиваем количество отображаемых
-    const maxDisplay = 4;
-    const displaySimilar = similar.slice(0, maxDisplay);
-    const hasMore = similar.length > maxDisplay;
-    
-    let html = '<div class="note-similar">';
-    html += '<div class="note-similar-list">';
-    
-    displaySimilar.forEach(function(n) {
-        let title = n.title || 'Без названия';
-        if (title.length > 18) {
-            title = title.slice(0, 16) + '…';
+    try {
+        const similar = findSimilarNotes(note.content, note.id, 5);
+        
+        if (similar.length === 0) return '';
+        
+        // Ограничиваем количество отображаемых
+        const maxDisplay = 4;
+        const displaySimilar = similar.slice(0, maxDisplay);
+        const hasMore = similar.length > maxDisplay;
+        
+        let html = '<div class="note-similar">';
+        html += '<div class="note-similar-list">';
+        
+        displaySimilar.forEach(function(n) {
+            let title = n.title || 'Без названия';
+            if (title.length > 18) {
+                title = title.slice(0, 16) + '…';
+            }
+            html += '<span class="note-similar-item" onclick="openNoteFromLink(' + n.id + ', event)" title="' + escapeHtml(n.title || 'Без названия') + '">';
+            html += escapeHtml(title);
+            html += '</span>';
+        });
+        
+        if (hasMore) {
+            html += '<span class="note-similar-more" onclick="showAllSimilarNotes(' + note.id + ', event)">+' + (similar.length - maxDisplay) + '</span>';
         }
-        html += '<span class="note-similar-item" onclick="openNoteFromLink(' + n.id + ', event)" title="' + escapeHtml(n.title || 'Без названия') + '">';
-        html += escapeHtml(title);
-        html += '</span>';
-    });
-    
-    if (hasMore) {
-        // ✅ ДОБАВЛЯЕМ КЛИК ДЛЯ ПОКАЗА ВСЕХ ПОХОЖИХ
-        html += '<span class="note-similar-more" onclick="showAllSimilarNotes(' + note.id + ', event)">+' + (similar.length - maxDisplay) + '</span>';
+        
+        html += '</div>';
+        html += '</div>';
+        
+        return html;
+    } catch (e) {
+        console.warn('Ошибка при рендере похожих заметок:', e);
+        return '';
     }
-    
-    html += '</div>';
-    html += '</div>';
-    
-    return html;
 }
 
 // ============================================
@@ -273,6 +333,50 @@ function closeSimilarPopup() {
     document.removeEventListener('click', closeSimilarPopupHandler);
 }
 
+// ============================================
+// ВИКИ-ССЫЛКИ [[Заголовок]] — ИСПРАВЛЕННАЯ
+// ============================================
+
+function renderWikiLinks(text, currentNoteId) {
+    if (!text) return text;
+    
+    // Ищем все [[Заголовок]]
+    const linkRegex = /\[\[([^\]]+)\]\]/g;
+    
+    // Заменяем каждое совпадение
+    return text.replace(linkRegex, function(match, title) {
+        const cleanTitle = title.trim();
+        
+        // Ищем заметку с таким заголовком
+        const note = notes.find(function(n) {
+            return n.title && n.title.toLowerCase() === cleanTitle.toLowerCase() && 
+                   !n.trashed && 
+                   n.id !== currentNoteId;
+        });
+        
+        if (note) {
+            // ✅ Нашли заметку — создаем ссылку
+            return `<span class="text-link" onclick="openNoteFromLink(${note.id}, event)" 
+                          data-note-id="${note.id}"
+                          title="Открыть заметку: ${cleanTitle}">
+                          ${cleanTitle}
+                          <svg class="link-icon" width="14" height="14" viewBox="0 0 24 24" 
+                               fill="none" stroke="currentColor" stroke-width="2.5" 
+                               stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                              <polyline points="15 3 21 3 21 9"/>
+                              <line x1="10" y1="14" x2="21" y2="3"/>
+                          </svg>
+                      </span>`;
+        } else {
+            // ❌ Заметка не найдена — показываем как есть
+            return `[[${cleanTitle}]]`;
+        }
+    });
+}
+
+window.renderWikiLinks = renderWikiLinks;
+
 // createNoteElement уже вызывает renderSimilarNotesBlock напрямую (в markdown.js)
 // renderMarkdown вызывает renderTextWithLinks напрямую (в markdown.js)
 
@@ -284,4 +388,3 @@ window.findSimilarNotes = findSimilarNotes;
 window.renderSimilarNotesBlock = renderSimilarNotesBlock;
 window.showAllSimilarNotes = showAllSimilarNotes;
 window.closeSimilarPopup = closeSimilarPopup;
-console.log('Умные ссылки загружены');

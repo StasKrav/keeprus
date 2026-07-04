@@ -361,5 +361,3 @@ window.previewVersion = previewVersion;
 window.restoreVersion = restoreVersion;
 window.addHistoryButtonToEditor = addHistoryButtonToEditor;
 window.showHistoryForCurrentNote = showHistoryForCurrentNote;
-
-console.log('📜 История версий загружена (сохранение только при закрытии)');

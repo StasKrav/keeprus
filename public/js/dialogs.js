@@ -138,4 +138,3 @@ window.clearTrash = clearTrash;
 window.showPromptDialog = showPromptDialog;
 window.closePromptDialog = closePromptDialog;
 
-console.log('✅ Диалоги загружены');

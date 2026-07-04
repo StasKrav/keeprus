@@ -165,5 +165,3 @@ window.renderColorFilter = renderColorFilter;
 window.getColorStats = getColorStats;
 window.toggleColorFilter = toggleColorFilter;
 window.loadColorFilterState = loadColorFilterState;
-
-console.log('🎨 Фильтр по цвету загружен');

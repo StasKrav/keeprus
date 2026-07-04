@@ -2,91 +2,194 @@
 // MARKDOWN PARSER
 // ============================================
 
-// escapeHtml определён в render-optimized.js (window.escapeHtml)
-// Используем его напрямую — он гарантированно доступен к моменту вызова renderMarkdown
-
 function renderMarkdown(text, currentNoteId) {
     if (!text) return "";
 
-    // Экранируем HTML (функция из render-optimized.js)
-    let html = window.escapeHtml(text);
-    
-    // Умные ссылки (если передан ID заметки)
+    // ============================================
+    // 1. ПОДГОТОВКА: защищаем существующие HTML-блоки
+    // ============================================
+    let html = text;
+    const protectedBlocks = [];
+    let blockIndex = 0;
+
+    function protectBlock(content) {
+        const marker = `__PROTECTED_${blockIndex}__`;
+        protectedBlocks.push(content);
+        blockIndex++;
+        return marker;
+    }
+
+    // Защищаем существующие ссылки (если они уже есть в тексте)
+    html = html.replace(/<span class="text-link"[^>]*>.*?<\/span>/gs, function(match) {
+        return protectBlock(match);
+    });
+
+    // Защищаем изображения
+    html = html.replace(/<img[^>]*>/gs, function(match) {
+        return protectBlock(match);
+    });
+
+    // Защищаем SVG
+    html = html.replace(/<svg[^>]*>.*?<\/svg>/gs, function(match) {
+        return protectBlock(match);
+    });
+
+    // Защищаем блоки кода (чтобы не сломать markdown внутри)
+    html = html.replace(/```([\s\S]*?)```/gs, function(match) {
+        return protectBlock(match);
+    });
+
+    // Защищаем инлайн-код
+    html = html.replace(/`([^`]+)`/g, function(match) {
+        return protectBlock(match);
+    });
+
+    // ============================================
+    // 2. СОЗДАЁМ НОВЫЕ УМНЫЕ ССЫЛКИ
+    // ============================================
+
+    // Вики-ссылки [[Заголовок]]
+    if (currentNoteId && typeof renderWikiLinks === 'function') {
+        html = renderWikiLinks(html, currentNoteId);
+    }
+
+    // @-менти
+    if (currentNoteId && typeof renderMentions === 'function') {
+        html = renderMentions(html, currentNoteId);
+    }
+
+    // Умные ссылки (совпадения по словам)
     if (currentNoteId && typeof renderTextWithLinks === 'function') {
         html = renderTextWithLinks(html, currentNoteId);
     }
 
-    // 0. Изображения
+    // ============================================
+    // 3. ЗАЩИЩАЕМ ВНОВЬ СОЗДАННЫЕ ССЫЛКИ
+    // ============================================
+
+    html = html.replace(/<span class="text-link"[^>]*>.*?<\/span>/gs, function(match) {
+        return protectBlock(match);
+    });
+
+    html = html.replace(/<img[^>]*>/gs, function(match) {
+        return protectBlock(match);
+    });
+
+    html = html.replace(/<svg[^>]*>.*?<\/svg>/gs, function(match) {
+        return protectBlock(match);
+    });
+
+    // ============================================
+    // 4. ЭКРАНИРУЕМ ОСТАЛЬНОЙ HTML (безопасность)
+    // ============================================
+
+    html = window.escapeHtml(html);
+
+    // ============================================
+    // 5. ВОЗВРАЩАЕМ ЗАЩИЩЁННЫЕ БЛОКИ
+    // ============================================
+
+    protectedBlocks.forEach(function(block, index) {
+        html = html.replace(`__PROTECTED_${index}__`, block);
+    });
+
+    // ============================================
+    // 6. ОБЫЧНЫЙ MARKDOWN
+    // ============================================
+
+    // Изображения (новые, не защищённые)
     html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="note-image">');
-    // 1. Заголовки
+
+    // Заголовки
     html = html.replace(/^### (.+)$/gm, "<h3>$1</h3>");
     html = html.replace(/^## (.+)$/gm, "<h2>$1</h2>");
     html = html.replace(/^# (.+)$/gm, "<h1>$1</h1>");
 
-    // 2. Жирный
+    // Жирный, курсив, зачёркнутый
     html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     html = html.replace(/__(.+?)__/g, "<strong>$1</strong>");
-
-    // 3. Курсив
     html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
     html = html.replace(/_(.+?)_/g, "<em>$1</em>");
-
-    // 4. Зачёркнутый
     html = html.replace(/~~(.+?)~~/g, "<del>$1</del>");
 
-    // 5. Встроенный код
+    // Инлайн-код (новый, не защищённый)
     html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
 
-    // 6. Блок кода
+    // Блоки кода (новые, не защищённые)
     html = html.replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>");
 
-    // 7. Списки
-    html = html.replace(/^\d+\. (.+)$/gm, "<oli>$1</oli>");
-    html = html.replace(/(<oli>[\s\S]*?<\/oli>(\n?))+/g, (match) => {
-        return '<ol>' + match.replace(/<\/?oli>/g, (m) => m === '<oli>' ? '<li>' : '</li>') + '</ol>';
-    });
-
+    // Списки
+    html = html.replace(/^(\d+)\.\s+(.+)$/gm, "<li>$2</li>");
     html = html.replace(/^- (.+)$/gm, "<li>$1</li>");
     html = html.replace(/^\* (.+)$/gm, "<li>$1</li>");
-    html = html.replace(/(<li>[\s\S]*?<\/li>(\n?))+/g, (match) => `<ul>${match}</ul>`);
 
-    // 8. Цитаты
+    // Оборачиваем списки в ul/ol
+    html = html.replace(/(<li>[\s\S]*?<\/li>(\n?))+/g, function(match) {
+        if (match.includes('<ol>') || match.includes('<ul>')) return match;
+        // Проверяем, нумерованный ли список
+        const isOrdered = match.includes('</li>') && /^\s*<li>/.test(match);
+        return isOrdered ? '<ol>' + match + '</ol>' : '<ul>' + match + '</ul>';
+    });
+
+    // Цитаты
     html = html.replace(/^> (.+)$/gm, "<blockquote>$1</blockquote>");
 
-    // 9. Горизонтальная линия
+    // Горизонтальная линия
     html = html.replace(/^---$/gm, "<hr>");
     html = html.replace(/^\*\*\*$/gm, "<hr>");
 
-    // 10. Параграфы и переносы
-    html = html.replace(/\n\n/g, "</p><p>");
-    html = html.replace(/\n/g, "<br>");
+    // ============================================
+    // 7. ФИНАЛЬНАЯ ОБРАБОТКА
+    // ============================================
 
-    // Оборачиваем в параграф
-    if (!html.startsWith("<h") && !html.startsWith("<ul") && 
-        !html.startsWith("<ol") && !html.startsWith("<blockquote") && 
-        !html.startsWith("<pre") && !html.startsWith("<p>") && 
-        !html.startsWith("<hr")) {
-        html = "<p>" + html + "</p>";
+    // Обработка переносов строк и параграфов
+    // Разбиваем на блоки по пустым строкам
+    const paragraphs = html.split(/\n\n+/);
+    let processed = [];
+
+    for (let i = 0; i < paragraphs.length; i++) {
+        let block = paragraphs[i].trim();
+        if (!block) continue;
+
+        // Проверяем, не является ли блок уже HTML-тегом
+        const isHtmlBlock = /^<(h[1-6]|ul|ol|blockquote|pre|hr|p|span|img|div)/.test(block);
+
+        if (isHtmlBlock) {
+            processed.push(block);
+        } else if (block.startsWith('<li>')) {
+            // Списки уже обработаны
+            processed.push(block);
+        } else {
+            // Обычный текст -> оборачиваем в <p>
+            block = block.replace(/\n/g, "<br>");
+            processed.push("<p>" + block + "</p>");
+        }
     }
 
-    // ⭐ КРИТИЧЕСКИ ВАЖНО: Очистка от XSS
+    html = processed.join("\n");
+
+    // ============================================
+    // 8. DOMPurify - финальная очистка
+    // ============================================
+
     if (typeof DOMPurify !== 'undefined') {
         html = DOMPurify.sanitize(html, {
             ALLOWED_TAGS: [
-                'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-                'p', 'br', 'strong', 'em', 'del',
-                'ul', 'ol', 'li',
-                'code', 'pre',
-                'blockquote', 'hr',
-                'a', 'img'
+                'h1', 'h2', 'h3', 'p', 'br', 'strong', 'em', 'del',
+                'ul', 'ol', 'li', 'code', 'pre', 'blockquote', 'hr',
+                'span', 'svg', 'path', 'polyline', 'line', 'circle',
+                'rect', 'polygon', 'a', 'img', 'div'
             ],
-            ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class']
+            ALLOWED_ATTR: [
+                'href', 'src', 'alt', 'title', 'class', 'id',
+                'data-note-id', 'onclick', 'style',
+                'width', 'height', 'viewBox', 'fill', 'stroke',
+                'stroke-width', 'stroke-linecap', 'stroke-linejoin',
+                'xmlns', 'd', 'points', 'cx', 'cy', 'r', 'x1', 'y1',
+                'x2', 'y2', 'x', 'y'
+            ],
+            ALLOW_DATA_ATTR: true
         });
-    } else {
-        // Fallback
-        html = html.replace(/<script.*?>.*?<\/script>/gi, '');
-        html = html.replace(/on\w+\s*=/gi, '');
-        html = html.replace(/javascript:/gi, '');
     }
 
     return html;

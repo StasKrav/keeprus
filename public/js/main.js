@@ -132,7 +132,6 @@ async function init() {
     // Рендерим фильтр по цвету
     if (typeof renderColorFilter === 'function') {
         renderColorFilter();
-        console.log('✅ Фильтр по цвету отрисован при загрузке');
     }
     
     // Обновляем логотип
@@ -250,7 +249,6 @@ async function init() {
     // Планируем напоминания после загрузки заметок
     if (typeof scheduleAllReminders === 'function') {
         scheduleAllReminders();
-        console.log('⏰ Напоминания запланированы');
     }
     
     // Запрашиваем разрешение на уведомления (не блокируем инициализацию)
@@ -258,19 +256,6 @@ async function init() {
         Notification.requestPermission();
     }
 
-    // // Register Service Worker for PWA offline support
-    // if ("serviceWorker" in navigator) {
-    //     navigator.serviceWorker.register("./sw.js").then((reg) => {
-    //         console.log("✅ Service Worker registered:", reg.scope);
-    //     }).catch((err) => {
-    //         console.warn("⚠️ Service Worker registration failed:", err);
-    //     });
-    // }
-
-    console.log("✨ Keeprus полностью функционален!");
-    console.log("📝 Горячие клавиши: Ctrl+N - новая заметка, Ctrl+S - сохранить");
-    console.log("💾 Заметки хранятся в localStorage браузера");
-    console.log("📁 Для резервного копирования используйте меню → Сохранить как...");
 }
 
 // Start the app

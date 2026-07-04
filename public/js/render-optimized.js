@@ -498,7 +498,6 @@ window.removeNoteCard = removeNoteCard;
 window.clearCardCache = clearCardCache;
 window.escapeHtml = escapeHtml;
 
-console.log('✅ Оптимизированный рендер загружен');
 
 // ============================================
 // ПОДДЕРЖКА ПРИНУДИТЕЛЬНОГО ОБНОВЛЕНИЯ
@@ -520,4 +519,3 @@ window.updateNoteCard = function(noteId) {
     }
 };
 
-console.log('✅ Принудительное обновление карточек добавлено');
